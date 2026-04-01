@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-profit: #00D68F;
+  --color-loss: #FF4D6A;
+  --color-accent-blue: #3B82F6;
+  --color-accent-amber: #FFB547;
+  --color-accent-purple: #A78BFA;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  --background: #0C0F14;
+  --foreground: #E8ECF4;
+  --card: #151921;
+  --card-foreground: #E8ECF4;
+  --border: #2A3040;
+  --muted: #1C2130;
+  --muted-foreground: #8892A6;
+  --input: #1C2130;
+  --ring: #3B82F6;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2A3040;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3A4050;
+}
+
+/* Number/financial data font */
+.font-data {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Profit/Loss coloring utility */
+.text-profit {
+  color: #00D68F;
+}
+
+.text-loss {
+  color: #FF4D6A;
+}
+
+.bg-profit {
+  background-color: rgba(0, 214, 143, 0.1);
+}
+
+.bg-loss {
+  background-color: rgba(255, 77, 106, 0.1);
+}

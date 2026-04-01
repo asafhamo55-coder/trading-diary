@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  calendarYear      Int      @default(2026)
+  startingBalance   Float    // Starting balance — $178,600
+  accountOpenBalance Float   // Account opening balance
+  commissionPerShare Float   @default(0.01)
+  minimumCommission  Float   @default(2.50)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  trades            Trade[]
+  monthlyReviews    MonthlyReview[]
+  errorDefinitions  ErrorDefinition[]
+  assetLeverages    AssetLeverage[]
+}
+
+model Trade {
+  id                String   @id @default(cuid())
+  accountId         String
+  account           Account  @relation(fields: [accountId], references: [id])
+
+  tradeDate         DateTime
+  month             Int
+  symbol            String
+  direction         Direction
+  tradeType         String?
+  isSwingContinuation Boolean @default(false)
+
+  entries           TradeLeg[]
+
+  totalPositionValue Float?
+  totalShares        Float?
+  sharesInProcess    Float?
+  avgBuyPrice        Float?
+  avgSellPrice       Float?
+  totalPnL           Float?
+  riskReward         Float?
+  returnOnPosition   Float?
+  riskAmount         Float?
+  totalCommissions   Float?
+  isCompleted        Boolean @default(false)
+
+  entryReason        String?
+  exitReason         String?
+  conclusions        String?
+  chartUrl           String?
+  notes              String?
+
+  dailyHigh          Float?
+  dailyClose         Float?
+  moneyLeftHighPct   Float?
+  moneyLeftClosePct  Float?
+
+  tradeErrors        TradeError[]
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([accountId, month])
+  @@index([accountId, tradeDate])
+  @@index([symbol])
+}
+
+enum Direction {
+  LONG
+  SHORT
+}
+
+model TradeLeg {
+  id          String  @id @default(cuid())
+  tradeId     String
+  trade       Trade   @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  legType     LegType
+  price       Float
+  quantity    Float
+  commission  Float   @default(0)
+  legOrder    Int
+
+  @@index([tradeId])
+}
+
+enum LegType {
+  BUY
+  SELL
+}
+
+model MonthlyReview {
+  id              String   @id @default(cuid())
+  accountId       String
+  account         Account  @relation(fields: [accountId], references: [id])
+  month           Int
+  year            Int      @default(2026)
+
+  portfolioStartValue  Float?
+  portfolioEndValue    Float?
+  riskUnit             Float?
+
+  goal1           String?
+  goal2           String?
+  goal3           String?
+  goalsMet        String?
+
+  monthlyConclusions String?
+  keyLessons         String?
+
+  useFixedRiskUnit   Boolean @default(false)
+  includeOpenTrades  Boolean @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([accountId, month, year])
+}
+
+model ErrorDefinition {
+  id          String  @id @default(cuid())
+  accountId   String
+  account     Account @relation(fields: [accountId], references: [id])
+  name        String
+  sortOrder   Int     @default(0)
+
+  tradeErrors TradeError[]
+
+  @@unique([accountId, name])
+}
+
+model TradeError {
+  id              String          @id @default(cuid())
+  tradeId         String
+  trade           Trade           @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  errorDefinitionId String
+  errorDefinition ErrorDefinition @relation(fields: [errorDefinitionId], references: [id])
+
+  @@unique([tradeId, errorDefinitionId])
+}
+
+model AssetLeverage {
+  id          String  @id @default(cuid())
+  accountId   String
+  account     Account @relation(fields: [accountId], references: [id])
+  symbol      String
+  leverage    Float   @default(1)
+
+  @@unique([accountId, symbol])
+}
