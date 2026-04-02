@@ -97,6 +97,7 @@ export function getDemoStats() {
     winRate: completed.length > 0 ? winners.length / completed.length : 0,
     totalPnL,
     currentPortfolio,
+    startingBalance: 178600,
     avgRR: completed.length > 0
       ? completed.reduce((s, t) => s + (t.riskReward ?? 0), 0) / completed.length
       : 0,
