@@ -705,7 +705,8 @@ async function main() {
     const totalSellQty = t.sellLegs.reduce((s, l) => s + l.qty, 0);
     const totalShares = Math.max(totalBuyQty, totalSellQty);
     const sharesInProcess = Math.abs(totalBuyQty - totalSellQty);
-    const isCompleted = t.sellLegs.length > 0 && sharesInProcess < 0.1;
+    // Mark as completed if there are sell legs (partial exits still count as completed per sheet)
+    const isCompleted = t.sellLegs.length > 0;
 
     const avgBuy = totalBuyQty > 0
       ? t.buyLegs.reduce((s, l) => s + l.price * l.qty, 0) / totalBuyQty
@@ -746,7 +747,10 @@ async function main() {
     });
   }
 
-  console.log(`Done! Seeded ${trades.length} trades (Jan: 1, Feb: ${trades.length - 1}).`);
+  const janCount = trades.filter(t => t.month === 1).length;
+  const febCount = trades.filter(t => t.month === 2).length;
+  const marCount = trades.filter(t => t.month === 3).length;
+  console.log(`Done! Seeded ${trades.length} trades (Jan: ${janCount}, Feb: ${febCount}, Mar: ${marCount}).`);
   console.log(`Account ID: ${account.id}`);
 
   await prisma.$disconnect();
