@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
 
     return jsonResponse(trades);
   } catch (error) {
-    return errorResponse("Failed to fetch trades", 500);
+    console.error("Fetch trades error:", error);
+    return errorResponse(`Failed to fetch trades: ${error instanceof Error ? error.message : "Unknown error"}`, 500);
   }
 }
 
