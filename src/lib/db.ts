@@ -1,14 +1,24 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 function createPrismaClient() {
-  // Use DIRECT_URL (port 5432) for direct connection, fall back to DATABASE_URL
-  const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL || "";
-  const adapter = new PrismaPg({ connectionString });
+  // Use DATABASE_URL (pooled connection, port 6543) for serverless compatibility
+  // Fall back to DIRECT_URL for local development
+  const connectionString = process.env.DATABASE_URL || process.env.DIRECT_URL || "";
+
+  // Create a pg Pool for the adapter (handles connection pooling properly)
+  const pool = new pg.Pool({
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+    max: 5,
+  });
+
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 }
 
