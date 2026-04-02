@@ -55,9 +55,9 @@ export async function POST(req: NextRequest) {
     const entriesWithComm = data.entries.map((leg) => ({
       ...leg,
       commission: calculateCommission(
+        leg.price,
         leg.quantity,
-        account.commissionPerShare,
-        account.minimumCommission
+        account.commissionPerShare
       ),
     }));
 

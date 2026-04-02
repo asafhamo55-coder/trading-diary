@@ -28,9 +28,9 @@ function weightedAverage(prices: number[], quantities: number[]): number {
   return totalValue / totalQty;
 }
 
-export function calculateCommission(qty: number, commPerShare: number, minComm: number): number {
-  if (qty === 0) return 0;
-  return Math.max(qty * commPerShare, minComm);
+export function calculateCommission(price: number, qty: number, commissionRate: number): number {
+  if (qty === 0 || price === 0) return 0;
+  return price * qty * commissionRate;
 }
 
 export function getBuyLegs(entries: TradeLegData[]): TradeLegData[] {

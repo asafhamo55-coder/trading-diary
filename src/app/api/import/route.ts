@@ -49,9 +49,9 @@ export async function POST(req: NextRequest) {
             price: l.price,
             quantity: l.quantity,
             commission: calculateCommission(
+              l.price,
               l.quantity,
-              account.commissionPerShare,
-              account.minimumCommission
+              account.commissionPerShare
             ),
             legOrder: j + 1,
           })),
@@ -60,9 +60,9 @@ export async function POST(req: NextRequest) {
             price: l.price,
             quantity: l.quantity,
             commission: calculateCommission(
+              l.price,
               l.quantity,
-              account.commissionPerShare,
-              account.minimumCommission
+              account.commissionPerShare
             ),
             legOrder: j + 1,
           })),

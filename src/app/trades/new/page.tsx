@@ -50,9 +50,9 @@ function deriveLeg(
     price,
     quantity,
     commission: calculateCommission(
+      price,
       quantity,
-      DEMO_ACCOUNT.commissionPerShare,
-      DEMO_ACCOUNT.minimumCommission
+      DEMO_ACCOUNT.commissionPerShare
     ),
     legOrder,
   };
@@ -271,13 +271,14 @@ export default function NewTradePage() {
             <h2 className="text-base font-semibold mb-4">Buy Legs</h2>
             <div className="space-y-3">
               {buyFields.map((field, index) => {
+                const prc = parseFloat(watchAll.buyLegs[index]?.price) || 0;
                 const qty = parseFloat(watchAll.buyLegs[index]?.quantity) || 0;
                 const commission =
-                  qty > 0
+                  qty > 0 && prc > 0
                     ? calculateCommission(
+                        prc,
                         qty,
-                        DEMO_ACCOUNT.commissionPerShare,
-                        DEMO_ACCOUNT.minimumCommission
+                        DEMO_ACCOUNT.commissionPerShare
                       )
                     : 0;
                 return (
@@ -340,14 +341,16 @@ export default function NewTradePage() {
             <h2 className="text-base font-semibold mb-4">Sell Legs</h2>
             <div className="space-y-3">
               {sellFields.map((field, index) => {
+                const prc =
+                  parseFloat(watchAll.sellLegs[index]?.price) || 0;
                 const qty =
                   parseFloat(watchAll.sellLegs[index]?.quantity) || 0;
                 const commission =
-                  qty > 0
+                  qty > 0 && prc > 0
                     ? calculateCommission(
+                        prc,
                         qty,
-                        DEMO_ACCOUNT.commissionPerShare,
-                        DEMO_ACCOUNT.minimumCommission
+                        DEMO_ACCOUNT.commissionPerShare
                       )
                     : 0;
                 return (

@@ -26,8 +26,8 @@ async function main() {
       calendarYear: 2026,
       startingBalance: 178600,
       accountOpenBalance: 178600,
-      commissionPerShare: 0.01,
-      minimumCommission: 2.5,
+      commissionPerShare: 0.000068848354793,
+      minimumCommission: 0,
     },
   });
 
@@ -65,7 +65,7 @@ async function main() {
       riskReward: null,
       returnOnPosition: 0.0716,
       riskAmount: null,
-      totalCommissions: 7.50,
+      totalCommissions: 3.00,
       isCompleted: true,
       entryReason: "Retest scenario",
       exitReason: "Sold 50%, securing part of the return (up to 10.5%)",
@@ -75,9 +75,9 @@ async function main() {
       dailyClose: 149.49,
       entries: {
         create: [
-          { legType: "BUY", price: 148.87, quantity: 141, commission: 2.5, legOrder: 1 },
-          { legType: "SELL", price: 164.23, quantity: 70, commission: 2.5, legOrder: 1 },
-          { legType: "SELL", price: 155.00, quantity: 71, commission: 2.5, legOrder: 2 },
+          { legType: "BUY", price: 148.87, quantity: 141, commission: 1.45, legOrder: 1 },
+          { legType: "SELL", price: 164.23, quantity: 70, commission: 0.79, legOrder: 1 },
+          { legType: "SELL", price: 155.00, quantity: 71, commission: 0.76, legOrder: 2 },
         ],
       },
     },

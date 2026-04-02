@@ -9,8 +9,8 @@ export const DEMO_ACCOUNT: Account = {
   calendarYear: 2026,
   startingBalance: 178600,
   accountOpenBalance: 178600,
-  commissionPerShare: 0.01,
-  minimumCommission: 2.5,
+  commissionPerShare: 0.000068848354793,
+  minimumCommission: 0,
 };
 
 export const DEMO_ERROR_DEFINITIONS: ErrorDefinition[] = [
@@ -27,13 +27,13 @@ export const DEMO_TRADES: Trade[] = [
     id: "t1", accountId: "demo-account", tradeDate: "2026-01-26", month: 1,
     symbol: "PG", direction: "LONG", tradeType: "Retest Long", isSwingContinuation: false,
     entries: [
-      { id: "l1", legType: "BUY", price: 148.87, quantity: 141, commission: 2.50, legOrder: 1 },
-      { id: "l2", legType: "SELL", price: 164.23, quantity: 70, commission: 2.50, legOrder: 1 },
-      { id: "l3", legType: "SELL", price: 155.00, quantity: 71, commission: 2.50, legOrder: 2 },
+      { id: "l1", legType: "BUY", price: 148.87, quantity: 141, commission: 1.45, legOrder: 1 },
+      { id: "l2", legType: "SELL", price: 164.23, quantity: 70, commission: 0.79, legOrder: 1 },
+      { id: "l3", legType: "SELL", price: 155.00, quantity: 71, commission: 0.76, legOrder: 2 },
     ],
     totalPositionValue: 20991, totalShares: 141, sharesInProcess: 0,
-    avgBuyPrice: 148.87, avgSellPrice: 159.58, totalPnL: 1502.58, riskReward: null,
-    returnOnPosition: 0.0716, riskAmount: null, totalCommissions: 7.50,
+    avgBuyPrice: 148.87, avgSellPrice: 159.58, totalPnL: 1507.08, riskReward: null,
+    returnOnPosition: 0.0718, riskAmount: null, totalCommissions: 3.00,
     isCompleted: true,
     entryReason: "Retest scenario",
     exitReason: "Sold 50%, securing part of the return (up to 10.5%)",

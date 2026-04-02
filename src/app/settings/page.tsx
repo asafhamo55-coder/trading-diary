@@ -111,7 +111,7 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className={labelClass}>Commission Per Share ($)</label>
+              <label className={labelClass}>Commission Rate (IBKR)</label>
               <input
                 type="number"
                 step="0.001"
