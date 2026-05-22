@@ -8,8 +8,19 @@ interface TradeForAnalytics {
   riskReward: number | null;
   totalPositionValue: number | null;
   isCompleted: boolean;
+  totalShares: number | null;
+  sharesInProcess: number | null;
   tradeDate: Date;
   tradeErrors: { errorDefinition: { id: string; name: string } }[];
+}
+
+// Include both fully closed and partial-exit trades — both contribute realized P&L.
+function hasRealizedPnL(t: TradeForAnalytics): boolean {
+  if (t.totalPnL === null) return false;
+  if (t.isCompleted) return true;
+  const total = t.totalShares ?? 0;
+  const open = t.sharesInProcess ?? 0;
+  return total > 0 && open < total;
 }
 
 export interface DirectionStats {
@@ -66,7 +77,7 @@ function avg(arr: number[]): number {
 }
 
 function calcDirectionStats(trades: TradeForAnalytics[]): DirectionStats {
-  const completed = trades.filter((t) => t.isCompleted && t.totalPnL !== null);
+  const completed = trades.filter(hasRealizedPnL);
   const pnls = completed.map((t) => t.totalPnL!);
   const winners = pnls.filter((p) => p > 0);
   const losers = pnls.filter((p) => p < 0);
@@ -85,7 +96,7 @@ function calcDirectionStats(trades: TradeForAnalytics[]): DirectionStats {
 }
 
 function calcWinLossStats(trades: TradeForAnalytics[], isWin: boolean): WinLossDirectionStats {
-  const filtered = trades.filter((t) => t.isCompleted && t.totalPnL !== null && (isWin ? t.totalPnL! > 0 : t.totalPnL! < 0));
+  const filtered = trades.filter((t) => hasRealizedPnL(t) && (isWin ? t.totalPnL! > 0 : t.totalPnL! < 0));
   const pnls = filtered.map((t) => t.totalPnL!);
   return {
     count: filtered.length,
@@ -101,7 +112,7 @@ export function calculateMonthlyAnalytics(trades: TradeForAnalytics[]): MonthlyA
   const shortTrades = trades.filter((t) => t.direction === "SHORT");
 
   const completedPnls = trades
-    .filter((t) => t.isCompleted && t.totalPnL !== null)
+    .filter(hasRealizedPnL)
     .map((t) => t.totalPnL!)
     .sort((a, b) => b - a);
 
@@ -116,7 +127,7 @@ export function calculateMonthlyAnalytics(trades: TradeForAnalytics[]): MonthlyA
   });
 
   const byStrategy: StrategyStats[] = Array.from(strategyMap.entries()).map(([strategy, stratTrades]) => {
-    const completed = stratTrades.filter((t) => t.isCompleted && t.totalPnL !== null);
+    const completed = stratTrades.filter(hasRealizedPnL);
     const pnls = completed.map((t) => t.totalPnL!);
     const winners = pnls.filter((p) => p > 0);
     return {

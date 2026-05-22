@@ -268,6 +268,7 @@ export type AccountWhereInput = {
   monthlyReviews?: Prisma.MonthlyReviewListRelationFilter
   errorDefinitions?: Prisma.ErrorDefinitionListRelationFilter
   assetLeverages?: Prisma.AssetLeverageListRelationFilter
+  fundTransactions?: Prisma.FundTransactionListRelationFilter
 }
 
 export type AccountOrderByWithRelationInput = {
@@ -284,6 +285,7 @@ export type AccountOrderByWithRelationInput = {
   monthlyReviews?: Prisma.MonthlyReviewOrderByRelationAggregateInput
   errorDefinitions?: Prisma.ErrorDefinitionOrderByRelationAggregateInput
   assetLeverages?: Prisma.AssetLeverageOrderByRelationAggregateInput
+  fundTransactions?: Prisma.FundTransactionOrderByRelationAggregateInput
 }
 
 export type AccountWhereUniqueInput = Prisma.AtLeast<{
@@ -303,6 +305,7 @@ export type AccountWhereUniqueInput = Prisma.AtLeast<{
   monthlyReviews?: Prisma.MonthlyReviewListRelationFilter
   errorDefinitions?: Prisma.ErrorDefinitionListRelationFilter
   assetLeverages?: Prisma.AssetLeverageListRelationFilter
+  fundTransactions?: Prisma.FundTransactionListRelationFilter
 }, "id" | "userId">
 
 export type AccountOrderByWithAggregationInput = {
@@ -351,6 +354,7 @@ export type AccountCreateInput = {
   monthlyReviews?: Prisma.MonthlyReviewCreateNestedManyWithoutAccountInput
   errorDefinitions?: Prisma.ErrorDefinitionCreateNestedManyWithoutAccountInput
   assetLeverages?: Prisma.AssetLeverageCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateInput = {
@@ -367,6 +371,7 @@ export type AccountUncheckedCreateInput = {
   monthlyReviews?: Prisma.MonthlyReviewUncheckedCreateNestedManyWithoutAccountInput
   errorDefinitions?: Prisma.ErrorDefinitionUncheckedCreateNestedManyWithoutAccountInput
   assetLeverages?: Prisma.AssetLeverageUncheckedCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUpdateInput = {
@@ -383,6 +388,7 @@ export type AccountUpdateInput = {
   monthlyReviews?: Prisma.MonthlyReviewUpdateManyWithoutAccountNestedInput
   errorDefinitions?: Prisma.ErrorDefinitionUpdateManyWithoutAccountNestedInput
   assetLeverages?: Prisma.AssetLeverageUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateInput = {
@@ -399,6 +405,7 @@ export type AccountUncheckedUpdateInput = {
   monthlyReviews?: Prisma.MonthlyReviewUncheckedUpdateManyWithoutAccountNestedInput
   errorDefinitions?: Prisma.ErrorDefinitionUncheckedUpdateManyWithoutAccountNestedInput
   assetLeverages?: Prisma.AssetLeverageUncheckedUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateManyInput = {
@@ -518,6 +525,20 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type AccountCreateNestedOneWithoutFundTransactionsInput = {
+  create?: Prisma.XOR<Prisma.AccountCreateWithoutFundTransactionsInput, Prisma.AccountUncheckedCreateWithoutFundTransactionsInput>
+  connectOrCreate?: Prisma.AccountCreateOrConnectWithoutFundTransactionsInput
+  connect?: Prisma.AccountWhereUniqueInput
+}
+
+export type AccountUpdateOneRequiredWithoutFundTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.AccountCreateWithoutFundTransactionsInput, Prisma.AccountUncheckedCreateWithoutFundTransactionsInput>
+  connectOrCreate?: Prisma.AccountCreateOrConnectWithoutFundTransactionsInput
+  upsert?: Prisma.AccountUpsertWithoutFundTransactionsInput
+  connect?: Prisma.AccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AccountUpdateToOneWithWhereWithoutFundTransactionsInput, Prisma.AccountUpdateWithoutFundTransactionsInput>, Prisma.AccountUncheckedUpdateWithoutFundTransactionsInput>
+}
+
 export type AccountCreateNestedOneWithoutTradesInput = {
   create?: Prisma.XOR<Prisma.AccountCreateWithoutTradesInput, Prisma.AccountUncheckedCreateWithoutTradesInput>
   connectOrCreate?: Prisma.AccountCreateOrConnectWithoutTradesInput
@@ -574,6 +595,86 @@ export type AccountUpdateOneRequiredWithoutAssetLeveragesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AccountUpdateToOneWithWhereWithoutAssetLeveragesInput, Prisma.AccountUpdateWithoutAssetLeveragesInput>, Prisma.AccountUncheckedUpdateWithoutAssetLeveragesInput>
 }
 
+export type AccountCreateWithoutFundTransactionsInput = {
+  id?: string
+  userId: string
+  calendarYear?: number
+  startingBalance: number
+  accountOpenBalance: number
+  commissionPerShare?: number
+  minimumCommission?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  trades?: Prisma.TradeCreateNestedManyWithoutAccountInput
+  monthlyReviews?: Prisma.MonthlyReviewCreateNestedManyWithoutAccountInput
+  errorDefinitions?: Prisma.ErrorDefinitionCreateNestedManyWithoutAccountInput
+  assetLeverages?: Prisma.AssetLeverageCreateNestedManyWithoutAccountInput
+}
+
+export type AccountUncheckedCreateWithoutFundTransactionsInput = {
+  id?: string
+  userId: string
+  calendarYear?: number
+  startingBalance: number
+  accountOpenBalance: number
+  commissionPerShare?: number
+  minimumCommission?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  trades?: Prisma.TradeUncheckedCreateNestedManyWithoutAccountInput
+  monthlyReviews?: Prisma.MonthlyReviewUncheckedCreateNestedManyWithoutAccountInput
+  errorDefinitions?: Prisma.ErrorDefinitionUncheckedCreateNestedManyWithoutAccountInput
+  assetLeverages?: Prisma.AssetLeverageUncheckedCreateNestedManyWithoutAccountInput
+}
+
+export type AccountCreateOrConnectWithoutFundTransactionsInput = {
+  where: Prisma.AccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.AccountCreateWithoutFundTransactionsInput, Prisma.AccountUncheckedCreateWithoutFundTransactionsInput>
+}
+
+export type AccountUpsertWithoutFundTransactionsInput = {
+  update: Prisma.XOR<Prisma.AccountUpdateWithoutFundTransactionsInput, Prisma.AccountUncheckedUpdateWithoutFundTransactionsInput>
+  create: Prisma.XOR<Prisma.AccountCreateWithoutFundTransactionsInput, Prisma.AccountUncheckedCreateWithoutFundTransactionsInput>
+  where?: Prisma.AccountWhereInput
+}
+
+export type AccountUpdateToOneWithWhereWithoutFundTransactionsInput = {
+  where?: Prisma.AccountWhereInput
+  data: Prisma.XOR<Prisma.AccountUpdateWithoutFundTransactionsInput, Prisma.AccountUncheckedUpdateWithoutFundTransactionsInput>
+}
+
+export type AccountUpdateWithoutFundTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  calendarYear?: Prisma.IntFieldUpdateOperationsInput | number
+  startingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  accountOpenBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  commissionPerShare?: Prisma.FloatFieldUpdateOperationsInput | number
+  minimumCommission?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  trades?: Prisma.TradeUpdateManyWithoutAccountNestedInput
+  monthlyReviews?: Prisma.MonthlyReviewUpdateManyWithoutAccountNestedInput
+  errorDefinitions?: Prisma.ErrorDefinitionUpdateManyWithoutAccountNestedInput
+  assetLeverages?: Prisma.AssetLeverageUpdateManyWithoutAccountNestedInput
+}
+
+export type AccountUncheckedUpdateWithoutFundTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  calendarYear?: Prisma.IntFieldUpdateOperationsInput | number
+  startingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  accountOpenBalance?: Prisma.FloatFieldUpdateOperationsInput | number
+  commissionPerShare?: Prisma.FloatFieldUpdateOperationsInput | number
+  minimumCommission?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  trades?: Prisma.TradeUncheckedUpdateManyWithoutAccountNestedInput
+  monthlyReviews?: Prisma.MonthlyReviewUncheckedUpdateManyWithoutAccountNestedInput
+  errorDefinitions?: Prisma.ErrorDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+  assetLeverages?: Prisma.AssetLeverageUncheckedUpdateManyWithoutAccountNestedInput
+}
+
 export type AccountCreateWithoutTradesInput = {
   id?: string
   userId: string
@@ -587,6 +688,7 @@ export type AccountCreateWithoutTradesInput = {
   monthlyReviews?: Prisma.MonthlyReviewCreateNestedManyWithoutAccountInput
   errorDefinitions?: Prisma.ErrorDefinitionCreateNestedManyWithoutAccountInput
   assetLeverages?: Prisma.AssetLeverageCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutTradesInput = {
@@ -602,6 +704,7 @@ export type AccountUncheckedCreateWithoutTradesInput = {
   monthlyReviews?: Prisma.MonthlyReviewUncheckedCreateNestedManyWithoutAccountInput
   errorDefinitions?: Prisma.ErrorDefinitionUncheckedCreateNestedManyWithoutAccountInput
   assetLeverages?: Prisma.AssetLeverageUncheckedCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutTradesInput = {
@@ -633,6 +736,7 @@ export type AccountUpdateWithoutTradesInput = {
   monthlyReviews?: Prisma.MonthlyReviewUpdateManyWithoutAccountNestedInput
   errorDefinitions?: Prisma.ErrorDefinitionUpdateManyWithoutAccountNestedInput
   assetLeverages?: Prisma.AssetLeverageUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutTradesInput = {
@@ -648,6 +752,7 @@ export type AccountUncheckedUpdateWithoutTradesInput = {
   monthlyReviews?: Prisma.MonthlyReviewUncheckedUpdateManyWithoutAccountNestedInput
   errorDefinitions?: Prisma.ErrorDefinitionUncheckedUpdateManyWithoutAccountNestedInput
   assetLeverages?: Prisma.AssetLeverageUncheckedUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateWithoutMonthlyReviewsInput = {
@@ -663,6 +768,7 @@ export type AccountCreateWithoutMonthlyReviewsInput = {
   trades?: Prisma.TradeCreateNestedManyWithoutAccountInput
   errorDefinitions?: Prisma.ErrorDefinitionCreateNestedManyWithoutAccountInput
   assetLeverages?: Prisma.AssetLeverageCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutMonthlyReviewsInput = {
@@ -678,6 +784,7 @@ export type AccountUncheckedCreateWithoutMonthlyReviewsInput = {
   trades?: Prisma.TradeUncheckedCreateNestedManyWithoutAccountInput
   errorDefinitions?: Prisma.ErrorDefinitionUncheckedCreateNestedManyWithoutAccountInput
   assetLeverages?: Prisma.AssetLeverageUncheckedCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutMonthlyReviewsInput = {
@@ -709,6 +816,7 @@ export type AccountUpdateWithoutMonthlyReviewsInput = {
   trades?: Prisma.TradeUpdateManyWithoutAccountNestedInput
   errorDefinitions?: Prisma.ErrorDefinitionUpdateManyWithoutAccountNestedInput
   assetLeverages?: Prisma.AssetLeverageUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutMonthlyReviewsInput = {
@@ -724,6 +832,7 @@ export type AccountUncheckedUpdateWithoutMonthlyReviewsInput = {
   trades?: Prisma.TradeUncheckedUpdateManyWithoutAccountNestedInput
   errorDefinitions?: Prisma.ErrorDefinitionUncheckedUpdateManyWithoutAccountNestedInput
   assetLeverages?: Prisma.AssetLeverageUncheckedUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateWithoutErrorDefinitionsInput = {
@@ -739,6 +848,7 @@ export type AccountCreateWithoutErrorDefinitionsInput = {
   trades?: Prisma.TradeCreateNestedManyWithoutAccountInput
   monthlyReviews?: Prisma.MonthlyReviewCreateNestedManyWithoutAccountInput
   assetLeverages?: Prisma.AssetLeverageCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutErrorDefinitionsInput = {
@@ -754,6 +864,7 @@ export type AccountUncheckedCreateWithoutErrorDefinitionsInput = {
   trades?: Prisma.TradeUncheckedCreateNestedManyWithoutAccountInput
   monthlyReviews?: Prisma.MonthlyReviewUncheckedCreateNestedManyWithoutAccountInput
   assetLeverages?: Prisma.AssetLeverageUncheckedCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutErrorDefinitionsInput = {
@@ -785,6 +896,7 @@ export type AccountUpdateWithoutErrorDefinitionsInput = {
   trades?: Prisma.TradeUpdateManyWithoutAccountNestedInput
   monthlyReviews?: Prisma.MonthlyReviewUpdateManyWithoutAccountNestedInput
   assetLeverages?: Prisma.AssetLeverageUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutErrorDefinitionsInput = {
@@ -800,6 +912,7 @@ export type AccountUncheckedUpdateWithoutErrorDefinitionsInput = {
   trades?: Prisma.TradeUncheckedUpdateManyWithoutAccountNestedInput
   monthlyReviews?: Prisma.MonthlyReviewUncheckedUpdateManyWithoutAccountNestedInput
   assetLeverages?: Prisma.AssetLeverageUncheckedUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateWithoutAssetLeveragesInput = {
@@ -815,6 +928,7 @@ export type AccountCreateWithoutAssetLeveragesInput = {
   trades?: Prisma.TradeCreateNestedManyWithoutAccountInput
   monthlyReviews?: Prisma.MonthlyReviewCreateNestedManyWithoutAccountInput
   errorDefinitions?: Prisma.ErrorDefinitionCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutAssetLeveragesInput = {
@@ -830,6 +944,7 @@ export type AccountUncheckedCreateWithoutAssetLeveragesInput = {
   trades?: Prisma.TradeUncheckedCreateNestedManyWithoutAccountInput
   monthlyReviews?: Prisma.MonthlyReviewUncheckedCreateNestedManyWithoutAccountInput
   errorDefinitions?: Prisma.ErrorDefinitionUncheckedCreateNestedManyWithoutAccountInput
+  fundTransactions?: Prisma.FundTransactionUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutAssetLeveragesInput = {
@@ -861,6 +976,7 @@ export type AccountUpdateWithoutAssetLeveragesInput = {
   trades?: Prisma.TradeUpdateManyWithoutAccountNestedInput
   monthlyReviews?: Prisma.MonthlyReviewUpdateManyWithoutAccountNestedInput
   errorDefinitions?: Prisma.ErrorDefinitionUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutAssetLeveragesInput = {
@@ -876,6 +992,7 @@ export type AccountUncheckedUpdateWithoutAssetLeveragesInput = {
   trades?: Prisma.TradeUncheckedUpdateManyWithoutAccountNestedInput
   monthlyReviews?: Prisma.MonthlyReviewUncheckedUpdateManyWithoutAccountNestedInput
   errorDefinitions?: Prisma.ErrorDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+  fundTransactions?: Prisma.FundTransactionUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 
@@ -888,6 +1005,7 @@ export type AccountCountOutputType = {
   monthlyReviews: number
   errorDefinitions: number
   assetLeverages: number
+  fundTransactions: number
 }
 
 export type AccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -895,6 +1013,7 @@ export type AccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   monthlyReviews?: boolean | AccountCountOutputTypeCountMonthlyReviewsArgs
   errorDefinitions?: boolean | AccountCountOutputTypeCountErrorDefinitionsArgs
   assetLeverages?: boolean | AccountCountOutputTypeCountAssetLeveragesArgs
+  fundTransactions?: boolean | AccountCountOutputTypeCountFundTransactionsArgs
 }
 
 /**
@@ -935,6 +1054,13 @@ export type AccountCountOutputTypeCountAssetLeveragesArgs<ExtArgs extends runtim
   where?: Prisma.AssetLeverageWhereInput
 }
 
+/**
+ * AccountCountOutputType without action
+ */
+export type AccountCountOutputTypeCountFundTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FundTransactionWhereInput
+}
+
 
 export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -950,6 +1076,7 @@ export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   monthlyReviews?: boolean | Prisma.Account$monthlyReviewsArgs<ExtArgs>
   errorDefinitions?: boolean | Prisma.Account$errorDefinitionsArgs<ExtArgs>
   assetLeverages?: boolean | Prisma.Account$assetLeveragesArgs<ExtArgs>
+  fundTransactions?: boolean | Prisma.Account$fundTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.AccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["account"]>
 
@@ -995,6 +1122,7 @@ export type AccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   monthlyReviews?: boolean | Prisma.Account$monthlyReviewsArgs<ExtArgs>
   errorDefinitions?: boolean | Prisma.Account$errorDefinitionsArgs<ExtArgs>
   assetLeverages?: boolean | Prisma.Account$assetLeveragesArgs<ExtArgs>
+  fundTransactions?: boolean | Prisma.Account$fundTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.AccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1007,6 +1135,7 @@ export type $AccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     monthlyReviews: Prisma.$MonthlyReviewPayload<ExtArgs>[]
     errorDefinitions: Prisma.$ErrorDefinitionPayload<ExtArgs>[]
     assetLeverages: Prisma.$AssetLeveragePayload<ExtArgs>[]
+    fundTransactions: Prisma.$FundTransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1416,6 +1545,7 @@ export interface Prisma__AccountClient<T, Null = never, ExtArgs extends runtime.
   monthlyReviews<T extends Prisma.Account$monthlyReviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$monthlyReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MonthlyReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   errorDefinitions<T extends Prisma.Account$errorDefinitionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$errorDefinitionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ErrorDefinitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assetLeverages<T extends Prisma.Account$assetLeveragesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$assetLeveragesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetLeveragePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  fundTransactions<T extends Prisma.Account$fundTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$fundTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FundTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1940,6 +2070,30 @@ export type Account$assetLeveragesArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.AssetLeverageScalarFieldEnum | Prisma.AssetLeverageScalarFieldEnum[]
+}
+
+/**
+ * Account.fundTransactions
+ */
+export type Account$fundTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FundTransaction
+   */
+  select?: Prisma.FundTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FundTransaction
+   */
+  omit?: Prisma.FundTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FundTransactionInclude<ExtArgs> | null
+  where?: Prisma.FundTransactionWhereInput
+  orderBy?: Prisma.FundTransactionOrderByWithRelationInput | Prisma.FundTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.FundTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FundTransactionScalarFieldEnum | Prisma.FundTransactionScalarFieldEnum[]
 }
 
 /**

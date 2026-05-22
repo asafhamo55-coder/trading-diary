@@ -32,6 +32,8 @@ export async function GET(
         riskReward: t.riskReward,
         totalPositionValue: t.totalPositionValue,
         isCompleted: t.isCompleted,
+        totalShares: t.totalShares,
+        sharesInProcess: t.sharesInProcess,
         tradeDate: t.tradeDate,
         tradeErrors: t.tradeErrors.map((te) => ({
           errorDefinition: { id: te.errorDefinition.id, name: te.errorDefinition.name },

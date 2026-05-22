@@ -65,9 +65,14 @@ export default function MonthlyDetailClient({
         ? analytics.losers.short
         : analytics.losers.overall;
 
-  const completedTrades = trades.filter(
-    (t) => t.isCompleted && t.totalPnL !== null
-  );
+  // Include partial-exit trades (have realized P&L but still open)
+  const completedTrades = trades.filter((t) => {
+    if (t.totalPnL === null) return false;
+    if (t.isCompleted) return true;
+    const total = t.totalShares ?? 0;
+    const open = t.sharesInProcess ?? 0;
+    return total > 0 && open < total;
+  });
   const sortedByPnL = [...completedTrades].sort(
     (a, b) => (b.totalPnL ?? 0) - (a.totalPnL ?? 0)
   );
@@ -81,19 +86,19 @@ export default function MonthlyDetailClient({
         <div className="flex items-center gap-4">
           <Link
             href={`/monthly/${prevMonth}`}
-            className="p-2 rounded-lg bg-[#1C2130] border border-[#2A3040] hover:border-[#3B82F6]/40 transition-colors"
+            className="p-2 rounded-lg bg-[var(--muted)] border border-[var(--border)] hover:border-[#3B82F6]/40 transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-[#8892A6]" />
+            <ChevronLeft className="w-5 h-5 text-[var(--muted-foreground)]" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-[#E8ECF4]">{monthName}</h1>
-            <p className="text-[#8892A6] text-sm">Monthly Deep Dive</p>
+            <h1 className="text-2xl font-bold text-[var(--foreground)]">{monthName}</h1>
+            <p className="text-[var(--muted-foreground)] text-sm">Monthly Deep Dive</p>
           </div>
           <Link
             href={`/monthly/${nextMonth}`}
-            className="p-2 rounded-lg bg-[#1C2130] border border-[#2A3040] hover:border-[#3B82F6]/40 transition-colors"
+            className="p-2 rounded-lg bg-[var(--muted)] border border-[var(--border)] hover:border-[#3B82F6]/40 transition-colors"
           >
-            <ChevronRight className="w-5 h-5 text-[#8892A6]" />
+            <ChevronRight className="w-5 h-5 text-[var(--muted-foreground)]" />
           </Link>
         </div>
         <Link
@@ -105,8 +110,8 @@ export default function MonthlyDetailClient({
       </div>
 
       {trades.length === 0 ? (
-        <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-12 text-center">
-          <p className="text-[#8892A6]">No trades recorded for {monthName}.</p>
+        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-12 text-center">
+          <p className="text-[var(--muted-foreground)]">No trades recorded for {monthName}.</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -143,13 +148,13 @@ export default function MonthlyDetailClient({
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-xl bg-[#151921] border border-[#2A3040] p-4"
+                className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-4"
               >
-                <p className="text-xs text-[#8892A6] mb-1">{stat.label}</p>
+                <p className="text-xs text-[var(--muted-foreground)] mb-1">{stat.label}</p>
                 <p
                   className={cn(
                     "text-xl font-bold",
-                    stat.color ?? "text-[#E8ECF4]"
+                    stat.color ?? "text-[var(--foreground)]"
                   )}
                 >
                   {stat.value}
@@ -159,8 +164,8 @@ export default function MonthlyDetailClient({
           </div>
 
           {/* Direction Breakdown */}
-          <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
-            <h2 className="text-lg font-semibold text-[#E8ECF4] mb-4">
+          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
               Direction Breakdown
             </h2>
             <div className="flex gap-2 mb-4">
@@ -172,7 +177,7 @@ export default function MonthlyDetailClient({
                     "px-4 py-1.5 rounded-lg text-sm font-medium transition-colors",
                     dirTab === tab
                       ? "bg-[#3B82F6] text-white"
-                      : "bg-[#1C2130] text-[#8892A6] hover:text-[#E8ECF4]"
+                      : "bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                   )}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -181,13 +186,13 @@ export default function MonthlyDetailClient({
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div>
-                <p className="text-xs text-[#8892A6]">Trades</p>
-                <p className="text-lg font-bold text-[#E8ECF4]">
+                <p className="text-xs text-[var(--muted-foreground)]">Trades</p>
+                <p className="text-lg font-bold text-[var(--foreground)]">
                   {dirStats.tradeCount}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-[#8892A6]">Total P&L</p>
+                <p className="text-xs text-[var(--muted-foreground)]">Total P&L</p>
                 <p
                   className={cn(
                     "text-lg font-bold",
@@ -198,7 +203,7 @@ export default function MonthlyDetailClient({
                 </p>
               </div>
               <div>
-                <p className="text-xs text-[#8892A6]">Avg P&L</p>
+                <p className="text-xs text-[var(--muted-foreground)]">Avg P&L</p>
                 <p
                   className={cn(
                     "text-lg font-bold",
@@ -211,14 +216,14 @@ export default function MonthlyDetailClient({
                 </p>
               </div>
               <div>
-                <p className="text-xs text-[#8892A6]">Win Rate</p>
-                <p className="text-lg font-bold text-[#E8ECF4]">
+                <p className="text-xs text-[var(--muted-foreground)]">Win Rate</p>
+                <p className="text-lg font-bold text-[var(--foreground)]">
                   {formatPercent(dirStats.winRate)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-[#8892A6]">Profit Factor</p>
-                <p className="text-lg font-bold text-[#E8ECF4]">
+                <p className="text-xs text-[var(--muted-foreground)]">Profit Factor</p>
+                <p className="text-lg font-bold text-[var(--foreground)]">
                   {dirStats.profitFactor === Infinity
                     ? "Inf"
                     : formatNumber(dirStats.profitFactor)}
@@ -229,52 +234,52 @@ export default function MonthlyDetailClient({
 
           {/* Winners vs Losers */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
+            <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
               <div className="flex items-center gap-2 mb-4">
                 <ArrowUpRight className="w-5 h-5 text-[#00D68F]" />
-                <h3 className="font-semibold text-[#E8ECF4]">Winners</h3>
+                <h3 className="font-semibold text-[var(--foreground)]">Winners</h3>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#8892A6]">Count</span>
-                  <span className="text-sm font-medium text-[#E8ECF4]">
+                  <span className="text-sm text-[var(--muted-foreground)]">Count</span>
+                  <span className="text-sm font-medium text-[var(--foreground)]">
                     {winStats.count}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#8892A6]">Total</span>
+                  <span className="text-sm text-[var(--muted-foreground)]">Total</span>
                   <span className="text-sm font-medium text-[#00D68F]">
                     {formatCurrency(winStats.totalPnL)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#8892A6]">Average</span>
+                  <span className="text-sm text-[var(--muted-foreground)]">Average</span>
                   <span className="text-sm font-medium text-[#00D68F]">
                     {formatCurrency(winStats.avgPnL)}
                   </span>
                 </div>
               </div>
             </div>
-            <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
+            <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
               <div className="flex items-center gap-2 mb-4">
                 <ArrowDownRight className="w-5 h-5 text-[#FF4D6A]" />
-                <h3 className="font-semibold text-[#E8ECF4]">Losers</h3>
+                <h3 className="font-semibold text-[var(--foreground)]">Losers</h3>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#8892A6]">Count</span>
-                  <span className="text-sm font-medium text-[#E8ECF4]">
+                  <span className="text-sm text-[var(--muted-foreground)]">Count</span>
+                  <span className="text-sm font-medium text-[var(--foreground)]">
                     {loseStats.count}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#8892A6]">Total</span>
+                  <span className="text-sm text-[var(--muted-foreground)]">Total</span>
                   <span className="text-sm font-medium text-[#FF4D6A]">
                     {formatCurrency(loseStats.totalPnL)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#8892A6]">Average</span>
+                  <span className="text-sm text-[var(--muted-foreground)]">Average</span>
                   <span className="text-sm font-medium text-[#FF4D6A]">
                     {formatCurrency(loseStats.avgPnL)}
                   </span>
@@ -285,27 +290,27 @@ export default function MonthlyDetailClient({
 
           {/* Strategy Performance */}
           {analytics.byStrategy.length > 0 && (
-            <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
-              <h2 className="text-lg font-semibold text-[#E8ECF4] mb-4">
+            <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
+              <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
                 Strategy Performance
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#2A3040]">
-                      <th className="text-left py-2 text-[#8892A6] font-medium">
+                    <tr className="border-b border-[var(--border)]">
+                      <th className="text-left py-2 text-[var(--muted-foreground)] font-medium">
                         Strategy
                       </th>
-                      <th className="text-right py-2 text-[#8892A6] font-medium">
+                      <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
                         Count
                       </th>
-                      <th className="text-right py-2 text-[#8892A6] font-medium">
+                      <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
                         Total P&L
                       </th>
-                      <th className="text-right py-2 text-[#8892A6] font-medium">
+                      <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
                         Avg P&L
                       </th>
-                      <th className="text-right py-2 text-[#8892A6] font-medium">
+                      <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
                         Win Rate
                       </th>
                     </tr>
@@ -316,8 +321,8 @@ export default function MonthlyDetailClient({
                         key={s.strategy}
                         className="border-b border-[#2A3040]/50"
                       >
-                        <td className="py-2 text-[#E8ECF4]">{s.strategy}</td>
-                        <td className="py-2 text-right text-[#E8ECF4]">
+                        <td className="py-2 text-[var(--foreground)]">{s.strategy}</td>
+                        <td className="py-2 text-right text-[var(--foreground)]">
                           {s.tradeCount}
                         </td>
                         <td
@@ -340,7 +345,7 @@ export default function MonthlyDetailClient({
                         >
                           {formatCurrency(s.avgPnL)}
                         </td>
-                        <td className="py-2 text-right text-[#E8ECF4]">
+                        <td className="py-2 text-right text-[var(--foreground)]">
                           {formatPercent(s.winRate)}
                         </td>
                       </tr>
@@ -353,26 +358,26 @@ export default function MonthlyDetailClient({
 
           {/* Top Winners & Losers */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
+            <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Trophy className="w-5 h-5 text-[#FFB547]" />
-                <h3 className="font-semibold text-[#E8ECF4]">Top 3 Winners</h3>
+                <h3 className="font-semibold text-[var(--foreground)]">Top 3 Winners</h3>
               </div>
               <div className="space-y-3">
                 {top3.map((trade, i) => (
                   <div
                     key={trade.id}
-                    className="flex items-center justify-between rounded-lg bg-[#1C2130] px-4 py-3"
+                    className="flex items-center justify-between rounded-lg bg-[var(--muted)] px-4 py-3"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xs font-bold text-[#FFB547]">
                         #{i + 1}
                       </span>
                       <div>
-                        <p className="text-sm font-medium text-[#E8ECF4]">
+                        <p className="text-sm font-medium text-[var(--foreground)]">
                           {trade.symbol}
                         </p>
-                        <p className="text-xs text-[#8892A6]">
+                        <p className="text-xs text-[var(--muted-foreground)]">
                           {trade.tradeType}
                         </p>
                       </div>
@@ -383,30 +388,30 @@ export default function MonthlyDetailClient({
                   </div>
                 ))}
                 {top3.length === 0 && (
-                  <p className="text-sm text-[#8892A6]">No winning trades</p>
+                  <p className="text-sm text-[var(--muted-foreground)]">No winning trades</p>
                 )}
               </div>
             </div>
-            <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
+            <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
               <div className="flex items-center gap-2 mb-4">
                 <TrendingDown className="w-5 h-5 text-[#FF4D6A]" />
-                <h3 className="font-semibold text-[#E8ECF4]">Top 3 Losers</h3>
+                <h3 className="font-semibold text-[var(--foreground)]">Top 3 Losers</h3>
               </div>
               <div className="space-y-3">
                 {bottom3.map((trade, i) => (
                   <div
                     key={trade.id}
-                    className="flex items-center justify-between rounded-lg bg-[#1C2130] px-4 py-3"
+                    className="flex items-center justify-between rounded-lg bg-[var(--muted)] px-4 py-3"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xs font-bold text-[#FF4D6A]">
                         #{i + 1}
                       </span>
                       <div>
-                        <p className="text-sm font-medium text-[#E8ECF4]">
+                        <p className="text-sm font-medium text-[var(--foreground)]">
                           {trade.symbol}
                         </p>
-                        <p className="text-xs text-[#8892A6]">
+                        <p className="text-xs text-[var(--muted-foreground)]">
                           {trade.tradeType}
                         </p>
                       </div>
@@ -417,37 +422,37 @@ export default function MonthlyDetailClient({
                   </div>
                 ))}
                 {bottom3.length === 0 && (
-                  <p className="text-sm text-[#8892A6]">No losing trades</p>
+                  <p className="text-sm text-[var(--muted-foreground)]">No losing trades</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Trades List */}
-          <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
-            <h2 className="text-lg font-semibold text-[#E8ECF4] mb-4">
+          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
               Trades
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[#2A3040]">
-                    <th className="text-left py-2 text-[#8892A6] font-medium">
+                  <tr className="border-b border-[var(--border)]">
+                    <th className="text-left py-2 text-[var(--muted-foreground)] font-medium">
                       Date
                     </th>
-                    <th className="text-left py-2 text-[#8892A6] font-medium">
+                    <th className="text-left py-2 text-[var(--muted-foreground)] font-medium">
                       Symbol
                     </th>
-                    <th className="text-left py-2 text-[#8892A6] font-medium">
+                    <th className="text-left py-2 text-[var(--muted-foreground)] font-medium">
                       Direction
                     </th>
-                    <th className="text-left py-2 text-[#8892A6] font-medium">
+                    <th className="text-left py-2 text-[var(--muted-foreground)] font-medium">
                       Type
                     </th>
-                    <th className="text-right py-2 text-[#8892A6] font-medium">
+                    <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
                       P&L
                     </th>
-                    <th className="text-right py-2 text-[#8892A6] font-medium">
+                    <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
                       R/R
                     </th>
                   </tr>
@@ -458,8 +463,8 @@ export default function MonthlyDetailClient({
                       key={t.id}
                       className="border-b border-[#2A3040]/50"
                     >
-                      <td className="py-2 text-[#E8ECF4]">{t.tradeDate}</td>
-                      <td className="py-2 font-medium text-[#E8ECF4]">
+                      <td className="py-2 text-[var(--foreground)]">{t.tradeDate}</td>
+                      <td className="py-2 font-medium text-[var(--foreground)]">
                         {t.symbol}
                       </td>
                       <td className="py-2">
@@ -474,14 +479,14 @@ export default function MonthlyDetailClient({
                           {t.direction}
                         </span>
                       </td>
-                      <td className="py-2 text-[#8892A6]">
+                      <td className="py-2 text-[var(--muted-foreground)]">
                         {t.tradeType ?? "-"}
                       </td>
                       <td
                         className={cn(
                           "py-2 text-right font-medium",
                           !t.isCompleted
-                            ? "text-[#8892A6]"
+                            ? "text-[var(--muted-foreground)]"
                             : (t.totalPnL ?? 0) >= 0
                               ? "text-[#00D68F]"
                               : "text-[#FF4D6A]"
@@ -491,7 +496,7 @@ export default function MonthlyDetailClient({
                           ? formatCurrency(t.totalPnL ?? 0)
                           : "Open"}
                       </td>
-                      <td className="py-2 text-right text-[#E8ECF4]">
+                      <td className="py-2 text-right text-[var(--foreground)]">
                         {t.isCompleted
                           ? formatNumber(t.riskReward ?? 0)
                           : "-"}

@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Account: 'Account',
+  FundTransaction: 'FundTransaction',
   Trade: 'Trade',
   TradeLeg: 'TradeLeg',
   MonthlyReview: 'MonthlyReview',
@@ -406,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "account" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage"
+    modelProps: "account" | "fundTransaction" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -481,6 +482,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AccountCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    FundTransaction: {
+      payload: Prisma.$FundTransactionPayload<ExtArgs>
+      fields: Prisma.FundTransactionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FundTransactionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FundTransactionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload>
+        }
+        findFirst: {
+          args: Prisma.FundTransactionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FundTransactionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload>
+        }
+        findMany: {
+          args: Prisma.FundTransactionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload>[]
+        }
+        create: {
+          args: Prisma.FundTransactionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload>
+        }
+        createMany: {
+          args: Prisma.FundTransactionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FundTransactionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload>[]
+        }
+        delete: {
+          args: Prisma.FundTransactionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload>
+        }
+        update: {
+          args: Prisma.FundTransactionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload>
+        }
+        deleteMany: {
+          args: Prisma.FundTransactionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FundTransactionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FundTransactionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload>[]
+        }
+        upsert: {
+          args: Prisma.FundTransactionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FundTransactionPayload>
+        }
+        aggregate: {
+          args: Prisma.FundTransactionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFundTransaction>
+        }
+        groupBy: {
+          args: Prisma.FundTransactionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FundTransactionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FundTransactionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FundTransactionCountAggregateOutputType> | number
         }
       }
     }
@@ -982,6 +1057,18 @@ export const AccountScalarFieldEnum = {
 export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
 
 
+export const FundTransactionScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  amount: 'amount',
+  comment: 'comment',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt'
+} as const
+
+export type FundTransactionScalarFieldEnum = (typeof FundTransactionScalarFieldEnum)[keyof typeof FundTransactionScalarFieldEnum]
+
+
 export const TradeScalarFieldEnum = {
   id: 'id',
   accountId: 'accountId',
@@ -991,6 +1078,7 @@ export const TradeScalarFieldEnum = {
   direction: 'direction',
   tradeType: 'tradeType',
   isSwingContinuation: 'isSwingContinuation',
+  isAsset: 'isAsset',
   totalPositionValue: 'totalPositionValue',
   totalShares: 'totalShares',
   sharesInProcess: 'sharesInProcess',
@@ -1299,6 +1387,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
+  fundTransaction?: Prisma.FundTransactionOmit
   trade?: Prisma.TradeOmit
   tradeLeg?: Prisma.TradeLegOmit
   monthlyReview?: Prisma.MonthlyReviewOmit

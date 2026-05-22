@@ -8,6 +8,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
+import EChart from "@/components/charts/EChart";
+import type { EChartsCoreOption } from "echarts/core";
 import { cn, formatCurrency, formatPercent, formatNumber } from "@/lib/utils";
 import { MONTH_NAMES } from "@/lib/types";
 import type { Trade } from "@/lib/types";
@@ -108,13 +110,92 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
     }).filter((m) => m.trades > 0);
   }, [trades]);
 
+  const monthlyTrendOption = useMemo<EChartsCoreOption>(() => {
+    const rows = monthlyTrend;
+    return {
+      grid: { left: 92, right: 120, top: 8, bottom: 24, containLabel: false },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: "#0C0F14",
+        borderColor: "#2A3040",
+        borderWidth: 1,
+        textStyle: { color: "#E8ECF4", fontSize: 12 },
+        axisPointer: { type: "shadow", shadowStyle: { color: "rgba(59,130,246,0.06)" } },
+        formatter: (params: unknown) => {
+          const arr = Array.isArray(params) ? params : [params];
+          const p = arr[0] as { name: string; value: number; dataIndex: number };
+          const row = rows[p.dataIndex];
+          const v = Number(p.value) || 0;
+          return `<div style="color:#8892A6;font-size:11px;margin-bottom:4px">${p.name}</div>` +
+            `<div style="color:${v >= 0 ? "#00D68F" : "#FF4D6A"}"><b>${v >= 0 ? "+" : ""}${formatCurrency(v)}</b></div>` +
+            `<div style="color:#8892A6;font-size:11px;margin-top:2px">${row?.trades ?? 0} trades</div>`;
+        },
+      },
+      xAxis: {
+        type: "value",
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { color: "#2A3040", type: "dashed" } },
+        axisLabel: {
+          color: "#8892A6",
+          fontSize: 11,
+          formatter: (v: number) =>
+            v === 0 ? "0" : `$${Math.round(v / 100) / 10}k`,
+        },
+      },
+      yAxis: {
+        type: "category",
+        inverse: true,
+        data: rows.map((r) => r.name),
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { color: "#E8ECF4", fontSize: 12 },
+      },
+      series: [
+        {
+          name: "P&L",
+          type: "bar",
+          data: rows.map((r) => ({
+            value: r.pnl,
+            itemStyle: {
+              color: r.pnl >= 0 ? "rgba(0,214,143,0.5)" : "rgba(255,77,106,0.5)",
+              borderRadius: [4, 4, 4, 4],
+            },
+          })),
+          barWidth: 16,
+          label: {
+            show: true,
+            position: "right",
+            color: "#E8ECF4",
+            fontSize: 12,
+            formatter: (p: { value: number; dataIndex: number }) => {
+              const r = rows[p.dataIndex];
+              const v = Number(p.value) || 0;
+              const sign = v > 0 ? "+" : "";
+              return `${sign}${formatCurrency(v)}  ·  ${r?.trades ?? 0} trades`;
+            },
+            rich: {},
+          },
+          markLine: {
+            silent: true,
+            symbol: "none",
+            lineStyle: { color: "#2A3040" },
+            data: [{ xAxis: 0 }],
+            label: { show: false },
+          },
+          animation: false,
+        },
+      ],
+    };
+  }, [monthlyTrend]);
+
   return (
     <div className="flex-1 p-6 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#E8ECF4]">
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">
           Advanced Analytics
         </h1>
-        <p className="text-[#8892A6] text-sm mt-1">
+        <p className="text-[var(--muted-foreground)] text-sm mt-1">
           Comprehensive performance analysis across all trades
         </p>
       </div>
@@ -162,16 +243,16 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl bg-[#151921] border border-[#2A3040] p-4"
+              className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-4"
             >
               <div className="flex items-center gap-2 mb-2">
                 <stat.icon className={cn("w-4 h-4", stat.iconColor)} />
-                <p className="text-xs text-[#8892A6]">{stat.label}</p>
+                <p className="text-xs text-[var(--muted-foreground)]">{stat.label}</p>
               </div>
               <p
                 className={cn(
                   "text-xl font-bold",
-                  stat.color ?? "text-[#E8ECF4]"
+                  stat.color ?? "text-[var(--foreground)]"
                 )}
               >
                 {stat.value}
@@ -181,24 +262,24 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
         </div>
 
         {/* Symbol Performance */}
-        <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
-          <h2 className="text-lg font-semibold text-[#E8ECF4] mb-4">
+        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
+          <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
             Symbol Performance
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#2A3040]">
-                  <th className="text-left py-2 text-[#8892A6] font-medium">
+                <tr className="border-b border-[var(--border)]">
+                  <th className="text-left py-2 text-[var(--muted-foreground)] font-medium">
                     Symbol
                   </th>
-                  <th className="text-right py-2 text-[#8892A6] font-medium">
+                  <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
                     Trades
                   </th>
-                  <th className="text-right py-2 text-[#8892A6] font-medium">
+                  <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
                     Total P&L
                   </th>
-                  <th className="text-right py-2 text-[#8892A6] font-medium">
+                  <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
                     Win Rate
                   </th>
                 </tr>
@@ -209,10 +290,10 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
                     key={s.symbol}
                     className="border-b border-[#2A3040]/50"
                   >
-                    <td className="py-2 font-medium text-[#E8ECF4]">
+                    <td className="py-2 font-medium text-[var(--foreground)]">
                       {s.symbol}
                     </td>
-                    <td className="py-2 text-right text-[#E8ECF4]">
+                    <td className="py-2 text-right text-[var(--foreground)]">
                       {s.count}
                     </td>
                     <td
@@ -224,7 +305,7 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
                       {s.totalPnL >= 0 ? "+" : ""}
                       {formatCurrency(s.totalPnL)}
                     </td>
-                    <td className="py-2 text-right text-[#E8ECF4]">
+                    <td className="py-2 text-right text-[var(--foreground)]">
                       {formatPercent(s.winRate)}
                     </td>
                   </tr>
@@ -236,20 +317,20 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
 
         {/* Direction Performance */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
+          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
             <div className="flex items-center gap-2 mb-4">
               <ArrowUpRight className="w-5 h-5 text-[#00D68F]" />
-              <h3 className="font-semibold text-[#E8ECF4]">Long Trades</h3>
+              <h3 className="font-semibold text-[var(--foreground)]">Long Trades</h3>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-[#8892A6]">Count</span>
-                <span className="text-sm font-medium text-[#E8ECF4]">
+                <span className="text-sm text-[var(--muted-foreground)]">Count</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">
                   {directionStats.long.count}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8892A6]">Total P&L</span>
+                <span className="text-sm text-[var(--muted-foreground)]">Total P&L</span>
                 <span
                   className={cn(
                     "text-sm font-medium",
@@ -262,33 +343,33 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8892A6]">Win Rate</span>
-                <span className="text-sm font-medium text-[#E8ECF4]">
+                <span className="text-sm text-[var(--muted-foreground)]">Win Rate</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">
                   {formatPercent(directionStats.long.winRate)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8892A6]">Avg R/R</span>
-                <span className="text-sm font-medium text-[#E8ECF4]">
+                <span className="text-sm text-[var(--muted-foreground)]">Avg R/R</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">
                   {formatNumber(directionStats.long.avgRR)}
                 </span>
               </div>
             </div>
           </div>
-          <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
+          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
             <div className="flex items-center gap-2 mb-4">
               <ArrowDownRight className="w-5 h-5 text-[#FF4D6A]" />
-              <h3 className="font-semibold text-[#E8ECF4]">Short Trades</h3>
+              <h3 className="font-semibold text-[var(--foreground)]">Short Trades</h3>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-[#8892A6]">Count</span>
-                <span className="text-sm font-medium text-[#E8ECF4]">
+                <span className="text-sm text-[var(--muted-foreground)]">Count</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">
                   {directionStats.short.count}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8892A6]">Total P&L</span>
+                <span className="text-sm text-[var(--muted-foreground)]">Total P&L</span>
                 <span
                   className={cn(
                     "text-sm font-medium",
@@ -301,14 +382,14 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8892A6]">Win Rate</span>
-                <span className="text-sm font-medium text-[#E8ECF4]">
+                <span className="text-sm text-[var(--muted-foreground)]">Win Rate</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">
                   {formatPercent(directionStats.short.winRate)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8892A6]">Avg R/R</span>
-                <span className="text-sm font-medium text-[#E8ECF4]">
+                <span className="text-sm text-[var(--muted-foreground)]">Avg R/R</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">
                   {formatNumber(directionStats.short.avgRR)}
                 </span>
               </div>
@@ -317,54 +398,17 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
         </div>
 
         {/* Monthly Trend */}
-        <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5">
-          <h2 className="text-lg font-semibold text-[#E8ECF4] mb-4">
+        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
+          <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
             Monthly Trend
           </h2>
-          <div className="space-y-3">
-            {monthlyTrend.map((m) => {
-              const maxPnL = Math.max(
-                ...monthlyTrend.map((x) => Math.abs(x.pnl)),
-                1
-              );
-              const barWidth = Math.round(
-                (Math.abs(m.pnl) / maxPnL) * 100
-              );
-              return (
-                <div key={m.month} className="flex items-center gap-4">
-                  <span className="text-sm font-medium text-[#E8ECF4] w-24 shrink-0">
-                    {m.name}
-                  </span>
-                  <div className="flex-1 flex items-center gap-3">
-                    <div className="flex-1 h-6 bg-[#1C2130] rounded-lg overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full rounded-lg transition-all",
-                          m.pnl >= 0 ? "bg-[#00D68F]/30" : "bg-[#FF4D6A]/30"
-                        )}
-                        style={{ width: `${barWidth}%` }}
-                      />
-                    </div>
-                    <span
-                      className={cn(
-                        "text-sm font-medium w-28 text-right shrink-0",
-                        m.pnl >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
-                      )}
-                    >
-                      {m.pnl >= 0 ? "+" : ""}
-                      {formatCurrency(m.pnl)}
-                    </span>
-                  </div>
-                  <span className="text-xs text-[#8892A6] w-16 text-right shrink-0">
-                    {m.trades} trades
-                  </span>
-                </div>
-              );
-            })}
-            {monthlyTrend.length === 0 && (
-              <p className="text-sm text-[#8892A6]">No trading data yet.</p>
-            )}
-          </div>
+          {monthlyTrend.length === 0 ? (
+            <p className="text-sm text-[var(--muted-foreground)]">No trading data yet.</p>
+          ) : (
+            <div style={{ height: Math.max(monthlyTrend.length * 32 + 32, 160) }}>
+              <EChart option={monthlyTrendOption} />
+            </div>
+          )}
         </div>
       </div>
     </div>

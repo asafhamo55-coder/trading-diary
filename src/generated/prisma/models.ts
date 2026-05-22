@@ -9,6 +9,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Account'
+export type * from './models/FundTransaction'
 export type * from './models/Trade'
 export type * from './models/TradeLeg'
 export type * from './models/MonthlyReview'

@@ -5,47 +5,71 @@ import { Calendar, TrendingUp, TrendingDown } from "lucide-react";
 import { cn, formatCurrency, formatPercent } from "@/lib/utils";
 import { MONTH_NAMES } from "@/lib/types";
 import type { Trade } from "@/lib/types";
+import YearPicker from "@/components/layout/YearPicker";
 
-export default function MonthlyOverviewClient({ trades }: { trades: Trade[] }) {
+// A trade contributes realized P&L when closed OR partially exited.
+function hasRealized(t: Trade): boolean {
+  if (t.isCompleted) return true;
+  const total = t.totalShares ?? 0;
+  const open = t.sharesInProcess ?? 0;
+  return total > 0 && open < total;
+}
+
+export default function MonthlyOverviewClient({
+  trades,
+  year,
+  availableYears,
+}: {
+  trades: Trade[];
+  year: number;
+  availableYears: number[];
+}) {
   const monthCards = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1;
     const monthTrades = trades.filter((t) => t.month === month);
-    const completed = monthTrades.filter((t) => t.isCompleted);
-    const totalPnL = completed.reduce((sum, t) => sum + (t.totalPnL ?? 0), 0);
-    const winners = completed.filter((t) => (t.totalPnL ?? 0) > 0);
-    const winRate = completed.length > 0 ? winners.length / completed.length : 0;
+    const realized = monthTrades.filter(hasRealized);
+    const totalPnL = realized.reduce((sum, t) => sum + (t.totalPnL ?? 0), 0);
+    const winners = realized.filter((t) => (t.totalPnL ?? 0) > 0);
+    const winRate = realized.length > 0 ? winners.length / realized.length : 0;
 
-    return { month, name: MONTH_NAMES[i], trades: completed.length, totalPnL, winRate, hasTrades: monthTrades.length > 0 };
+    return { month, name: MONTH_NAMES[i], trades: realized.length, totalPnL, winRate, hasTrades: monthTrades.length > 0 };
   });
 
   return (
     <div className="flex-1 p-6 lg:p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#E8ECF4]">Monthly Overview</h1>
-        <p className="text-[#8892A6] text-sm mt-1">Performance breakdown by month</p>
+      <div className="mb-8 flex items-end justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">Monthly Overview</h1>
+          <p className="text-[var(--muted-foreground)] text-sm mt-1">
+            Performance breakdown by month · {year}
+          </p>
+        </div>
+        <YearPicker years={availableYears} selected={year} />
       </div>
+
+      {/* Link each month card to /monthly/[month]?year=YYYY so drill-down stays in selected year */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {monthCards.map((card) => (
           <Link
             key={card.month}
-            href={`/monthly/${card.month}`}
-            className="block rounded-xl bg-[#151921] border border-[#2A3040] p-5 hover:border-[#3B82F6]/40 transition-colors"
+            href={`/monthly/${card.month}?year=${year}`}
+            className="block rounded-xl bg-[var(--card)] border border-[var(--border)] p-5 hover:border-[#3B82F6]/40 transition-colors"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[#3B82F6]" />
-                <span className="font-semibold text-[#E8ECF4]">{card.name}</span>
+                <span className="font-semibold text-[var(--foreground)]">{card.name}</span>
               </div>
               {card.hasTrades && (
-                <span className="text-xs text-[#8892A6]">{card.trades} trades</span>
+                <span className="text-xs text-[var(--muted-foreground)]">{card.trades} trades</span>
               )}
             </div>
 
             {card.hasTrades ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#8892A6]">Total P&L</span>
+                  <span className="text-sm text-[var(--muted-foreground)]">Total P&L</span>
                   <span
                     className={cn(
                       "text-lg font-bold",
@@ -57,8 +81,8 @@ export default function MonthlyOverviewClient({ trades }: { trades: Trade[] }) {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#8892A6]">Win Rate</span>
-                  <span className="text-sm font-medium text-[#E8ECF4]">
+                  <span className="text-sm text-[var(--muted-foreground)]">Win Rate</span>
+                  <span className="text-sm font-medium text-[var(--foreground)]">
                     {formatPercent(card.winRate)}
                   </span>
                 </div>
@@ -74,7 +98,7 @@ export default function MonthlyOverviewClient({ trades }: { trades: Trade[] }) {
                 </div>
               </div>
             ) : (
-              <p className="text-[#8892A6] text-sm">No trades</p>
+              <p className="text-[var(--muted-foreground)] text-sm">No trades</p>
             )}
           </Link>
         ))}

@@ -23,6 +23,11 @@ export * from './enums';
  */
 export type Account = Prisma.AccountModel
 /**
+ * Model FundTransaction
+ * 
+ */
+export type FundTransaction = Prisma.FundTransactionModel
+/**
  * Model Trade
  * 
  */

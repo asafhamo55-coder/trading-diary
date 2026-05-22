@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   LineChart,
@@ -12,11 +12,16 @@ import {
   BarChart3,
   AlertTriangle,
   Settings,
+  Wallet,
   ChevronLeft,
   ChevronRight,
   TrendingUp,
+  LogOut,
+  GripVertical,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "./ThemeToggle";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -25,38 +30,169 @@ const NAV_ITEMS = [
   { label: "Portfolio", icon: Briefcase, href: "/portfolio" },
   { label: "Journal", icon: BookOpen, href: "/journal" },
   { label: "Analytics", icon: BarChart3, href: "/analytics" },
+  { label: "Assets", icon: Wallet, href: "/assets" },
+  { label: "Stocks", icon: LineChart, href: "/stocks" },
   { label: "Errors", icon: AlertTriangle, href: "/errors" },
   { label: "Settings", icon: Settings, href: "/settings" },
 ];
 
+const STORAGE_KEY = "sidebar-nav-order-v1";
+
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const [order, setOrder] = useState<string[]>(NAV_ITEMS.map((i) => i.href));
+  const [draggingHref, setDraggingHref] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+
+  // Load saved order from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as string[];
+        const known = new Set(NAV_ITEMS.map((i) => i.href));
+        // Keep saved entries that still exist + append any new items
+        const filtered = saved.filter((h) => known.has(h));
+        const missing = NAV_ITEMS.map((i) => i.href).filter(
+          (h) => !filtered.includes(h)
+        );
+        setOrder([...filtered, ...missing]);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  function persistOrder(next: string[]) {
+    setOrder(next);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function resetOrder() {
+    const def = NAV_ITEMS.map((i) => i.href);
+    setOrder(def);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function handleDragStart(href: string) {
+    setDraggingHref(href);
+  }
+
+  function handleDragOver(e: React.DragEvent, targetHref: string) {
+    e.preventDefault();
+    if (!draggingHref || draggingHref === targetHref) return;
+    const next = [...order];
+    const from = next.indexOf(draggingHref);
+    const to = next.indexOf(targetHref);
+    if (from === -1 || to === -1) return;
+    next.splice(from, 1);
+    next.splice(to, 0, draggingHref);
+    setOrder(next);
+  }
+
+  function handleDragEnd() {
+    setDraggingHref(null);
+    persistOrder(order);
+  }
+
+  if (pathname === "/login") return null;
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
+
+  const itemsByHref = Object.fromEntries(NAV_ITEMS.map((i) => [i.href, i]));
+  const orderedItems = order
+    .map((h) => itemsByHref[h])
+    .filter((i): i is typeof NAV_ITEMS[number] => Boolean(i));
 
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col h-screen sticky top-0 border-r border-[#2A3040] bg-[#151921] transition-all duration-300",
+        "hidden md:flex flex-col h-screen sticky top-0 border-r border-[var(--border)] bg-[var(--card)] transition-all duration-300",
         collapsed ? "w-[68px]" : "w-[240px]"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-[#2A3040]">
+      <div className="flex items-center gap-3 px-4 h-16 border-b border-[var(--border)]">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#3B82F6]/10 shrink-0">
           <TrendingUp className="w-5 h-5 text-[#3B82F6]" />
         </div>
         {!collapsed && (
-          <span className="text-[#E8ECF4] font-semibold text-sm whitespace-nowrap">
+          <span className="text-[var(--foreground)] font-semibold text-sm whitespace-nowrap">
             Trading Journal Pro
           </span>
         )}
       </div>
 
+      {/* Reorder toggle */}
+      {!collapsed && (
+        <div className="px-3 pt-3 flex items-center justify-between">
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className={cn(
+              "text-[10px] font-medium uppercase tracking-wider transition-colors",
+              editMode
+                ? "text-[#3B82F6]"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+            )}
+          >
+            {editMode ? "Done reordering" : "Reorder"}
+          </button>
+          {editMode && (
+            <button
+              onClick={resetOrder}
+              className="inline-flex items-center gap-1 text-[10px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+              title="Reset to default order"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Navigation */}
-      <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
+      <nav className="flex-1 flex flex-col gap-1 px-3 py-3 overflow-y-auto">
+        {orderedItems.map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + "/");
+          const isDragging = draggingHref === item.href;
+
+          if (editMode) {
+            return (
+              <div
+                key={item.href}
+                draggable
+                onDragStart={() => handleDragStart(item.href)}
+                onDragOver={(e) => handleDragOver(e, item.href)}
+                onDragEnd={handleDragEnd}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-move select-none border",
+                  isDragging
+                    ? "border-[#3B82F6] bg-[#3B82F6]/10 text-[#3B82F6] opacity-50"
+                    : "border-[var(--border)] bg-[var(--muted)] text-[var(--foreground)] hover:border-[#3B82F6]/40"
+                )}
+              >
+                <GripVertical className="w-4 h-4 text-[var(--muted-foreground)] shrink-0" />
+                <item.icon className="w-5 h-5 shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
+              </div>
+            );
+          }
+
           return (
             <Link
               key={item.href}
@@ -65,7 +201,7 @@ export default function Sidebar() {
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 isActive
                   ? "bg-[#3B82F6]/10 text-[#3B82F6]"
-                  : "text-[#8892A6] hover:text-[#E8ECF4] hover:bg-[#1C2130]"
+                  : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
               )}
             >
               <item.icon className="w-5 h-5 shrink-0" />
@@ -75,11 +211,19 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Collapse toggle */}
-      <div className="px-3 py-4 border-t border-[#2A3040]">
+      {/* Theme + Logout + Collapse toggle */}
+      <div className="px-3 py-4 border-t border-[var(--border)] space-y-2">
+        <ThemeToggle collapsed={collapsed} />
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[#FF4D6A]/10 transition-colors text-sm"
+        >
+          <LogOut className="w-5 h-5 shrink-0" />
+          {!collapsed && <span>Sign out</span>}
+        </button>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-center w-full gap-2 px-3 py-2 rounded-lg text-[#8892A6] hover:text-[#E8ECF4] hover:bg-[#1C2130] transition-colors text-sm"
+          className="flex items-center justify-center w-full gap-2 px-3 py-2 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors text-sm"
         >
           {collapsed ? (
             <ChevronRight className="w-5 h-5" />

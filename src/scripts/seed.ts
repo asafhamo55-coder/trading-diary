@@ -705,8 +705,8 @@ async function main() {
     const totalSellQty = t.sellLegs.reduce((s, l) => s + l.qty, 0);
     const totalShares = Math.max(totalBuyQty, totalSellQty);
     const sharesInProcess = Math.abs(totalBuyQty - totalSellQty);
-    // Mark as completed if there are sell legs (partial exits still count as completed per sheet)
-    const isCompleted = t.sellLegs.length > 0;
+    // Only fully closed trades are completed; partial exits stay open with realized P&L.
+    const isCompleted = totalBuyQty > 0 && totalSellQty === totalBuyQty;
 
     const avgBuy = totalBuyQty > 0
       ? t.buyLegs.reduce((s, l) => s + l.price * l.qty, 0) / totalBuyQty

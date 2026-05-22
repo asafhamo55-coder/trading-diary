@@ -22,6 +22,20 @@ model Account {
   monthlyReviews    MonthlyReview[]
   errorDefinitions  ErrorDefinition[]
   assetLeverages    AssetLeverage[]
+  fundTransactions  FundTransaction[]
+}
+
+model FundTransaction {
+  id          String   @id @default(cuid())
+  accountId   String
+  account     Account  @relation(fields: [accountId], references: [id])
+  // Positive = deposit, negative = withdrawal
+  amount      Float
+  comment     String?
+  occurredAt  DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([accountId, occurredAt])
 }
 
 model Trade {
@@ -35,6 +49,7 @@ model Trade {
   direction         Direction
   tradeType         String?
   isSwingContinuation Boolean @default(false)
+  isAsset           Boolean  @default(false)
 
   entries           TradeLeg[]
 

@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Account: 'Account',
+  FundTransaction: 'FundTransaction',
   Trade: 'Trade',
   TradeLeg: 'TradeLeg',
   MonthlyReview: 'MonthlyReview',
@@ -91,6 +92,18 @@ export const AccountScalarFieldEnum = {
 export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
 
 
+export const FundTransactionScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  amount: 'amount',
+  comment: 'comment',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt'
+} as const
+
+export type FundTransactionScalarFieldEnum = (typeof FundTransactionScalarFieldEnum)[keyof typeof FundTransactionScalarFieldEnum]
+
+
 export const TradeScalarFieldEnum = {
   id: 'id',
   accountId: 'accountId',
@@ -100,6 +113,7 @@ export const TradeScalarFieldEnum = {
   direction: 'direction',
   tradeType: 'tradeType',
   isSwingContinuation: 'isSwingContinuation',
+  isAsset: 'isAsset',
   totalPositionValue: 'totalPositionValue',
   totalShares: 'totalShares',
   sharesInProcess: 'sharesInProcess',

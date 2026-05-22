@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
             direction: t.direction,
             tradeType: t.tradeType,
             isSwingContinuation: t.isSwingContinuation ?? false,
+            isAsset: t.isAsset ?? false,
             ...computed,
             entryReason: t.entryReason,
             exitReason: t.exitReason,

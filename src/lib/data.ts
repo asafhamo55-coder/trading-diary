@@ -2,6 +2,7 @@
 // Used by page components to get real data
 
 import { prisma } from "./db";
+import { tradeDateYearFilter } from "./year";
 import { DEMO_TRADES, DEMO_ACCOUNT, DEMO_MONTHLY_REVIEWS, DEMO_ERROR_DEFINITIONS, getDemoStats, getDemoMonthlyPnL, getDemoEquityCurve } from "./demo-data";
 
 // Fallback flag — if DB is not connected, use demo data
@@ -24,7 +25,7 @@ export async function getAccount() {
   return DEMO_ACCOUNT;
 }
 
-export async function getAllTrades(filters?: { month?: number; direction?: string; symbol?: string }) {
+export async function getAllTrades(filters?: { month?: number; direction?: string; symbol?: string; year?: number | null }) {
   try {
     const account = await prisma.account.findFirst();
     if (!account) return DEMO_TRADES;
@@ -33,6 +34,8 @@ export async function getAllTrades(filters?: { month?: number; direction?: strin
     if (filters?.month) where.month = filters.month;
     if (filters?.direction) where.direction = filters.direction;
     if (filters?.symbol) where.symbol = { contains: filters.symbol, mode: "insensitive" };
+    const dateFilter = tradeDateYearFilter(filters?.year ?? undefined);
+    if (dateFilter) where.tradeDate = dateFilter;
 
     const trades = await prisma.trade.findMany({
       where,
@@ -63,13 +66,16 @@ export async function getTradeById(id: string) {
   return DEMO_TRADES.find((t) => t.id === id) || null;
 }
 
-export async function getTradesByMonth(month: number) {
+export async function getTradesByMonth(month: number, year?: number | null) {
   try {
     const account = await prisma.account.findFirst();
     if (!account) return DEMO_TRADES.filter((t) => t.month === month);
 
+    const where: Record<string, unknown> = { accountId: account.id, month };
+    const dateFilter = tradeDateYearFilter(year ?? undefined);
+    if (dateFilter) where.tradeDate = dateFilter;
     const trades = await prisma.trade.findMany({
-      where: { accountId: account.id, month },
+      where,
       include: {
         entries: { orderBy: { legOrder: "asc" } },
         tradeErrors: { include: { errorDefinition: true } },
@@ -142,17 +148,36 @@ export async function getErrorDefinitions() {
   }
 }
 
-export async function getDashboardStats() {
+// A trade contributes realized P&L when at least one share has been closed
+// (partial-exit open trades count too).
+function hasRealizedPnL(t: {
+  isCompleted: boolean;
+  totalShares: number | null;
+  sharesInProcess: number | null;
+}): boolean {
+  if (t.isCompleted) return true;
+  const total = t.totalShares ?? 0;
+  const open = t.sharesInProcess ?? 0;
+  return total > 0 && open < total;
+}
+
+export async function getDashboardStats(year?: number | null) {
   try {
     const account = await prisma.account.findFirst();
     if (!account) return getDemoStats();
 
+    const where: Record<string, unknown> = { accountId: account.id };
+    const dateFilter = tradeDateYearFilter(year ?? undefined);
+    if (dateFilter) where.tradeDate = dateFilter;
     const trades = await prisma.trade.findMany({
-      where: { accountId: account.id },
+      where,
       select: {
         totalPnL: true,
         riskReward: true,
         isCompleted: true,
+        isAsset: true,
+        totalShares: true,
+        sharesInProcess: true,
         month: true,
         tradeDate: true,
         direction: true,
@@ -160,45 +185,80 @@ export async function getDashboardStats() {
       },
     });
 
-    const completed = trades.filter((t) => t.isCompleted && t.totalPnL !== null);
-    const winners = completed.filter((t) => t.totalPnL! > 0);
-    const totalPnL = completed.reduce((s, t) => s + t.totalPnL!, 0);
+    const realized = trades.filter(
+      (t) => hasRealizedPnL(t) && t.totalPnL !== null
+    );
+    const winners = realized.filter((t) => t.totalPnL! > 0);
+    const totalPnL = realized.reduce((s, t) => s + t.totalPnL!, 0);
     const currentPortfolio = account.startingBalance + totalPnL;
     const wins = winners.reduce((s, t) => s + t.totalPnL!, 0);
-    const losses = Math.abs(completed.filter((t) => t.totalPnL! < 0).reduce((s, t) => s + t.totalPnL!, 0));
+    const losses = Math.abs(
+      realized.filter((t) => t.totalPnL! < 0).reduce((s, t) => s + t.totalPnL!, 0)
+    );
+
+    // Per-segment slice (assets vs stocks)
+    function segmentStats(filtered: typeof realized) {
+      const ws = filtered.filter((t) => t.totalPnL! > 0);
+      const ls = filtered.filter((t) => t.totalPnL! < 0);
+      const segPnL = filtered.reduce((s, t) => s + t.totalPnL!, 0);
+      const segWins = ws.reduce((s, t) => s + t.totalPnL!, 0);
+      const segLosses = Math.abs(ls.reduce((s, t) => s + t.totalPnL!, 0));
+      return {
+        count: filtered.length,
+        totalPnL: segPnL,
+        winRate: filtered.length > 0 ? ws.length / filtered.length : 0,
+        profitFactor: segLosses > 0 ? segWins / segLosses : 0,
+      };
+    }
 
     return {
-      totalTrades: completed.length,
+      totalTrades: realized.length,
       openTrades: trades.filter((t) => !t.isCompleted).length,
-      winRate: completed.length > 0 ? winners.length / completed.length : 0,
+      winRate: realized.length > 0 ? winners.length / realized.length : 0,
       totalPnL,
       currentPortfolio,
       startingBalance: account.startingBalance,
-      avgRR: completed.length > 0
-        ? completed.reduce((s, t) => s + (t.riskReward ?? 0), 0) / completed.length
-        : 0,
+      avgRR:
+        realized.length > 0
+          ? realized.reduce((s, t) => s + (t.riskReward ?? 0), 0) /
+            realized.length
+          : 0,
       profitFactor: losses > 0 ? wins / losses : 0,
-      bestTrade: completed.length > 0 ? Math.max(...completed.map((t) => t.totalPnL!)) : 0,
-      worstTrade: completed.length > 0 ? Math.min(...completed.map((t) => t.totalPnL!)) : 0,
+      bestTrade:
+        realized.length > 0 ? Math.max(...realized.map((t) => t.totalPnL!)) : 0,
+      worstTrade:
+        realized.length > 0 ? Math.min(...realized.map((t) => t.totalPnL!)) : 0,
+      assets: segmentStats(realized.filter((t) => t.isAsset)),
+      stocks: segmentStats(realized.filter((t) => !t.isAsset)),
     };
   } catch {
     return getDemoStats();
   }
 }
 
-export async function getMonthlyPnL() {
+export async function getMonthlyPnL(year?: number | null) {
   try {
     const account = await prisma.account.findFirst();
     if (!account) return getDemoMonthlyPnL();
 
+    const where: Record<string, unknown> = { accountId: account.id };
+    const dateFilter = tradeDateYearFilter(year ?? undefined);
+    if (dateFilter) where.tradeDate = dateFilter;
     const trades = await prisma.trade.findMany({
-      where: { accountId: account.id, isCompleted: true },
-      select: { month: true, totalPnL: true },
+      where,
+      select: {
+        month: true,
+        totalPnL: true,
+        isCompleted: true,
+        totalShares: true,
+        sharesInProcess: true,
+      },
     });
+    const realized = trades.filter(hasRealizedPnL);
 
     const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     return Array.from({ length: 12 }, (_, i) => {
-      const monthTrades = trades.filter((t) => t.month === i + 1);
+      const monthTrades = realized.filter((t) => t.month === i + 1);
       const pnl = monthTrades.reduce((sum, t) => sum + (t.totalPnL ?? 0), 0);
       return { month: i + 1, pnl, name: MONTH_NAMES[i] };
     });
@@ -207,25 +267,213 @@ export async function getMonthlyPnL() {
   }
 }
 
-export async function getRecentTrades(limit = 5) {
+export async function getRecentTrades(limit = 5, year?: number | null) {
   try {
     const account = await prisma.account.findFirst();
-    if (!account) return DEMO_TRADES.filter((t) => t.isCompleted).slice(0, limit);
+    if (!account)
+      return DEMO_TRADES.filter((t) => t.isCompleted).slice(0, limit);
 
+    const where: Record<string, unknown> = { accountId: account.id };
+    const dateFilter = tradeDateYearFilter(year ?? undefined);
+    if (dateFilter) where.tradeDate = dateFilter;
+    // Include partial-exit open trades — they have realized P&L too.
     const trades = await prisma.trade.findMany({
-      where: { accountId: account.id, isCompleted: true },
+      where,
       include: {
         entries: { orderBy: { legOrder: "asc" } },
         tradeErrors: { include: { errorDefinition: true } },
       },
       orderBy: { tradeDate: "desc" },
-      take: limit,
+      take: limit * 4, // fetch extra, then filter
     });
 
-    return trades.map(serializeTrade);
+    const realized = trades.filter(hasRealizedPnL).slice(0, limit);
+    return realized.map(serializeTrade);
   } catch {
     return DEMO_TRADES.filter((t) => t.isCompleted).slice(0, limit);
   }
+}
+
+export interface DashboardInsights {
+  equityCurve: { date: string; cumulative: number; pnl: number; symbol: string }[];
+  drawdown: {
+    maxDrawdown: number;
+    maxDrawdownPct: number;
+    currentDrawdown: number;
+    longestLossStreak: number;
+  };
+  expectancy: {
+    expectancy: number;
+    avgWinner: number;
+    avgLoser: number;
+    winRate: number;
+    lossRate: number;
+    winnerCount: number;
+    loserCount: number;
+  };
+  byStrategy: {
+    tradeType: string;
+    count: number;
+    totalPnL: number;
+    winRate: number;
+    avgRR: number;
+  }[];
+}
+
+export async function getDashboardInsights(
+  filter?: { isAsset?: boolean; year?: number | null }
+): Promise<DashboardInsights> {
+  try {
+    const account = await prisma.account.findFirst();
+    if (!account) {
+      return emptyInsights();
+    }
+
+    const where: Record<string, unknown> = { accountId: account.id };
+    if (filter?.isAsset !== undefined) where.isAsset = filter.isAsset;
+    const dateFilter = tradeDateYearFilter(filter?.year ?? undefined);
+    if (dateFilter) where.tradeDate = dateFilter;
+
+    const trades = await prisma.trade.findMany({
+      where,
+      select: {
+        tradeDate: true,
+        totalPnL: true,
+        riskReward: true,
+        tradeType: true,
+        symbol: true,
+        isCompleted: true,
+        totalShares: true,
+        sharesInProcess: true,
+      },
+      orderBy: { tradeDate: "asc" },
+    });
+
+    // Include both fully closed AND partial-exit open trades.
+    const completed = trades.filter(
+      (t) => t.totalPnL !== null && hasRealizedPnL(t)
+    );
+    if (completed.length === 0) return emptyInsights();
+
+    // Equity curve + running peak for drawdown
+    let cumulative = 0;
+    let peak = 0;
+    let maxDrawdown = 0;
+    const equityCurve: DashboardInsights["equityCurve"] = [];
+    for (const t of completed) {
+      const pnl = t.totalPnL!;
+      cumulative += pnl;
+      if (cumulative > peak) peak = cumulative;
+      const dd = peak - cumulative;
+      if (dd > maxDrawdown) maxDrawdown = dd;
+      equityCurve.push({
+        date: (t.tradeDate as Date).toISOString().slice(0, 10),
+        cumulative: Math.round(cumulative * 100) / 100,
+        pnl,
+        symbol: t.symbol,
+      });
+    }
+    const currentDrawdown = peak - cumulative;
+    const peakValue = account.startingBalance + peak;
+    const maxDrawdownPct = peakValue > 0 ? maxDrawdown / peakValue : 0;
+
+    // Longest losing streak
+    let longestLossStreak = 0;
+    let currentLossStreak = 0;
+    for (const t of completed) {
+      if ((t.totalPnL ?? 0) < 0) {
+        currentLossStreak++;
+        if (currentLossStreak > longestLossStreak)
+          longestLossStreak = currentLossStreak;
+      } else {
+        currentLossStreak = 0;
+      }
+    }
+
+    // Expectancy + avg winner / avg loser
+    const winners = completed.filter((t) => t.totalPnL! > 0);
+    const losers = completed.filter((t) => t.totalPnL! < 0);
+    const avgWinner =
+      winners.length > 0
+        ? winners.reduce((s, t) => s + t.totalPnL!, 0) / winners.length
+        : 0;
+    const avgLoser =
+      losers.length > 0
+        ? losers.reduce((s, t) => s + t.totalPnL!, 0) / losers.length
+        : 0;
+    const winRate = completed.length > 0 ? winners.length / completed.length : 0;
+    const lossRate = completed.length > 0 ? losers.length / completed.length : 0;
+    const expectancy = winRate * avgWinner + lossRate * avgLoser;
+
+    // By strategy / tradeType
+    const stratMap = new Map<
+      string,
+      { count: number; totalPnL: number; winners: number; rrSum: number }
+    >();
+    for (const t of completed) {
+      const key = t.tradeType || "(none)";
+      if (!stratMap.has(key))
+        stratMap.set(key, { count: 0, totalPnL: 0, winners: 0, rrSum: 0 });
+      const s = stratMap.get(key)!;
+      s.count++;
+      s.totalPnL += t.totalPnL!;
+      if (t.totalPnL! > 0) s.winners++;
+      s.rrSum += t.riskReward ?? 0;
+    }
+    const byStrategy = Array.from(stratMap.entries())
+      .map(([tradeType, s]) => ({
+        tradeType,
+        count: s.count,
+        totalPnL: s.totalPnL,
+        winRate: s.count > 0 ? s.winners / s.count : 0,
+        avgRR: s.count > 0 ? s.rrSum / s.count : 0,
+      }))
+      .sort((a, b) => b.totalPnL - a.totalPnL);
+
+    return {
+      equityCurve,
+      drawdown: {
+        maxDrawdown,
+        maxDrawdownPct,
+        currentDrawdown,
+        longestLossStreak,
+      },
+      expectancy: {
+        expectancy,
+        avgWinner,
+        avgLoser,
+        winRate,
+        lossRate,
+        winnerCount: winners.length,
+        loserCount: losers.length,
+      },
+      byStrategy,
+    };
+  } catch {
+    return emptyInsights();
+  }
+}
+
+function emptyInsights(): DashboardInsights {
+  return {
+    equityCurve: [],
+    drawdown: {
+      maxDrawdown: 0,
+      maxDrawdownPct: 0,
+      currentDrawdown: 0,
+      longestLossStreak: 0,
+    },
+    expectancy: {
+      expectancy: 0,
+      avgWinner: 0,
+      avgLoser: 0,
+      winRate: 0,
+      lossRate: 0,
+      winnerCount: 0,
+      loserCount: 0,
+    },
+    byStrategy: [],
+  };
 }
 
 // Serialize Prisma objects to plain JSON (dates → strings)

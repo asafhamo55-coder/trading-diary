@@ -1,17 +1,52 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Pencil, TrendingUp, TrendingDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  ArrowLeft,
+  Pencil,
+  TrendingUp,
+  TrendingDown,
+  Trash2,
+  Loader2,
+} from "lucide-react";
 import { cn, formatCurrency, formatPercent, formatNumber } from "@/lib/utils";
 import type { Trade } from "@/lib/types";
 
 export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
+  const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    if (!trade) return;
+    if (
+      !confirm(
+        `Permanently delete this ${trade.direction} ${trade.symbol} trade from ${trade.tradeDate}?\n\nThis can't be undone.`
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/trades/${trade.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
+      router.push("/trades");
+      router.refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Delete failed");
+      setDeleting(false);
+    }
+  }
   if (!trade) {
     return (
-      <div className="min-h-screen bg-[#0C0F14] text-[#E8ECF4] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Trade not found</h1>
-          <p className="text-[#8892A6] mb-6">
+          <p className="text-[var(--muted-foreground)] mb-6">
             The trade you are looking for does not exist.
           </p>
           <Link
@@ -29,6 +64,14 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
   const pnl = trade.totalPnL ?? 0;
   const isProfit = pnl > 0;
   const isLoss = pnl < 0;
+  const totalShares = trade.totalShares ?? 0;
+  const sharesOpen = trade.sharesInProcess ?? 0;
+  const isPartial =
+    !trade.isCompleted &&
+    totalShares > 0 &&
+    sharesOpen > 0 &&
+    sharesOpen < totalShares;
+  const hasRealized = trade.isCompleted || isPartial;
   const buyLegs = trade.entries
     .filter((e) => e.legType === "BUY")
     .sort((a, b) => a.legOrder - b.legOrder);
@@ -37,24 +80,39 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
     .sort((a, b) => a.legOrder - b.legOrder);
 
   return (
-    <div className="min-h-screen bg-[#0C0F14] text-[#E8ECF4]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/trades"
-            className="inline-flex items-center gap-1.5 text-sm text-[#8892A6] hover:text-[#E8ECF4] transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Trades
           </Link>
-          <Link
-            href={`/trades/${trade.id}/edit`}
-            className="inline-flex items-center gap-2 rounded-lg border border-[#2A3040] bg-[#151921] px-4 py-2 text-sm font-medium text-[#8892A6] hover:text-[#E8ECF4] transition-colors"
-          >
-            <Pencil className="h-4 w-4" />
-            Edit
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-medium text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:border-[#FF4D6A]/40 transition-colors disabled:opacity-60"
+              title="Permanently delete this trade"
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              Delete
+            </button>
+            <Link
+              href={`/trades/${trade.id}/edit`}
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+            >
+              <Pencil className="h-4 w-4" />
+              Edit
+            </Link>
+          </div>
         </div>
 
         {/* Header */}
@@ -91,13 +149,24 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                   "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold",
                   trade.isCompleted
                     ? "bg-[#00D68F]/10 text-[#00D68F]"
+                    : isPartial
+                    ? "bg-[#FFB547]/10 text-[#FFB547]"
                     : "bg-[#3B82F6]/10 text-[#3B82F6]"
                 )}
+                title={
+                  isPartial
+                    ? `Partial exit — ${sharesOpen} of ${totalShares} shares still open`
+                    : undefined
+                }
               >
-                {trade.isCompleted ? "Closed" : "Open"}
+                {trade.isCompleted
+                  ? "Closed"
+                  : isPartial
+                  ? `Partial (${sharesOpen}/${totalShares} open)`
+                  : "Open"}
               </span>
             </div>
-            <p className="text-sm text-[#8892A6] mt-0.5">
+            <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
               {trade.tradeDate}
               {trade.tradeType && ` \u00B7 ${trade.tradeType}`}
               {trade.isSwingContinuation && " \u00B7 Swing Continuation"}
@@ -107,7 +176,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
-          <StatCard label="P&L" large>
+          <StatCard label={isPartial ? "Realized P&L" : "P&L"} large>
             <span
               className={cn(
                 "font-mono",
@@ -115,7 +184,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                 isLoss && "text-[#FF4D6A]"
               )}
             >
-              {trade.isCompleted ? formatCurrency(pnl) : "Open"}
+              {hasRealized ? formatCurrency(pnl) : "Open"}
             </span>
           </StatCard>
           <StatCard label="Position Value">
@@ -146,9 +215,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                 isLoss && "text-[#FF4D6A]"
               )}
             >
-              {trade.isCompleted
-                ? formatNumber(trade.riskReward ?? 0)
-                : "\u2014"}
+              {hasRealized ? formatNumber(trade.riskReward ?? 0) : "\u2014"}
             </span>
           </StatCard>
           <StatCard label="Return on Position">
@@ -159,7 +226,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                 isLoss && "text-[#FF4D6A]"
               )}
             >
-              {trade.isCompleted
+              {hasRealized
                 ? formatPercent(trade.returnOnPosition ?? 0)
                 : "\u2014"}
             </span>
@@ -172,18 +239,18 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
         </div>
 
         {/* Trade Legs */}
-        <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-6 mb-8">
+        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6 mb-8">
           <h2 className="text-base font-semibold mb-4">Trade Legs</h2>
 
           {buyLegs.length > 0 && (
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-[#8892A6] mb-2">
+              <h3 className="text-sm font-medium text-[var(--muted-foreground)] mb-2">
                 Buy Legs
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#2A3040] text-[#8892A6]">
+                    <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
                       <th className="pb-2 text-left font-medium">#</th>
                       <th className="pb-2 text-right font-medium">Price</th>
                       <th className="pb-2 text-right font-medium">Quantity</th>
@@ -197,9 +264,9 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                     {buyLegs.map((leg, i) => (
                       <tr
                         key={leg.id}
-                        className="border-b border-[#2A3040] last:border-b-0"
+                        className="border-b border-[var(--border)] last:border-b-0"
                       >
-                        <td className="py-2 text-[#8892A6]">
+                        <td className="py-2 text-[var(--muted-foreground)]">
                           {leg.legOrder}
                         </td>
                         <td className="py-2 text-right font-mono">
@@ -208,7 +275,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                         <td className="py-2 text-right font-mono">
                           {leg.quantity}
                         </td>
-                        <td className="py-2 text-right font-mono text-[#8892A6]">
+                        <td className="py-2 text-right font-mono text-[var(--muted-foreground)]">
                           {formatCurrency(leg.commission)}
                         </td>
                         <td className="py-2 text-right font-mono">
@@ -224,13 +291,13 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
 
           {sellLegs.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-[#8892A6] mb-2">
+              <h3 className="text-sm font-medium text-[var(--muted-foreground)] mb-2">
                 Sell Legs
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#2A3040] text-[#8892A6]">
+                    <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
                       <th className="pb-2 text-left font-medium">#</th>
                       <th className="pb-2 text-right font-medium">Price</th>
                       <th className="pb-2 text-right font-medium">Quantity</th>
@@ -244,9 +311,9 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                     {sellLegs.map((leg) => (
                       <tr
                         key={leg.id}
-                        className="border-b border-[#2A3040] last:border-b-0"
+                        className="border-b border-[var(--border)] last:border-b-0"
                       >
-                        <td className="py-2 text-[#8892A6]">
+                        <td className="py-2 text-[var(--muted-foreground)]">
                           {leg.legOrder}
                         </td>
                         <td className="py-2 text-right font-mono">
@@ -255,7 +322,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                         <td className="py-2 text-right font-mono">
                           {leg.quantity}
                         </td>
-                        <td className="py-2 text-right font-mono text-[#8892A6]">
+                        <td className="py-2 text-right font-mono text-[var(--muted-foreground)]">
                           {formatCurrency(leg.commission)}
                         </td>
                         <td className="py-2 text-right font-mono">
@@ -275,14 +342,14 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
           trade.exitReason ||
           trade.conclusions ||
           trade.notes) && (
-          <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-6 mb-8">
+          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6 mb-8">
             <h2 className="text-base font-semibold mb-4">
               Post-Trade Analysis
             </h2>
             <div className="space-y-4">
               {trade.entryReason && (
                 <div>
-                  <h3 className="text-sm font-medium text-[#8892A6] mb-1">
+                  <h3 className="text-sm font-medium text-[var(--muted-foreground)] mb-1">
                     Entry Reason
                   </h3>
                   <p className="text-sm">{trade.entryReason}</p>
@@ -290,7 +357,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
               )}
               {trade.exitReason && (
                 <div>
-                  <h3 className="text-sm font-medium text-[#8892A6] mb-1">
+                  <h3 className="text-sm font-medium text-[var(--muted-foreground)] mb-1">
                     Exit Reason
                   </h3>
                   <p className="text-sm">{trade.exitReason}</p>
@@ -298,7 +365,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
               )}
               {trade.conclusions && (
                 <div>
-                  <h3 className="text-sm font-medium text-[#8892A6] mb-1">
+                  <h3 className="text-sm font-medium text-[var(--muted-foreground)] mb-1">
                     Conclusions
                   </h3>
                   <p className="text-sm">{trade.conclusions}</p>
@@ -306,7 +373,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
               )}
               {trade.notes && (
                 <div>
-                  <h3 className="text-sm font-medium text-[#8892A6] mb-1">
+                  <h3 className="text-sm font-medium text-[var(--muted-foreground)] mb-1">
                     Notes
                   </h3>
                   <p className="text-sm">{trade.notes}</p>
@@ -318,7 +385,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
 
         {/* Error Tags */}
         {trade.tradeErrors.length > 0 && (
-          <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-6 mb-8">
+          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6 mb-8">
             <h2 className="text-base font-semibold mb-4">Error Tags</h2>
             <div className="flex flex-wrap gap-2">
               {trade.tradeErrors.map((err) => (
@@ -337,13 +404,13 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
         {trade.direction === "LONG" &&
           (trade.moneyLeftHighPct !== null ||
             trade.moneyLeftClosePct !== null) && (
-            <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-6 mb-8">
+            <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6 mb-8">
               <h2 className="text-base font-semibold mb-4">
                 Money Left on Table
               </h2>
               <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
                 <div>
-                  <div className="text-xs text-[#8892A6] mb-1">
+                  <div className="text-xs text-[var(--muted-foreground)] mb-1">
                     Daily High
                   </div>
                   <div className="text-sm font-mono font-semibold">
@@ -351,7 +418,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-[#8892A6] mb-1">
+                  <div className="text-xs text-[var(--muted-foreground)] mb-1">
                     Daily Close
                   </div>
                   <div className="text-sm font-mono font-semibold">
@@ -361,20 +428,20 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-[#8892A6] mb-1">
+                  <div className="text-xs text-[var(--muted-foreground)] mb-1">
                     vs High
                   </div>
-                  <div className="text-sm font-mono font-semibold text-[#8892A6]">
+                  <div className="text-sm font-mono font-semibold text-[var(--muted-foreground)]">
                     {trade.moneyLeftHighPct !== null
                       ? formatPercent(trade.moneyLeftHighPct)
                       : "\u2014"}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-[#8892A6] mb-1">
+                  <div className="text-xs text-[var(--muted-foreground)] mb-1">
                     vs Close
                   </div>
-                  <div className="text-sm font-mono font-semibold text-[#8892A6]">
+                  <div className="text-sm font-mono font-semibold text-[var(--muted-foreground)]">
                     {trade.moneyLeftClosePct !== null
                       ? formatPercent(trade.moneyLeftClosePct)
                       : "\u2014"}
@@ -398,8 +465,8 @@ function StatCard({
   large?: boolean;
 }) {
   return (
-    <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-4">
-      <div className="text-xs text-[#8892A6] mb-1">{label}</div>
+    <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-4">
+      <div className="text-xs text-[var(--muted-foreground)] mb-1">{label}</div>
       <div className={cn("font-semibold", large ? "text-xl" : "text-sm")}>
         {children}
       </div>

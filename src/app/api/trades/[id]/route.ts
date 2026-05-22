@@ -55,14 +55,13 @@ export async function PUT(
         ),
       }));
 
-      const assetLev = await prisma.assetLeverage.findUnique({
+      const assetLevs = await prisma.assetLeverage.findMany({
         where: {
-          accountId_symbol: {
-            accountId: account.id,
-            symbol: data.symbol || "",
-          },
+          accountId: account.id,
+          symbol: { equals: data.symbol || "", mode: "insensitive" },
         },
       });
+      const assetLev = assetLevs[0] ?? null;
 
       const review = await prisma.monthlyReview.findUnique({
         where: {
@@ -95,15 +94,30 @@ export async function PUT(
       const trade = await prisma.trade.update({
         where: { id },
         data: {
-          ...data,
-          tradeDate: data.tradeDate || undefined,
+          tradeDate: data.tradeDate ?? undefined,
+          month: data.month ?? undefined,
           symbol: data.symbol?.toUpperCase(),
+          direction: data.direction ?? undefined,
+          tradeType: data.tradeType ?? undefined,
+          isSwingContinuation: data.isSwingContinuation ?? undefined,
+          isAsset: data.isAsset ?? undefined,
+          entryReason: data.entryReason ?? undefined,
+          exitReason: data.exitReason ?? undefined,
+          conclusions: data.conclusions ?? undefined,
           chartUrl: data.chartUrl || null,
+          notes: data.notes ?? undefined,
+          dailyHigh: data.dailyHigh ?? null,
+          dailyClose: data.dailyClose ?? null,
           ...computed,
           entries: { create: entriesWithComm },
-          tradeErrors: data.errorIds && data.errorIds.length > 0
-            ? { create: data.errorIds.map((eid) => ({ errorDefinitionId: eid })) }
-            : undefined,
+          tradeErrors:
+            data.errorIds && data.errorIds.length > 0
+              ? {
+                  create: data.errorIds.map((eid) => ({
+                    errorDefinitionId: eid,
+                  })),
+                }
+              : undefined,
         },
         include: {
           entries: { orderBy: { legOrder: "asc" } },
@@ -114,14 +128,23 @@ export async function PUT(
       return jsonResponse(trade);
     }
 
-    // Simple field update (no entries change)
-    const { entries: _e, errorIds: _err, ...simpleData } = data;
+    // Simple field update (no entries change) — pick only Trade columns
     const trade = await prisma.trade.update({
       where: { id },
       data: {
-        ...simpleData,
-        tradeDate: simpleData.tradeDate || undefined,
-        chartUrl: simpleData.chartUrl || null,
+        tradeDate: data.tradeDate ?? undefined,
+        month: data.month ?? undefined,
+        symbol: data.symbol?.toUpperCase(),
+        direction: data.direction ?? undefined,
+        tradeType: data.tradeType ?? undefined,
+        isSwingContinuation: data.isSwingContinuation ?? undefined,
+        entryReason: data.entryReason ?? undefined,
+        exitReason: data.exitReason ?? undefined,
+        conclusions: data.conclusions ?? undefined,
+        chartUrl: data.chartUrl || null,
+        notes: data.notes ?? undefined,
+        dailyHigh: data.dailyHigh ?? null,
+        dailyClose: data.dailyClose ?? null,
       },
       include: {
         entries: { orderBy: { legOrder: "asc" } },
@@ -132,7 +155,10 @@ export async function PUT(
     return jsonResponse(trade);
   } catch (error) {
     console.error("Update trade error:", error);
-    return errorResponse("Failed to update trade", 500);
+    return errorResponse(
+      `Failed to update trade: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500
+    );
   }
 }
 

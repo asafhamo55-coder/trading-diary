@@ -21,6 +21,7 @@ export interface Trade {
   direction: Direction;
   tradeType: string | null;
   isSwingContinuation: boolean;
+  isAsset: boolean;
   entries: TradeLeg[];
   totalPositionValue: number | null;
   totalShares: number | null;

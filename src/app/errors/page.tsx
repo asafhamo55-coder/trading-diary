@@ -53,15 +53,15 @@ export default function ErrorsPage() {
   return (
     <div className="flex-1 p-6 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#E8ECF4]">Error Management</h1>
-        <p className="text-[#8892A6] text-sm mt-1">
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Error Management</h1>
+        <p className="text-[var(--muted-foreground)] text-sm mt-1">
           Track and analyze trading mistakes
         </p>
       </div>
 
       {/* Add Error Form */}
-      <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-5 mb-6">
-        <h2 className="text-sm font-semibold text-[#E8ECF4] mb-3">
+      <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5 mb-6">
+        <h2 className="text-sm font-semibold text-[var(--foreground)] mb-3">
           Add New Error Type
         </h2>
         <div className="flex gap-3">
@@ -71,7 +71,7 @@ export default function ErrorsPage() {
             onChange={(e) => setNewErrorName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAddError()}
             placeholder="Error name..."
-            className="flex-1 bg-[#1C2130] border border-[#2A3040] rounded-lg px-3 py-2 text-sm text-[#E8ECF4] placeholder-[#8892A6] focus:outline-none focus:border-[#3B82F6] transition-colors"
+            className="flex-1 bg-[var(--muted)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-none focus:border-[#3B82F6] transition-colors"
           />
           <button
             onClick={handleAddError}
@@ -92,17 +92,17 @@ export default function ErrorsPage() {
           return (
             <div
               key={error.id}
-              className="rounded-xl bg-[#151921] border border-[#2A3040] p-5"
+              className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <AlertTriangle className="w-4 h-4 text-[#FFB547] shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-[#E8ECF4]">
+                    <h3 className="font-semibold text-[var(--foreground)]">
                       {error.name}
                     </h3>
                     <div className="flex items-center gap-4 mt-1">
-                      <span className="text-xs text-[#8892A6]">
+                      <span className="text-xs text-[var(--muted-foreground)]">
                         {stat.count} {stat.count === 1 ? "trade" : "trades"}
                       </span>
                       <span
@@ -120,14 +120,14 @@ export default function ErrorsPage() {
                 </div>
                 <button
                   onClick={() => handleRemoveError(error.id)}
-                  className="p-1.5 rounded-lg text-[#8892A6] hover:text-[#FF4D6A] hover:bg-[#1C2130] transition-colors"
+                  className="p-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[var(--muted)] transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Frequency bar */}
-              <div className="h-2 bg-[#1C2130] rounded-full overflow-hidden">
+              <div className="h-2 bg-[var(--muted)] rounded-full overflow-hidden">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all",
@@ -141,8 +141,8 @@ export default function ErrorsPage() {
         })}
 
         {errors.length === 0 && (
-          <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-12 text-center">
-            <p className="text-[#8892A6]">
+          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-12 text-center">
+            <p className="text-[var(--muted-foreground)]">
               No error types defined. Add one above.
             </p>
           </div>

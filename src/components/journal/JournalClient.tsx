@@ -64,16 +64,16 @@ export default function JournalClient({ reviews }: { reviews: MonthlyReview[] })
   }
 
   const inputClass =
-    "w-full bg-[#1C2130] border border-[#2A3040] rounded-lg px-3 py-2 text-sm text-[#E8ECF4] placeholder-[#8892A6] focus:outline-none focus:border-[#3B82F6] transition-colors";
+    "w-full bg-[var(--muted)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-none focus:border-[#3B82F6] transition-colors";
   const textareaClass =
-    "w-full bg-[#1C2130] border border-[#2A3040] rounded-lg px-3 py-2 text-sm text-[#E8ECF4] placeholder-[#8892A6] focus:outline-none focus:border-[#3B82F6] transition-colors resize-y min-h-[80px]";
-  const labelClass = "block text-sm font-medium text-[#8892A6] mb-1";
+    "w-full bg-[var(--muted)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-none focus:border-[#3B82F6] transition-colors resize-y min-h-[80px]";
+  const labelClass = "block text-sm font-medium text-[var(--muted-foreground)] mb-1";
 
   return (
     <div className="flex-1 p-6 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#E8ECF4]">Monthly Journal</h1>
-        <p className="text-[#8892A6] text-sm mt-1">
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Monthly Journal</h1>
+        <p className="text-[var(--muted-foreground)] text-sm mt-1">
           Review and reflect on your trading month
         </p>
       </div>
@@ -88,7 +88,7 @@ export default function JournalClient({ reviews }: { reviews: MonthlyReview[] })
               "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
               selectedMonth === i + 1
                 ? "bg-[#3B82F6] text-white"
-                : "bg-[#1C2130] text-[#8892A6] hover:text-[#E8ECF4] border border-[#2A3040]"
+                : "bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] border border-[var(--border)]"
             )}
           >
             {name.slice(0, 3)}
@@ -96,10 +96,10 @@ export default function JournalClient({ reviews }: { reviews: MonthlyReview[] })
         ))}
       </div>
 
-      <div className="rounded-xl bg-[#151921] border border-[#2A3040] p-6">
+      <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6">
         <div className="flex items-center gap-2 mb-6">
           <BookOpen className="w-5 h-5 text-[#3B82F6]" />
-          <h2 className="text-lg font-semibold text-[#E8ECF4]">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">
             {MONTH_NAMES[selectedMonth - 1]} Review
           </h2>
         </div>
@@ -107,7 +107,7 @@ export default function JournalClient({ reviews }: { reviews: MonthlyReview[] })
         <div className="space-y-6">
           {/* Monthly Goals */}
           <div>
-            <h3 className="text-sm font-semibold text-[#E8ECF4] mb-3">
+            <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">
               Monthly Goals
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

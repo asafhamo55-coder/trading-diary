@@ -17,6 +17,7 @@ export const createTradeSchema = z.object({
   direction: directionSchema,
   tradeType: z.string().optional().nullable(),
   isSwingContinuation: z.boolean().default(false),
+  isAsset: z.boolean().default(false),
   entries: z.array(tradeLegSchema).min(1, "At least one leg required"),
   entryReason: z.string().optional().nullable(),
   exitReason: z.string().optional().nullable(),
@@ -32,7 +33,7 @@ export const updateTradeSchema = createTradeSchema.partial();
 
 export const monthlyReviewSchema = z.object({
   month: z.number().int().min(1).max(12),
-  year: z.number().int().default(2026),
+  year: z.number().int().default(() => new Date().getFullYear()),
   portfolioStartValue: z.number().optional().nullable(),
   portfolioEndValue: z.number().optional().nullable(),
   riskUnit: z.number().optional().nullable(),
@@ -71,6 +72,7 @@ export const importTradeSchema = z.object({
   direction: directionSchema,
   tradeType: z.string().optional(),
   isSwingContinuation: z.boolean().optional().default(false),
+  isAsset: z.boolean().optional().default(false),
   buyLegs: z.array(z.object({ price: z.number(), quantity: z.number() })),
   sellLegs: z.array(z.object({ price: z.number(), quantity: z.number() })),
   entryReason: z.string().optional(),
@@ -82,7 +84,7 @@ export const importTradeSchema = z.object({
 
 export const bulkImportSchema = z.object({
   trades: z.array(importTradeSchema),
-  year: z.number().int().default(2026),
+  year: z.number().int().default(() => new Date().getFullYear()),
 });
 
 export type CreateTradeInput = z.infer<typeof createTradeSchema>;

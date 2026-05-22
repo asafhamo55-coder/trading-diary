@@ -12,7 +12,8 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
-:root {
+:root,
+:root.dark {
   --background: #0C0F14;
   --foreground: #E8ECF4;
   --card: #151921;
@@ -21,6 +22,18 @@
   --muted: #1C2130;
   --muted-foreground: #8892A6;
   --input: #1C2130;
+  --ring: #3B82F6;
+}
+
+:root.light {
+  --background: #F5F7FB;
+  --foreground: #0C0F14;
+  --card: #FFFFFF;
+  --card-foreground: #0C0F14;
+  --border: #D6DAE2;
+  --muted: #EBEEF3;
+  --muted-foreground: #5B6573;
+  --input: #FFFFFF;
   --ring: #3B82F6;
 }
 

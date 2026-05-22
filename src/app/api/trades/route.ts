@@ -62,10 +62,14 @@ export async function POST(req: NextRequest) {
       ),
     }));
 
-    // Get leverage for this symbol
-    const assetLev = await prisma.assetLeverage.findUnique({
-      where: { accountId_symbol: { accountId: account.id, symbol: data.symbol } },
+    // Get leverage for this symbol (case-insensitive)
+    const assetLevs = await prisma.assetLeverage.findMany({
+      where: {
+        accountId: account.id,
+        symbol: { equals: data.symbol, mode: "insensitive" },
+      },
     });
+    const assetLev = assetLevs[0] ?? null;
 
     // Get risk unit for the month
     const review = await prisma.monthlyReview.findUnique({
@@ -102,6 +106,7 @@ export async function POST(req: NextRequest) {
         direction: data.direction,
         tradeType: data.tradeType,
         isSwingContinuation: data.isSwingContinuation,
+        isAsset: data.isAsset,
         ...computed,
         dailyHigh: data.dailyHigh,
         dailyClose: data.dailyClose,

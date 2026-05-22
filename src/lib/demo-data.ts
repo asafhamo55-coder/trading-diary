@@ -25,7 +25,7 @@ export const DEMO_ERROR_DEFINITIONS: ErrorDefinition[] = [
 export const DEMO_TRADES: Trade[] = [
   {
     id: "t1", accountId: "demo-account", tradeDate: "2026-01-26", month: 1,
-    symbol: "PG", direction: "LONG", tradeType: "Retest Long", isSwingContinuation: false,
+    symbol: "PG", direction: "LONG", tradeType: "Retest Long", isSwingContinuation: false, isAsset: false,
     entries: [
       { id: "l1", legType: "BUY", price: 148.87, quantity: 141, commission: 1.45, legOrder: 1 },
       { id: "l2", legType: "SELL", price: 164.23, quantity: 70, commission: 0.79, legOrder: 1 },
@@ -108,5 +108,7 @@ export function getDemoStats() {
     })(),
     bestTrade: Math.max(...completed.map((t) => t.totalPnL ?? 0)),
     worstTrade: Math.min(...completed.map((t) => t.totalPnL ?? 0)),
+    assets: { count: 0, totalPnL: 0, winRate: 0, profitFactor: 0 },
+    stocks: { count: completed.length, totalPnL, winRate: completed.length > 0 ? winners.length / completed.length : 0, profitFactor: 0 },
   };
 }

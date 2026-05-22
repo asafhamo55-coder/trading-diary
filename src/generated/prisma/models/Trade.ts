@@ -71,6 +71,7 @@ export type TradeMinAggregateOutputType = {
   direction: $Enums.Direction | null
   tradeType: string | null
   isSwingContinuation: boolean | null
+  isAsset: boolean | null
   totalPositionValue: number | null
   totalShares: number | null
   sharesInProcess: number | null
@@ -104,6 +105,7 @@ export type TradeMaxAggregateOutputType = {
   direction: $Enums.Direction | null
   tradeType: string | null
   isSwingContinuation: boolean | null
+  isAsset: boolean | null
   totalPositionValue: number | null
   totalShares: number | null
   sharesInProcess: number | null
@@ -137,6 +139,7 @@ export type TradeCountAggregateOutputType = {
   direction: number
   tradeType: number
   isSwingContinuation: number
+  isAsset: number
   totalPositionValue: number
   totalShares: number
   sharesInProcess: number
@@ -208,6 +211,7 @@ export type TradeMinAggregateInputType = {
   direction?: true
   tradeType?: true
   isSwingContinuation?: true
+  isAsset?: true
   totalPositionValue?: true
   totalShares?: true
   sharesInProcess?: true
@@ -241,6 +245,7 @@ export type TradeMaxAggregateInputType = {
   direction?: true
   tradeType?: true
   isSwingContinuation?: true
+  isAsset?: true
   totalPositionValue?: true
   totalShares?: true
   sharesInProcess?: true
@@ -274,6 +279,7 @@ export type TradeCountAggregateInputType = {
   direction?: true
   tradeType?: true
   isSwingContinuation?: true
+  isAsset?: true
   totalPositionValue?: true
   totalShares?: true
   sharesInProcess?: true
@@ -394,6 +400,7 @@ export type TradeGroupByOutputType = {
   direction: $Enums.Direction
   tradeType: string | null
   isSwingContinuation: boolean
+  isAsset: boolean
   totalPositionValue: number | null
   totalShares: number | null
   sharesInProcess: number | null
@@ -450,6 +457,7 @@ export type TradeWhereInput = {
   direction?: Prisma.EnumDirectionFilter<"Trade"> | $Enums.Direction
   tradeType?: Prisma.StringNullableFilter<"Trade"> | string | null
   isSwingContinuation?: Prisma.BoolFilter<"Trade"> | boolean
+  isAsset?: Prisma.BoolFilter<"Trade"> | boolean
   totalPositionValue?: Prisma.FloatNullableFilter<"Trade"> | number | null
   totalShares?: Prisma.FloatNullableFilter<"Trade"> | number | null
   sharesInProcess?: Prisma.FloatNullableFilter<"Trade"> | number | null
@@ -486,6 +494,7 @@ export type TradeOrderByWithRelationInput = {
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrderInput | Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
+  isAsset?: Prisma.SortOrder
   totalPositionValue?: Prisma.SortOrderInput | Prisma.SortOrder
   totalShares?: Prisma.SortOrderInput | Prisma.SortOrder
   sharesInProcess?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -525,6 +534,7 @@ export type TradeWhereUniqueInput = Prisma.AtLeast<{
   direction?: Prisma.EnumDirectionFilter<"Trade"> | $Enums.Direction
   tradeType?: Prisma.StringNullableFilter<"Trade"> | string | null
   isSwingContinuation?: Prisma.BoolFilter<"Trade"> | boolean
+  isAsset?: Prisma.BoolFilter<"Trade"> | boolean
   totalPositionValue?: Prisma.FloatNullableFilter<"Trade"> | number | null
   totalShares?: Prisma.FloatNullableFilter<"Trade"> | number | null
   sharesInProcess?: Prisma.FloatNullableFilter<"Trade"> | number | null
@@ -561,6 +571,7 @@ export type TradeOrderByWithAggregationInput = {
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrderInput | Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
+  isAsset?: Prisma.SortOrder
   totalPositionValue?: Prisma.SortOrderInput | Prisma.SortOrder
   totalShares?: Prisma.SortOrderInput | Prisma.SortOrder
   sharesInProcess?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -602,6 +613,7 @@ export type TradeScalarWhereWithAggregatesInput = {
   direction?: Prisma.EnumDirectionWithAggregatesFilter<"Trade"> | $Enums.Direction
   tradeType?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
   isSwingContinuation?: Prisma.BoolWithAggregatesFilter<"Trade"> | boolean
+  isAsset?: Prisma.BoolWithAggregatesFilter<"Trade"> | boolean
   totalPositionValue?: Prisma.FloatNullableWithAggregatesFilter<"Trade"> | number | null
   totalShares?: Prisma.FloatNullableWithAggregatesFilter<"Trade"> | number | null
   sharesInProcess?: Prisma.FloatNullableWithAggregatesFilter<"Trade"> | number | null
@@ -634,6 +646,7 @@ export type TradeCreateInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -670,6 +683,7 @@ export type TradeUncheckedCreateInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -704,6 +718,7 @@ export type TradeUpdateInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -740,6 +755,7 @@ export type TradeUncheckedUpdateInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -775,6 +791,7 @@ export type TradeCreateManyInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -807,6 +824,7 @@ export type TradeUpdateManyMutationInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -840,6 +858,7 @@ export type TradeUncheckedUpdateManyInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -883,6 +902,7 @@ export type TradeCountOrderByAggregateInput = {
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
+  isAsset?: Prisma.SortOrder
   totalPositionValue?: Prisma.SortOrder
   totalShares?: Prisma.SortOrder
   sharesInProcess?: Prisma.SortOrder
@@ -934,6 +954,7 @@ export type TradeMaxOrderByAggregateInput = {
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
+  isAsset?: Prisma.SortOrder
   totalPositionValue?: Prisma.SortOrder
   totalShares?: Prisma.SortOrder
   sharesInProcess?: Prisma.SortOrder
@@ -967,6 +988,7 @@ export type TradeMinOrderByAggregateInput = {
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
+  isAsset?: Prisma.SortOrder
   totalPositionValue?: Prisma.SortOrder
   totalShares?: Prisma.SortOrder
   sharesInProcess?: Prisma.SortOrder
@@ -1060,10 +1082,6 @@ export type EnumDirectionFieldUpdateOperationsInput = {
   set?: $Enums.Direction
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
@@ -1112,6 +1130,7 @@ export type TradeCreateWithoutAccountInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -1146,6 +1165,7 @@ export type TradeUncheckedCreateWithoutAccountInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -1210,6 +1230,7 @@ export type TradeScalarWhereInput = {
   direction?: Prisma.EnumDirectionFilter<"Trade"> | $Enums.Direction
   tradeType?: Prisma.StringNullableFilter<"Trade"> | string | null
   isSwingContinuation?: Prisma.BoolFilter<"Trade"> | boolean
+  isAsset?: Prisma.BoolFilter<"Trade"> | boolean
   totalPositionValue?: Prisma.FloatNullableFilter<"Trade"> | number | null
   totalShares?: Prisma.FloatNullableFilter<"Trade"> | number | null
   sharesInProcess?: Prisma.FloatNullableFilter<"Trade"> | number | null
@@ -1242,6 +1263,7 @@ export type TradeCreateWithoutEntriesInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -1277,6 +1299,7 @@ export type TradeUncheckedCreateWithoutEntriesInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -1326,6 +1349,7 @@ export type TradeUpdateWithoutEntriesInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1361,6 +1385,7 @@ export type TradeUncheckedUpdateWithoutEntriesInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1394,6 +1419,7 @@ export type TradeCreateWithoutTradeErrorsInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -1429,6 +1455,7 @@ export type TradeUncheckedCreateWithoutTradeErrorsInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -1478,6 +1505,7 @@ export type TradeUpdateWithoutTradeErrorsInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1513,6 +1541,7 @@ export type TradeUncheckedUpdateWithoutTradeErrorsInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1546,6 +1575,7 @@ export type TradeCreateManyAccountInput = {
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: number | null
   totalShares?: number | null
   sharesInProcess?: number | null
@@ -1578,6 +1608,7 @@ export type TradeUpdateWithoutAccountInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1612,6 +1643,7 @@ export type TradeUncheckedUpdateWithoutAccountInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1646,6 +1678,7 @@ export type TradeUncheckedUpdateManyWithoutAccountInput = {
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAsset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalPositionValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   totalShares?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   sharesInProcess?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1719,6 +1752,7 @@ export type TradeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   direction?: boolean
   tradeType?: boolean
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: boolean
   totalShares?: boolean
   sharesInProcess?: boolean
@@ -1756,6 +1790,7 @@ export type TradeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   direction?: boolean
   tradeType?: boolean
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: boolean
   totalShares?: boolean
   sharesInProcess?: boolean
@@ -1790,6 +1825,7 @@ export type TradeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   direction?: boolean
   tradeType?: boolean
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: boolean
   totalShares?: boolean
   sharesInProcess?: boolean
@@ -1824,6 +1860,7 @@ export type TradeSelectScalar = {
   direction?: boolean
   tradeType?: boolean
   isSwingContinuation?: boolean
+  isAsset?: boolean
   totalPositionValue?: boolean
   totalShares?: boolean
   sharesInProcess?: boolean
@@ -1848,7 +1885,7 @@ export type TradeSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TradeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "tradeDate" | "month" | "symbol" | "direction" | "tradeType" | "isSwingContinuation" | "totalPositionValue" | "totalShares" | "sharesInProcess" | "avgBuyPrice" | "avgSellPrice" | "totalPnL" | "riskReward" | "returnOnPosition" | "riskAmount" | "totalCommissions" | "isCompleted" | "entryReason" | "exitReason" | "conclusions" | "chartUrl" | "notes" | "dailyHigh" | "dailyClose" | "moneyLeftHighPct" | "moneyLeftClosePct" | "createdAt" | "updatedAt", ExtArgs["result"]["trade"]>
+export type TradeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "tradeDate" | "month" | "symbol" | "direction" | "tradeType" | "isSwingContinuation" | "isAsset" | "totalPositionValue" | "totalShares" | "sharesInProcess" | "avgBuyPrice" | "avgSellPrice" | "totalPnL" | "riskReward" | "returnOnPosition" | "riskAmount" | "totalCommissions" | "isCompleted" | "entryReason" | "exitReason" | "conclusions" | "chartUrl" | "notes" | "dailyHigh" | "dailyClose" | "moneyLeftHighPct" | "moneyLeftClosePct" | "createdAt" | "updatedAt", ExtArgs["result"]["trade"]>
 export type TradeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   entries?: boolean | Prisma.Trade$entriesArgs<ExtArgs>
@@ -1878,6 +1915,7 @@ export type $TradePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     direction: $Enums.Direction
     tradeType: string | null
     isSwingContinuation: boolean
+    isAsset: boolean
     totalPositionValue: number | null
     totalShares: number | null
     sharesInProcess: number | null
@@ -2334,6 +2372,7 @@ export interface TradeFieldRefs {
   readonly direction: Prisma.FieldRef<"Trade", 'Direction'>
   readonly tradeType: Prisma.FieldRef<"Trade", 'String'>
   readonly isSwingContinuation: Prisma.FieldRef<"Trade", 'Boolean'>
+  readonly isAsset: Prisma.FieldRef<"Trade", 'Boolean'>
   readonly totalPositionValue: Prisma.FieldRef<"Trade", 'Float'>
   readonly totalShares: Prisma.FieldRef<"Trade", 'Float'>
   readonly sharesInProcess: Prisma.FieldRef<"Trade", 'Float'>

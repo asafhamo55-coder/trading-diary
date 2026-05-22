@@ -21,8 +21,9 @@ export async function POST(
     if (!trade) return errorResponse("Trade not found", 404);
 
     const leverage =
-      trade.account.assetLeverages.find((a) => a.symbol === trade.symbol)
-        ?.leverage ?? 1;
+      trade.account.assetLeverages.find(
+        (a) => a.symbol.toLowerCase() === trade.symbol.toLowerCase()
+      )?.leverage ?? 1;
 
     const review = await prisma.monthlyReview.findUnique({
       where: {
