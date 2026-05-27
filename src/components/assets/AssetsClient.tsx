@@ -318,20 +318,20 @@ export default function AssetsClient({
             </p>
           </div>
 
-          {/* Per-symbol widgets */}
-          {symbolRows.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {/* Per-asset widgets (assets only) */}
+          {kind === "asset" && symbolRows.length > 0 && (
+            <div className="flex gap-3 overflow-x-auto">
               {symbolRows.map((r) => (
                 <div
                   key={r.symbol}
-                  className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4"
+                  className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex-1 min-w-0"
                 >
-                  <p className="text-xs text-[var(--muted-foreground)] font-medium mb-2">
+                  <p className="text-xs text-[var(--muted-foreground)] font-medium mb-2 truncate">
                     {r.symbol}
                   </p>
                   <p
                     className={cn(
-                      "text-lg font-bold font-data mb-2",
+                      "text-lg font-bold font-data mb-2 whitespace-nowrap",
                       r.totalPnL > 0
                         ? "text-[#00D68F]"
                         : r.totalPnL < 0
@@ -342,7 +342,7 @@ export default function AssetsClient({
                     {r.totalPnL > 0 ? "+" : ""}
                     {formatCurrency(r.totalPnL)}
                   </p>
-                  <div className="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+                  <div className="flex items-center justify-between text-xs text-[var(--muted-foreground)] whitespace-nowrap gap-2">
                     <span>{r.count} trade{r.count !== 1 ? "s" : ""}</span>
                     <span
                       className={cn(
