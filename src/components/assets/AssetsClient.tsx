@@ -318,6 +318,46 @@ export default function AssetsClient({
             </p>
           </div>
 
+          {/* Per-symbol widgets */}
+          {symbolRows.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {symbolRows.map((r) => (
+                <div
+                  key={r.symbol}
+                  className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4"
+                >
+                  <p className="text-xs text-[var(--muted-foreground)] font-medium mb-2">
+                    {r.symbol}
+                  </p>
+                  <p
+                    className={cn(
+                      "text-lg font-bold font-data mb-2",
+                      r.totalPnL > 0
+                        ? "text-[#00D68F]"
+                        : r.totalPnL < 0
+                        ? "text-[#FF4D6A]"
+                        : "text-[var(--foreground)]"
+                    )}
+                  >
+                    {r.totalPnL > 0 ? "+" : ""}
+                    {formatCurrency(r.totalPnL)}
+                  </p>
+                  <div className="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+                    <span>{r.count} trade{r.count !== 1 ? "s" : ""}</span>
+                    <span
+                      className={cn(
+                        "font-data font-medium",
+                        r.winRate >= 0.5 ? "text-[#00D68F]" : "text-[#FF4D6A]"
+                      )}
+                    >
+                      {formatPercent(r.winRate)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Monthly P&L Bar Chart */}
           {monthlyPnL.some((m) => m.pnl !== 0) && (
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
