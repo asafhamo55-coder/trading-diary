@@ -60,12 +60,12 @@ export function getDemoTradesByMonth(month: number): Trade[] {
   return DEMO_TRADES.filter((t) => t.month === month);
 }
 
-export function getDemoMonthlyPnL(): { month: number; pnl: number; name: string }[] {
+export function getDemoMonthlyPnL(): { month: number; pnl: number; name: string; count: number }[] {
   const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return Array.from({ length: 12 }, (_, i) => {
     const trades = getDemoTradesByMonth(i + 1);
     const pnl = trades.reduce((sum, t) => sum + (t.totalPnL ?? 0), 0);
-    return { month: i + 1, pnl, name: MONTH_NAMES[i] };
+    return { month: i + 1, pnl, name: MONTH_NAMES[i], count: trades.length };
   });
 }
 

@@ -38,7 +38,7 @@ export default function TradesListClient({
     "ALL"
   );
   const [symbolSearch, setSymbolSearch] = useState("");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   // Counts per month (across all trades, so the pill labels are stable)
   const monthCounts = useMemo(() => {

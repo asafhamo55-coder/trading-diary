@@ -48,6 +48,7 @@ interface MonthlyPnLEntry {
   month: number;
   pnl: number;
   name: string;
+  count: number;
 }
 
 interface Trade {
@@ -283,6 +284,37 @@ export default function DashboardClient({
               {formatPercent(totalReturn)}
             </span>
           </div>
+        </div>
+
+        {/* Monthly P&L widgets */}
+        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
+          {monthlyPnL.map((m) => (
+            <div
+              key={m.month}
+              className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-2.5 text-center"
+            >
+              <p className="text-[10px] text-[var(--muted-foreground)] font-medium mb-1">
+                {m.name}
+              </p>
+              {m.count > 0 ? (
+                <p
+                  className={cn(
+                    "text-xs font-bold font-data",
+                    m.pnl > 0
+                      ? "text-[#00D68F]"
+                      : m.pnl < 0
+                      ? "text-[#FF4D6A]"
+                      : "text-[var(--muted-foreground)]"
+                  )}
+                >
+                  {m.pnl > 0 ? "+" : ""}
+                  {formatCurrency(m.pnl)}
+                </p>
+              ) : (
+                <p className="text-xs text-[var(--border)] font-data">—</p>
+              )}
+            </div>
+          ))}
         </div>
 
         {/* Stat cards */}

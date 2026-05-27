@@ -260,7 +260,7 @@ export async function getMonthlyPnL(year?: number | null) {
     return Array.from({ length: 12 }, (_, i) => {
       const monthTrades = realized.filter((t) => t.month === i + 1);
       const pnl = monthTrades.reduce((sum, t) => sum + (t.totalPnL ?? 0), 0);
-      return { month: i + 1, pnl, name: MONTH_NAMES[i] };
+      return { month: i + 1, pnl, name: MONTH_NAMES[i], count: monthTrades.length };
     });
   } catch {
     return getDemoMonthlyPnL();
