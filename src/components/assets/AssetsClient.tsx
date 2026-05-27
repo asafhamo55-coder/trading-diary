@@ -8,6 +8,7 @@ import {
   Scale,
   LineChart as LineChartIcon,
   PieChart,
+  BarChart3,
 } from "lucide-react";
 import EChart from "@/components/charts/EChart";
 import type { EChartsCoreOption } from "echarts/core";
@@ -88,10 +89,107 @@ export default function AssetsClient({
     }))
     .sort((a, b) => b.totalPnL - a.totalPnL);
 
+  const monthlyPnL = useMemo(() => {
+    const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const realized = trades.filter((t) => {
+      if (t.isCompleted && t.totalPnL !== null) return true;
+      const total = t.totalShares ?? 0;
+      const open = t.sharesInProcess ?? 0;
+      return total > 0 && open < total && t.totalPnL !== null;
+    });
+    return Array.from({ length: 12 }, (_, i) => {
+      const monthTrades = realized.filter((t) => t.month === i + 1);
+      const pnl = monthTrades.reduce((sum, t) => sum + (t.totalPnL ?? 0), 0);
+      return { month: i + 1, pnl, name: MONTH_NAMES[i] };
+    });
+  }, [trades]);
+
+  const monthlyOption = useMemo<EChartsCoreOption>(() => {
+    return {
+      grid: { left: 56, right: 12, top: 32, bottom: 24, containLabel: false },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: "#0C0F14",
+        borderColor: "#2A3040",
+        borderWidth: 1,
+        textStyle: { color: "#E8ECF4", fontSize: 12 },
+        axisPointer: { type: "shadow", shadowStyle: { color: `${v.accent}10` } },
+        formatter: (params: unknown) => {
+          const arr = Array.isArray(params) ? params : [params];
+          const p = arr[0] as { name: string; value: number };
+          const val = Number(p.value) || 0;
+          return `<div style="color:#8892A6;font-size:11px;margin-bottom:4px">${p.name}</div>` +
+            `<div style="color:${val >= 0 ? "#00D68F" : "#FF4D6A"}"><b>${val >= 0 ? "+" : ""}${formatCurrency(val)}</b></div>`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: monthlyPnL.map((m) => m.name),
+        axisLine: { lineStyle: { color: "#2A3040" } },
+        axisTick: { show: false },
+        axisLabel: { color: "#8892A6", fontSize: 11 },
+      },
+      yAxis: {
+        type: "value",
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { color: "#2A3040", type: "dashed" } },
+        axisLabel: {
+          color: "#8892A6",
+          fontSize: 11,
+          formatter: (val: number) =>
+            val === 0 ? "0" : `$${Math.round(val / 100) / 10}k`,
+        },
+      },
+      series: [
+        {
+          name: "P&L",
+          type: "bar",
+          data: monthlyPnL.map((m) => ({
+            value: m.pnl,
+            itemStyle: {
+              color:
+                m.pnl > 0
+                  ? "rgba(0,214,143,0.75)"
+                  : m.pnl < 0
+                  ? "rgba(255,77,106,0.75)"
+                  : "#2A3040",
+              borderRadius: [4, 4, 0, 0],
+            },
+          })),
+          label: {
+            show: true,
+            position: "top",
+            color: "#E8ECF4",
+            fontSize: 10,
+            formatter: (p: { value: number }) => {
+              const val = Number(p.value) || 0;
+              if (!val) return "";
+              const abs = Math.abs(val);
+              const formatted =
+                abs >= 1000
+                  ? `${(val / 1000).toFixed(1)}k`
+                  : `${Math.round(val)}`;
+              return `${val > 0 ? "+" : val < 0 ? "-" : ""}$${formatted.replace("-", "")}`;
+            },
+          },
+          markLine: {
+            silent: true,
+            symbol: "none",
+            lineStyle: { color: "#2A3040", type: "solid" },
+            data: [{ yAxis: 0 }],
+            label: { show: false },
+          },
+          animation: false,
+        },
+      ],
+    };
+  }, [monthlyPnL, v.accent]);
+
   const equityOption = useMemo<EChartsCoreOption>(() => {
     const data = insights.equityCurve;
     return {
-      grid: { left: 56, right: 12, top: 12, bottom: 28, containLabel: false },
+      grid: { left: 56, right: 12, top: 24, bottom: 28, containLabel: false },
       tooltip: {
         trigger: "axis",
         backgroundColor: "#0C0F14",
@@ -138,9 +236,20 @@ export default function AssetsClient({
         {
           name: "Cumulative",
           type: "line",
-          data: data.map((d) => d.cumulative),
+          data: data.map((d) => ({
+            value: d.cumulative,
+            label: {
+              show: true,
+              formatter: d.symbol,
+              color: (d.pnl ?? 0) >= 0 ? "#00D68F" : "#FF4D6A",
+              fontSize: 9,
+              fontWeight: 500,
+              position: (d.pnl ?? 0) >= 0 ? "top" : "bottom",
+            },
+          })),
           smooth: true,
-          showSymbol: false,
+          showSymbol: true,
+          symbolSize: 4,
           lineStyle: { color: v.accent, width: 2 },
           itemStyle: { color: v.accent },
           animation: false,
@@ -208,6 +317,24 @@ export default function AssetsClient({
                 ` · ${insights.equityCurve.length} with realized P&L`}
             </p>
           </div>
+
+          {/* Monthly P&L Bar Chart */}
+          {monthlyPnL.some((m) => m.pnl !== 0) && (
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3
+                  className="w-4 h-4"
+                  style={{ color: v.accent }}
+                />
+                <h3 className="text-sm font-semibold text-[var(--foreground)]">
+                  Monthly P&L
+                </h3>
+              </div>
+              <div className="h-56">
+                <EChart option={monthlyOption} />
+              </div>
+            </div>
+          )}
 
           {/* Risk + Expectancy */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

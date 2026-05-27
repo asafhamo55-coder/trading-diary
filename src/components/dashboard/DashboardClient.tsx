@@ -82,7 +82,7 @@ export default function DashboardClient({
   const equityOption = useMemo<EChartsCoreOption>(() => {
     const data = insights.equityCurve;
     return {
-      grid: { left: 56, right: 12, top: 12, bottom: 28, containLabel: false },
+      grid: { left: 56, right: 12, top: 24, bottom: 28, containLabel: false },
       tooltip: {
         trigger: "axis",
         backgroundColor: "#0C0F14",
@@ -133,9 +133,20 @@ export default function DashboardClient({
         {
           name: "Cumulative",
           type: "line",
-          data: data.map((d) => d.cumulative),
+          data: data.map((d) => ({
+            value: d.cumulative,
+            label: {
+              show: true,
+              formatter: d.symbol,
+              color: (d.pnl ?? 0) >= 0 ? "#00D68F" : "#FF4D6A",
+              fontSize: 9,
+              fontWeight: 500,
+              position: (d.pnl ?? 0) >= 0 ? "top" : "bottom",
+            },
+          })),
           smooth: true,
-          showSymbol: false,
+          showSymbol: true,
+          symbolSize: 4,
           lineStyle: { color: "#3B82F6", width: 2 },
           itemStyle: { color: "#3B82F6" },
           animation: false,
