@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
+import BiometricSettings from "@/components/settings/BiometricSettings";
 
 interface AccountFields {
   calendarYear: number;
@@ -264,6 +265,8 @@ export default function SettingsClient({
       )}
 
       <div className="space-y-6 max-w-3xl">
+        <BiometricSettings />
+
         {/* Account Settings */}
         <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6">
           <div className="flex items-center gap-2 mb-6">
