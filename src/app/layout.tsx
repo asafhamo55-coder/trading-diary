@@ -34,7 +34,7 @@ export default function RootLayout({
       <body className="min-h-full bg-[var(--background)] text-[var(--foreground)] safe-area">
         <div className="flex min-h-screen">
           <Sidebar />
-          <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+          <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden pt-14 md:pt-0">
             {children}
           </main>
         </div>

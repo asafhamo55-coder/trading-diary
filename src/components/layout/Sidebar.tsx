@@ -19,6 +19,8 @@ import {
   LogOut,
   GripVertical,
   RotateCcw,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "./ThemeToggle";
@@ -42,9 +44,24 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [order, setOrder] = useState<string[]>(NAV_ITEMS.map((i) => i.href));
   const [draggingHref, setDraggingHref] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
+
+  // Close mobile drawer whenever the route changes
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll while drawer is open
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   // Load saved order from localStorage
   useEffect(() => {
@@ -118,7 +135,93 @@ export default function Sidebar() {
     .map((h) => itemsByHref[h])
     .filter((i): i is typeof NAV_ITEMS[number] => Boolean(i));
 
+  const navList = (
+    <nav className="flex-1 flex flex-col gap-1 px-3 py-3 overflow-y-auto">
+      {orderedItems.map((item) => {
+        const isActive =
+          pathname === item.href || pathname.startsWith(item.href + "/");
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={() => setMobileOpen(false)}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              isActive
+                ? "bg-[#3B82F6]/10 text-[#3B82F6]"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+            )}
+          >
+            <item.icon className="w-5 h-5 shrink-0" />
+            <span>{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+
   return (
+    <>
+      {/* Mobile hamburger — fixed top-left */}
+      <button
+        type="button"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open navigation menu"
+        className="md:hidden fixed top-3 left-3 z-40 flex items-center justify-center w-10 h-10 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] shadow-md"
+        style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside
+            className="absolute left-0 top-0 h-full w-[280px] max-w-[85vw] flex flex-col bg-[var(--card)] border-r border-[var(--border)] shadow-2xl"
+            style={{
+              paddingTop: "env(safe-area-inset-top)",
+              paddingBottom: "env(safe-area-inset-bottom)",
+              paddingLeft: "env(safe-area-inset-left)",
+            }}
+          >
+            <div className="flex items-center justify-between px-4 h-16 border-b border-[var(--border)]">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#3B82F6]/10">
+                  <TrendingUp className="w-5 h-5 text-[#3B82F6]" />
+                </div>
+                <span className="text-[var(--foreground)] font-semibold text-sm">
+                  Trading Journal Pro
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+                className="flex items-center justify-center w-9 h-9 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {navList}
+            <div className="px-3 py-4 border-t border-[var(--border)] space-y-2">
+              <ThemeToggle collapsed={false} />
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[#FF4D6A]/10 transition-colors text-sm"
+              >
+                <LogOut className="w-5 h-5 shrink-0" />
+                <span>Sign out</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
     <aside
       className={cn(
         "hidden md:flex flex-col h-screen sticky top-0 border-r border-[var(--border)] bg-[var(--card)] transition-all duration-300",
@@ -236,5 +339,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }
