@@ -28,3 +28,19 @@ export function formatNumber(value: number, decimals = 2): string {
     maximumFractionDigits: decimals,
   }).format(value);
 }
+
+/**
+ * Today's date as `YYYY-MM-DD` in US market time (America/New_York).
+ * Trades are journaled by the Eastern market day, so new-trade forms should
+ * default to this rather than the browser/UTC date. Call at render time (not
+ * module scope) so the value can't freeze on a long-lived tab/PWA session.
+ */
+export function todayInEastern(): string {
+  // en-CA formats as YYYY-MM-DD; timeZone pins it to the Eastern calendar date.
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}

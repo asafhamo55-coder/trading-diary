@@ -11,7 +11,7 @@ import {
   ChevronUp,
   Loader2,
 } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, todayInEastern } from "@/lib/utils";
 import { TRADE_TYPES, type Direction } from "@/lib/types";
 import {
   computeAllTradeFields,
@@ -77,7 +77,10 @@ function deriveLeg(
 }
 
 const DEFAULTS: TradeFormValues = {
-  tradeDate: new Date().toISOString().slice(0, 10),
+  // Placeholder only — the real default is computed at mount in `defaultValues`
+  // (see below) so it uses the Eastern market date and never freezes on a
+  // long-lived tab/PWA session. Do NOT compute a date at module scope here.
+  tradeDate: "",
   symbol: "",
   direction: "LONG",
   tradeType: "",
@@ -118,7 +121,12 @@ export default function TradeFormClient({
 
   const { register, control, watch, handleSubmit, setValue } =
     useForm<TradeFormValues>({
-      defaultValues: { ...DEFAULTS, ...initialValues },
+      defaultValues: {
+        ...DEFAULTS,
+        ...initialValues,
+        // New trades default to today's Eastern market date; edits keep theirs.
+        tradeDate: initialValues?.tradeDate || todayInEastern(),
+      },
     });
 
   const {
