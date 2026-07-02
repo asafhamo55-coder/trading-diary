@@ -15,7 +15,6 @@ import {
   Wallet,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
   LogOut,
   GripVertical,
   RotateCcw,
@@ -24,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "./ThemeToggle";
+import Logo from "./Logo";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -189,14 +189,7 @@ export default function Sidebar() {
             }}
           >
             <div className="flex items-center justify-between px-4 h-16 border-b border-[var(--border)]">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#3B82F6]/10">
-                  <TrendingUp className="w-5 h-5 text-[#3B82F6]" />
-                </div>
-                <span className="text-[var(--foreground)] font-semibold text-sm">
-                  Trading Journal Pro
-                </span>
-              </div>
+              <Logo />
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
@@ -230,14 +223,7 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-[var(--border)]">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#3B82F6]/10 shrink-0">
-          <TrendingUp className="w-5 h-5 text-[#3B82F6]" />
-        </div>
-        {!collapsed && (
-          <span className="text-[var(--foreground)] font-semibold text-sm whitespace-nowrap">
-            Trading Journal Pro
-          </span>
-        )}
+        <Logo collapsed={collapsed} />
       </div>
 
       {/* Reorder toggle */}

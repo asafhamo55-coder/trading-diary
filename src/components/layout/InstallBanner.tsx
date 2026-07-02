@@ -43,7 +43,7 @@ export default function InstallBanner() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-[var(--foreground)]">
-              Install Trading Journal
+              Install Hamo Traders
             </p>
             <p className="mt-1 text-xs text-[var(--muted-foreground)] leading-relaxed">
               Tap <Share className="inline h-3 w-3 mb-0.5" /> in Safari, then

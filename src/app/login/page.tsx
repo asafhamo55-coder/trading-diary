@@ -2,7 +2,8 @@
 
 import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock, Loader2, TrendingUp } from "lucide-react";
+import { Lock, Loader2 } from "lucide-react";
+import Logo from "@/components/layout/Logo";
 
 function LoginForm() {
   const router = useRouter();
@@ -43,13 +44,8 @@ function LoginForm() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--background)] p-4">
       <div className="w-full max-w-sm">
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#3B82F6]/10">
-            <TrendingUp className="w-6 h-6 text-[#3B82F6]" />
-          </div>
-          <span className="text-[var(--foreground)] font-semibold text-lg">
-            Trading Journal Pro
-          </span>
+        <div className="flex items-center justify-center mb-8">
+          <Logo size="lg" />
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-2xl">

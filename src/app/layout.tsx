@@ -5,12 +5,12 @@ import InstallBanner from "@/components/layout/InstallBanner";
 import BiometricGate from "@/components/auth/BiometricGate";
 
 export const metadata: Metadata = {
-  title: "Trading Journal Pro",
+  title: "Hamo Traders",
   description: "Professional trading diary & analytics",
-  applicationName: "Trading Journal",
+  applicationName: "Hamo Traders",
   appleWebApp: {
     capable: true,
-    title: "Trading Journal",
+    title: "Hamo Traders",
     statusBarStyle: "black-translucent",
   },
   formatDetection: {

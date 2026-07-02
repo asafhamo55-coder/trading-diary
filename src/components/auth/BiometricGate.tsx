@@ -73,7 +73,7 @@ export default function BiometricGate({
           App Locked
         </h2>
         <p className="text-sm text-[var(--muted-foreground)] mb-8 text-center max-w-xs">
-          Unlock Trading Journal with Face ID to continue.
+          Unlock Hamo Traders with Face ID to continue.
         </p>
         <button
           type="button"

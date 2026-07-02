@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Trading Journal Pro",
-    short_name: "Trading Journal",
+    name: "Hamo Traders",
+    short_name: "Hamo Traders",
     description: "Professional trading diary & analytics",
     start_url: "/dashboard",
     display: "standalone",

@@ -70,7 +70,7 @@ export async function registerBiometric(): Promise<{
     const credential = (await navigator.credentials.create({
       publicKey: {
         challenge,
-        rp: { name: "Trading Journal Pro", id: window.location.hostname },
+        rp: { name: "Hamo Traders", id: window.location.hostname },
         user: {
           id: userId,
           name: "trader@local",
