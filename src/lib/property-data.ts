@@ -94,22 +94,43 @@ export interface PropertyWithTx extends PropertyDTO {
   tenants: TenantDTO[];
 }
 
+// Fetch tenants for a set of properties. Isolated + guarded so a missing
+// Tenant table (e.g. before its migration is run) can never hide properties.
+async function tenantsByProperty(
+  propertyIds: string[]
+): Promise<Map<string, TenantDTO[]>> {
+  const byProp = new Map<string, TenantDTO[]>();
+  if (propertyIds.length === 0) return byProp;
+  try {
+    const tenants = await prisma.tenant.findMany({
+      where: { propertyId: { in: propertyIds } },
+      orderBy: { leaseStart: "desc" },
+    });
+    for (const t of tenants) {
+      const arr = byProp.get(t.propertyId) ?? [];
+      arr.push(serializeTenant(t));
+      byProp.set(t.propertyId, arr);
+    }
+  } catch {
+    // Tenant table not present yet — properties still load, just without tenants.
+  }
+  return byProp;
+}
+
 export async function getProperties(): Promise<PropertyWithTx[]> {
   try {
     const accountId = await firstAccountId();
     if (!accountId) return [];
     const properties = await prisma.property.findMany({
       where: { accountId },
-      include: {
-        transactions: { orderBy: { date: "desc" } },
-        tenants: { orderBy: { leaseStart: "desc" } },
-      },
+      include: { transactions: { orderBy: { date: "desc" } } },
       orderBy: { createdAt: "asc" },
     });
+    const tenants = await tenantsByProperty(properties.map((p) => p.id));
     return properties.map((p) => ({
       ...serializeProperty(p),
       transactions: p.transactions.map(serializeTx),
-      tenants: p.tenants.map(serializeTenant),
+      tenants: tenants.get(p.id) ?? [],
     }));
   } catch {
     // Table may not exist yet (pre-migration) — degrade to empty.
@@ -123,16 +144,14 @@ export async function getPropertyById(id: string): Promise<PropertyWithTx | null
     if (!accountId) return null;
     const p = await prisma.property.findFirst({
       where: { id, accountId },
-      include: {
-        transactions: { orderBy: { date: "desc" } },
-        tenants: { orderBy: { leaseStart: "desc" } },
-      },
+      include: { transactions: { orderBy: { date: "desc" } } },
     });
     if (!p) return null;
+    const tenants = await tenantsByProperty([p.id]);
     return {
       ...serializeProperty(p),
       transactions: p.transactions.map(serializeTx),
-      tenants: p.tenants.map(serializeTenant),
+      tenants: tenants.get(p.id) ?? [],
     };
   } catch {
     return null;
