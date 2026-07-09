@@ -67,6 +67,33 @@ export interface PropertyDTO {
   notes: string | null;
 }
 
+export interface TenantDTO {
+  id: string;
+  propertyId: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  leaseStart: string; // YYYY-MM-DD
+  leaseEnd: string | null; // null = current / ongoing
+  monthlyRent: number | null;
+  securityDeposit: number | null;
+  notes: string | null;
+}
+
+/**
+ * A tenant is "current" when the lease hasn't ended yet (no end date, or the
+ * end date is today or later). `today` is passed in as YYYY-MM-DD so callers
+ * control the reference date (and server/client stay consistent).
+ */
+export function isCurrentTenant(t: TenantDTO, today: string): boolean {
+  return t.leaseEnd === null || t.leaseEnd >= today;
+}
+
+/** Sort tenants newest-lease first (most recent / current at the top). */
+export function sortTenantsByRecency(tenants: TenantDTO[]): TenantDTO[] {
+  return [...tenants].sort((a, b) => b.leaseStart.localeCompare(a.leaseStart));
+}
+
 /** Signed contribution of a transaction to net income (+income, −expense). */
 export function signedAmount(t: { type: PropertyTxType; amount: number }): number {
   return t.type === "INCOME" ? t.amount : -t.amount;

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import YearPicker from "@/components/layout/YearPicker";
+import TenantsSection from "@/components/properties/TenantsSection";
 import {
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,
@@ -21,6 +22,7 @@ import {
   getCategory,
   type PropertyYearSummary,
   type PropertyTransactionDTO,
+  type TenantDTO,
 } from "@/lib/property";
 
 interface PropertyInfo {
@@ -38,12 +40,16 @@ export default function PropertyDetailClient({
   availableYears,
   summary,
   transactions,
+  tenants,
+  today,
 }: {
   property: PropertyInfo;
   year: number;
   availableYears: number[];
   summary: PropertyYearSummary;
   transactions: PropertyTransactionDTO[];
+  tenants: TenantDTO[];
+  today: string;
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -145,6 +151,13 @@ export default function PropertyDetailClient({
         </div>
         <YearPicker years={availableYears} selected={year} />
       </div>
+
+      {/* Tenants */}
+      <TenantsSection
+        propertyId={property.id}
+        tenants={tenants}
+        today={today}
+      />
 
       {/* Tax summary */}
       <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">

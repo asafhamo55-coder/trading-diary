@@ -41,11 +41,32 @@ model Property {
   notes         String?
 
   transactions  PropertyTransaction[]
+  tenants       Tenant[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([accountId])
+}
+
+model Tenant {
+  id              String    @id @default(cuid())
+  propertyId      String
+  property        Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  name            String
+  email           String?
+  phone           String?
+  leaseStart      DateTime
+  leaseEnd        DateTime?  // null = current / ongoing lease
+  monthlyRent     Float?
+  securityDeposit Float?
+  notes           String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([propertyId, leaseStart])
 }
 
 model PropertyTransaction {

@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Account: 'Account',
   Property: 'Property',
+  Tenant: 'Tenant',
   PropertyTransaction: 'PropertyTransaction',
   FundTransaction: 'FundTransaction',
   Trade: 'Trade',
@@ -107,6 +108,24 @@ export const PropertyScalarFieldEnum = {
 } as const
 
 export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
+
+
+export const TenantScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  leaseStart: 'leaseStart',
+  leaseEnd: 'leaseEnd',
+  monthlyRent: 'monthlyRent',
+  securityDeposit: 'securityDeposit',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
 
 
 export const PropertyTransactionScalarFieldEnum = {

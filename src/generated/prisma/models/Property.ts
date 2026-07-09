@@ -250,6 +250,7 @@ export type PropertyWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   transactions?: Prisma.PropertyTransactionListRelationFilter
+  tenants?: Prisma.TenantListRelationFilter
 }
 
 export type PropertyOrderByWithRelationInput = {
@@ -264,6 +265,7 @@ export type PropertyOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   account?: Prisma.AccountOrderByWithRelationInput
   transactions?: Prisma.PropertyTransactionOrderByRelationAggregateInput
+  tenants?: Prisma.TenantOrderByRelationAggregateInput
 }
 
 export type PropertyWhereUniqueInput = Prisma.AtLeast<{
@@ -281,6 +283,7 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   transactions?: Prisma.PropertyTransactionListRelationFilter
+  tenants?: Prisma.TenantListRelationFilter
 }, "id">
 
 export type PropertyOrderByWithAggregationInput = {
@@ -326,6 +329,7 @@ export type PropertyCreateInput = {
   updatedAt?: Date | string
   account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
   transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateInput = {
@@ -339,6 +343,7 @@ export type PropertyUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUpdateInput = {
@@ -352,6 +357,7 @@ export type PropertyUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
   transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateInput = {
@@ -365,6 +371,7 @@ export type PropertyUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyInput = {
@@ -519,6 +526,20 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type PropertyCreateNestedOneWithoutTenantsInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutTenantsInput, Prisma.PropertyUncheckedCreateWithoutTenantsInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutTenantsInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutTenantsNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutTenantsInput, Prisma.PropertyUncheckedCreateWithoutTenantsInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutTenantsInput
+  upsert?: Prisma.PropertyUpsertWithoutTenantsInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutTenantsInput, Prisma.PropertyUpdateWithoutTenantsInput>, Prisma.PropertyUncheckedUpdateWithoutTenantsInput>
+}
+
 export type PropertyCreateNestedOneWithoutTransactionsInput = {
   create?: Prisma.XOR<Prisma.PropertyCreateWithoutTransactionsInput, Prisma.PropertyUncheckedCreateWithoutTransactionsInput>
   connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutTransactionsInput
@@ -543,6 +564,7 @@ export type PropertyCreateWithoutAccountInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutAccountInput = {
@@ -555,6 +577,7 @@ export type PropertyUncheckedCreateWithoutAccountInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutAccountInput = {
@@ -598,6 +621,74 @@ export type PropertyScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
 }
 
+export type PropertyCreateWithoutTenantsInput = {
+  id?: string
+  nickname: string
+  address: string
+  purchasePrice?: number | null
+  purchaseDate?: Date | string | null
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
+  transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutTenantsInput = {
+  id?: string
+  accountId: string
+  nickname: string
+  address: string
+  purchasePrice?: number | null
+  purchaseDate?: Date | string | null
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutTenantsInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutTenantsInput, Prisma.PropertyUncheckedCreateWithoutTenantsInput>
+}
+
+export type PropertyUpsertWithoutTenantsInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutTenantsInput, Prisma.PropertyUncheckedUpdateWithoutTenantsInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutTenantsInput, Prisma.PropertyUncheckedCreateWithoutTenantsInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutTenantsInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutTenantsInput, Prisma.PropertyUncheckedUpdateWithoutTenantsInput>
+}
+
+export type PropertyUpdateWithoutTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
+  transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
 export type PropertyCreateWithoutTransactionsInput = {
   id?: string
   nickname: string
@@ -608,6 +699,7 @@ export type PropertyCreateWithoutTransactionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutTransactionsInput = {
@@ -620,6 +712,7 @@ export type PropertyUncheckedCreateWithoutTransactionsInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutTransactionsInput = {
@@ -648,6 +741,7 @@ export type PropertyUpdateWithoutTransactionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutTransactionsInput = {
@@ -660,6 +754,7 @@ export type PropertyUncheckedUpdateWithoutTransactionsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyAccountInput = {
@@ -683,6 +778,7 @@ export type PropertyUpdateWithoutAccountInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutAccountInput = {
@@ -695,6 +791,7 @@ export type PropertyUncheckedUpdateWithoutAccountInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateManyWithoutAccountInput = {
@@ -715,10 +812,12 @@ export type PropertyUncheckedUpdateManyWithoutAccountInput = {
 
 export type PropertyCountOutputType = {
   transactions: number
+  tenants: number
 }
 
 export type PropertyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   transactions?: boolean | PropertyCountOutputTypeCountTransactionsArgs
+  tenants?: boolean | PropertyCountOutputTypeCountTenantsArgs
 }
 
 /**
@@ -738,6 +837,13 @@ export type PropertyCountOutputTypeCountTransactionsArgs<ExtArgs extends runtime
   where?: Prisma.PropertyTransactionWhereInput
 }
 
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeCountTenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TenantWhereInput
+}
+
 
 export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -751,6 +857,7 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   updatedAt?: boolean
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   transactions?: boolean | Prisma.Property$transactionsArgs<ExtArgs>
+  tenants?: boolean | Prisma.Property$tenantsArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["property"]>
 
@@ -796,6 +903,7 @@ export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   transactions?: boolean | Prisma.Property$transactionsArgs<ExtArgs>
+  tenants?: boolean | Prisma.Property$tenantsArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PropertyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -810,6 +918,7 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     account: Prisma.$AccountPayload<ExtArgs>
     transactions: Prisma.$PropertyTransactionPayload<ExtArgs>[]
+    tenants: Prisma.$TenantPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1217,6 +1326,7 @@ export interface Prisma__PropertyClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   account<T extends Prisma.AccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccountDefaultArgs<ExtArgs>>): Prisma.Prisma__AccountClient<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   transactions<T extends Prisma.Property$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tenants<T extends Prisma.Property$tenantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$tenantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1677,6 +1787,30 @@ export type Property$transactionsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.PropertyTransactionScalarFieldEnum | Prisma.PropertyTransactionScalarFieldEnum[]
+}
+
+/**
+ * Property.tenants
+ */
+export type Property$tenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Tenant
+   */
+  select?: Prisma.TenantSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Tenant
+   */
+  omit?: Prisma.TenantOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantInclude<ExtArgs> | null
+  where?: Prisma.TenantWhereInput
+  orderBy?: Prisma.TenantOrderByWithRelationInput | Prisma.TenantOrderByWithRelationInput[]
+  cursor?: Prisma.TenantWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TenantScalarFieldEnum | Prisma.TenantScalarFieldEnum[]
 }
 
 /**

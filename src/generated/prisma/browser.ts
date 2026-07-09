@@ -28,6 +28,11 @@ export type Account = Prisma.AccountModel
  */
 export type Property = Prisma.PropertyModel
 /**
+ * Model Tenant
+ * 
+ */
+export type Tenant = Prisma.TenantModel
+/**
  * Model PropertyTransaction
  * 
  */

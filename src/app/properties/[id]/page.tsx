@@ -27,6 +27,7 @@ export default async function PropertyDetailPage({
 
   const summary = summarizeYear(property.transactions, year);
   const yearTx = property.transactions.filter((t) => t.year === year);
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <PropertyDetailClient
@@ -42,6 +43,8 @@ export default async function PropertyDetailPage({
       availableYears={availableYears}
       summary={summary}
       transactions={yearTx}
+      tenants={property.tenants}
+      today={today}
     />
   );
 }

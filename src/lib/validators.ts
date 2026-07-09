@@ -113,10 +113,24 @@ export const createPropertyTransactionSchema = z.object({
   description: z.string().max(300).optional().nullable(),
 });
 
+export const createTenantSchema = z.object({
+  name: z.string().min(1, "Tenant name is required").max(120),
+  email: z.string().email("Invalid email").optional().nullable().or(z.literal("")),
+  phone: z.string().max(40).optional().nullable(),
+  leaseStart: z.string().min(1, "Lease start date is required"),
+  leaseEnd: z.string().optional().nullable(),
+  monthlyRent: z.number().nonnegative().optional().nullable(),
+  securityDeposit: z.number().nonnegative().optional().nullable(),
+  notes: z.string().max(1000).optional().nullable(),
+});
+
+export const updateTenantSchema = createTenantSchema.partial();
+
 export type CreatePropertyInput = z.infer<typeof createPropertySchema>;
 export type CreatePropertyTransactionInput = z.infer<
   typeof createPropertyTransactionSchema
 >;
+export type CreateTenantInput = z.infer<typeof createTenantSchema>;
 
 export type CreateTradeInput = z.infer<typeof createTradeSchema>;
 export type UpdateTradeInput = z.infer<typeof updateTradeSchema>;

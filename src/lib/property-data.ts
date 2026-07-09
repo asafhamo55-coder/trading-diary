@@ -1,6 +1,11 @@
 // Server-side data fetching for Hamo Properties.
 import { prisma } from "./db";
-import type { PropertyDTO, PropertyTransactionDTO, PropertyTxType } from "./property";
+import type {
+  PropertyDTO,
+  PropertyTransactionDTO,
+  PropertyTxType,
+  TenantDTO,
+} from "./property";
 import { signedAmount } from "./property";
 
 async function firstAccountId(): Promise<string | null> {
@@ -58,8 +63,35 @@ function serializeProperty(p: {
   };
 }
 
+function serializeTenant(t: {
+  id: string;
+  propertyId: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  leaseStart: Date;
+  leaseEnd: Date | null;
+  monthlyRent: number | null;
+  securityDeposit: number | null;
+  notes: string | null;
+}): TenantDTO {
+  return {
+    id: t.id,
+    propertyId: t.propertyId,
+    name: t.name,
+    email: t.email,
+    phone: t.phone,
+    leaseStart: toDateStr(t.leaseStart),
+    leaseEnd: t.leaseEnd ? toDateStr(t.leaseEnd) : null,
+    monthlyRent: t.monthlyRent,
+    securityDeposit: t.securityDeposit,
+    notes: t.notes,
+  };
+}
+
 export interface PropertyWithTx extends PropertyDTO {
   transactions: PropertyTransactionDTO[];
+  tenants: TenantDTO[];
 }
 
 export async function getProperties(): Promise<PropertyWithTx[]> {
@@ -68,12 +100,16 @@ export async function getProperties(): Promise<PropertyWithTx[]> {
     if (!accountId) return [];
     const properties = await prisma.property.findMany({
       where: { accountId },
-      include: { transactions: { orderBy: { date: "desc" } } },
+      include: {
+        transactions: { orderBy: { date: "desc" } },
+        tenants: { orderBy: { leaseStart: "desc" } },
+      },
       orderBy: { createdAt: "asc" },
     });
     return properties.map((p) => ({
       ...serializeProperty(p),
       transactions: p.transactions.map(serializeTx),
+      tenants: p.tenants.map(serializeTenant),
     }));
   } catch {
     // Table may not exist yet (pre-migration) — degrade to empty.
@@ -87,10 +123,17 @@ export async function getPropertyById(id: string): Promise<PropertyWithTx | null
     if (!accountId) return null;
     const p = await prisma.property.findFirst({
       where: { id, accountId },
-      include: { transactions: { orderBy: { date: "desc" } } },
+      include: {
+        transactions: { orderBy: { date: "desc" } },
+        tenants: { orderBy: { leaseStart: "desc" } },
+      },
     });
     if (!p) return null;
-    return { ...serializeProperty(p), transactions: p.transactions.map(serializeTx) };
+    return {
+      ...serializeProperty(p),
+      transactions: p.transactions.map(serializeTx),
+      tenants: p.tenants.map(serializeTenant),
+    };
   } catch {
     return null;
   }

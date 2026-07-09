@@ -54,6 +54,28 @@ async function migrate() {
     `CREATE INDEX IF NOT EXISTS "PropertyTransaction_propertyId_year_idx" ON "PropertyTransaction"("propertyId", "year")`
   );
 
+  // Tenants — current + historical, per property.
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "Tenant" (
+      "id" TEXT NOT NULL,
+      "propertyId" TEXT NOT NULL,
+      "name" TEXT NOT NULL,
+      "email" TEXT,
+      "phone" TEXT,
+      "leaseStart" TIMESTAMP(3) NOT NULL,
+      "leaseEnd" TIMESTAMP(3),
+      "monthlyRent" DOUBLE PRECISION,
+      "securityDeposit" DOUBLE PRECISION,
+      "notes" TEXT,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "Tenant_pkey" PRIMARY KEY ("id")
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS "Tenant_propertyId_leaseStart_idx" ON "Tenant"("propertyId", "leaseStart")`
+  );
+
   // Foreign keys (guarded — ADD CONSTRAINT has no IF NOT EXISTS).
   await prisma.$executeRawUnsafe(`
     DO $$ BEGIN
@@ -71,12 +93,20 @@ async function migrate() {
       END IF;
     END $$
   `);
+  await prisma.$executeRawUnsafe(`
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Tenant_propertyId_fkey') THEN
+        ALTER TABLE "Tenant" ADD CONSTRAINT "Tenant_propertyId_fkey"
+        FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+      END IF;
+    END $$
+  `);
 }
 
 export async function POST() {
   try {
     await migrate();
-    return jsonResponse({ ok: true, message: "Property tables ensured" });
+    return jsonResponse({ ok: true, message: "Property & Tenant tables ensured" });
   } catch (error) {
     return errorResponse(
       `Migration failed: ${error instanceof Error ? error.message : "Unknown error"}`,

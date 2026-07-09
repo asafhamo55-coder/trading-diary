@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Account: 'Account',
   Property: 'Property',
+  Tenant: 'Tenant',
   PropertyTransaction: 'PropertyTransaction',
   FundTransaction: 'FundTransaction',
   Trade: 'Trade',
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "account" | "property" | "propertyTransaction" | "fundTransaction" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage"
+    modelProps: "account" | "property" | "tenant" | "propertyTransaction" | "fundTransaction" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -558,6 +559,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PropertyCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PropertyCountAggregateOutputType> | number
+        }
+      }
+    }
+    Tenant: {
+      payload: Prisma.$TenantPayload<ExtArgs>
+      fields: Prisma.TenantFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        findMany: {
+          args: Prisma.TenantFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>[]
+        }
+        create: {
+          args: Prisma.TenantCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        createMany: {
+          args: Prisma.TenantCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        update: {
+          args: Prisma.TenantUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenant>
+        }
+        groupBy: {
+          args: Prisma.TenantGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantCountAggregateOutputType> | number
         }
       }
     }
@@ -1222,6 +1297,24 @@ export const PropertyScalarFieldEnum = {
 export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
 
 
+export const TenantScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  leaseStart: 'leaseStart',
+  leaseEnd: 'leaseEnd',
+  monthlyRent: 'monthlyRent',
+  securityDeposit: 'securityDeposit',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
 export const PropertyTransactionScalarFieldEnum = {
   id: 'id',
   propertyId: 'propertyId',
@@ -1583,6 +1676,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   property?: Prisma.PropertyOmit
+  tenant?: Prisma.TenantOmit
   propertyTransaction?: Prisma.PropertyTransactionOmit
   fundTransaction?: Prisma.FundTransactionOmit
   trade?: Prisma.TradeOmit
