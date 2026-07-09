@@ -34,7 +34,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || `HTTP ${res.status}`);
       }
-      router.push("/trades");
+      router.push("/trade/trades");
       router.refresh();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Delete failed");
@@ -50,7 +50,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
             The trade you are looking for does not exist.
           </p>
           <Link
-            href="/trades"
+            href="/trade/trades"
             className="inline-flex items-center gap-1.5 text-sm text-[#3B82F6] hover:text-[#3B82F6]/80 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -85,7 +85,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
         {/* Navigation */}
         <div className="flex items-center justify-between mb-8">
           <Link
-            href="/trades"
+            href="/trade/trades"
             className="inline-flex items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -106,7 +106,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
               Delete
             </button>
             <Link
-              href={`/trades/${trade.id}/edit`}
+              href={`/trade/trades/${trade.id}/edit`}
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
             >
               <Pencil className="h-4 w-4" />

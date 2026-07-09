@@ -32,7 +32,7 @@ export default function Header({ title }: HeaderProps) {
 
         {/* New Trade button */}
         <Link
-          href="/trades/new"
+          href="/trade/trades/new"
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
             "bg-[#3B82F6] text-white hover:bg-[#3B82F6]/90"

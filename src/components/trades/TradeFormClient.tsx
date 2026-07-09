@@ -264,7 +264,7 @@ export default function TradeFormClient({
 
         const saved = await res.json();
         const id = saved?.id ?? tradeId;
-        router.push(id ? `/trades/${id}` : "/trades");
+        router.push(id ? `/trade/trades/${id}` : "/trade/trades");
         router.refresh();
       } catch (err) {
         setSubmitError(
@@ -285,7 +285,7 @@ export default function TradeFormClient({
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <Link
-            href={isEdit && tradeId ? `/trades/${tradeId}` : "/trades"}
+            href={isEdit && tradeId ? `/trade/trades/${tradeId}` : "/trade/trades"}
             className="inline-flex items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -599,7 +599,7 @@ export default function TradeFormClient({
 
           <div className="flex justify-end gap-3">
             <Link
-              href={isEdit && tradeId ? `/trades/${tradeId}` : "/trades"}
+              href={isEdit && tradeId ? `/trade/trades/${tradeId}` : "/trade/trades"}
               className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-5 py-2.5 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
             >
               Cancel

@@ -1,16 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import Sidebar from "@/components/layout/Sidebar";
 import InstallBanner from "@/components/layout/InstallBanner";
 import BiometricGate from "@/components/auth/BiometricGate";
 
 export const metadata: Metadata = {
-  title: "Hamo Traders",
-  description: "Professional trading diary & analytics",
-  applicationName: "Hamo Traders",
+  title: "Hamo Home Equity",
+  description: "Consolidated equity across Hamo Trade, Properties & Home",
+  applicationName: "Hamo Home Equity",
   appleWebApp: {
     capable: true,
-    title: "Hamo Traders",
+    title: "Hamo Home Equity",
     statusBarStyle: "black-translucent",
   },
   formatDetection: {
@@ -34,12 +33,7 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full bg-[var(--background)] text-[var(--foreground)] safe-area">
         <BiometricGate>
-          <div className="flex min-h-screen">
-            <Sidebar />
-            <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden pt-14 md:pt-0">
-              {children}
-            </main>
-          </div>
+          {children}
           <InstallBanner />
         </BiometricGate>
       </body>

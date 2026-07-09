@@ -402,14 +402,14 @@ export default function DashboardClient({
               icon={<Wallet className="w-4 h-4" />}
               accent="#A78BFA"
               stats={stats.assets}
-              href="/assets"
+              href="/trade/assets"
             />
             <SegmentPanel
               kind="stocks"
               icon={<BarChart3 className="w-4 h-4" />}
               accent="#3B82F6"
               stats={stats.stocks}
-              href="/stocks"
+              href="/trade/stocks"
             />
           </div>
         )}

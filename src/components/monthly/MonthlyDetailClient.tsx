@@ -85,7 +85,7 @@ export default function MonthlyDetailClient({
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <Link
-            href={`/monthly/${prevMonth}`}
+            href={`/trade/monthly/${prevMonth}`}
             className="p-2 rounded-lg bg-[var(--muted)] border border-[var(--border)] hover:border-[#3B82F6]/40 transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-[var(--muted-foreground)]" />
@@ -95,14 +95,14 @@ export default function MonthlyDetailClient({
             <p className="text-[var(--muted-foreground)] text-sm">Monthly Deep Dive</p>
           </div>
           <Link
-            href={`/monthly/${nextMonth}`}
+            href={`/trade/monthly/${nextMonth}`}
             className="p-2 rounded-lg bg-[var(--muted)] border border-[var(--border)] hover:border-[#3B82F6]/40 transition-colors"
           >
             <ChevronRight className="w-5 h-5 text-[var(--muted-foreground)]" />
           </Link>
         </div>
         <Link
-          href="/monthly"
+          href="/trade/monthly"
           className="text-sm text-[#3B82F6] hover:underline"
         >
           Back to Overview

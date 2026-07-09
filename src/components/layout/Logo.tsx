@@ -5,14 +5,22 @@ interface LogoProps {
   collapsed?: boolean;
   /** Visual scale. `md` is the default header/sidebar size; `lg` for auth screens. */
   size?: "md" | "lg";
+  /** Accented second word of the wordmark (e.g. "Home Equity", "Trade"). */
+  accentWord?: string;
   className?: string;
 }
 
 /**
- * Hamo Traders brand lockup — a gradient chart mark (matching the PWA app
- * icons) plus a two-tone wordmark. Single source of truth for app branding.
+ * Hamo brand lockup — a gradient chart mark (matching the PWA app icons) plus a
+ * two-tone wordmark ("Hamo" + an accented product word). Single source of truth
+ * for app branding across Hamo Home Equity and its sub-apps.
  */
-export default function Logo({ collapsed = false, size = "md", className }: LogoProps) {
+export default function Logo({
+  collapsed = false,
+  size = "md",
+  accentWord = "Home Equity",
+  className,
+}: LogoProps) {
   const mark = size === "lg" ? "w-10 h-10 rounded-xl" : "w-8 h-8 rounded-lg";
   const glyph = size === "lg" ? 24 : 20;
   const word = size === "lg" ? "text-lg" : "text-sm";
@@ -46,7 +54,7 @@ export default function Logo({ collapsed = false, size = "md", className }: Logo
       {!collapsed && (
         <span className={cn("font-semibold tracking-tight whitespace-nowrap", word)}>
           <span className="text-[var(--foreground)]">Hamo</span>{" "}
-          <span className="text-[#3B82F6]">Traders</span>
+          <span className="text-[#3B82F6]">{accentWord}</span>
         </span>
       )}
     </div>

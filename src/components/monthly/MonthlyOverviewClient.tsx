@@ -53,7 +53,7 @@ export default function MonthlyOverviewClient({
         {monthCards.map((card) => (
           <Link
             key={card.month}
-            href={`/monthly/${card.month}?year=${year}`}
+            href={`/trade/monthly/${card.month}?year=${year}`}
             className="block rounded-xl bg-[var(--card)] border border-[var(--border)] p-5 hover:border-[#3B82F6]/40 transition-colors"
           >
             <div className="flex items-center justify-between mb-4">

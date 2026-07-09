@@ -8,7 +8,7 @@ import Logo from "@/components/layout/Logo";
 function LoginForm() {
   const router = useRouter();
   const search = useSearchParams();
-  const next = search.get("next") || "/dashboard";
+  const next = search.get("next") || "/";
   const unconfigured = search.get("error") === "unconfigured";
 
   const [password, setPassword] = useState("");

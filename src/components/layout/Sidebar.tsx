@@ -20,25 +20,26 @@ import {
   RotateCcw,
   Menu,
   X,
+  Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "./ThemeToggle";
 import Logo from "./Logo";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Trades", icon: LineChart, href: "/trades" },
-  { label: "Monthly", icon: Calendar, href: "/monthly" },
-  { label: "Portfolio", icon: Briefcase, href: "/portfolio" },
-  { label: "Journal", icon: BookOpen, href: "/journal" },
-  { label: "Analytics", icon: BarChart3, href: "/analytics" },
-  { label: "Assets", icon: Wallet, href: "/assets" },
-  { label: "Stocks", icon: LineChart, href: "/stocks" },
-  { label: "Errors", icon: AlertTriangle, href: "/errors" },
-  { label: "Settings", icon: Settings, href: "/settings" },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/trade/dashboard" },
+  { label: "Trades", icon: LineChart, href: "/trade/trades" },
+  { label: "Monthly", icon: Calendar, href: "/trade/monthly" },
+  { label: "Portfolio", icon: Briefcase, href: "/trade/portfolio" },
+  { label: "Journal", icon: BookOpen, href: "/trade/journal" },
+  { label: "Analytics", icon: BarChart3, href: "/trade/analytics" },
+  { label: "Assets", icon: Wallet, href: "/trade/assets" },
+  { label: "Stocks", icon: LineChart, href: "/trade/stocks" },
+  { label: "Errors", icon: AlertTriangle, href: "/trade/errors" },
+  { label: "Settings", icon: Settings, href: "/trade/settings" },
 ];
 
-const STORAGE_KEY = "sidebar-nav-order-v1";
+const STORAGE_KEY = "sidebar-nav-order-v2";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -135,8 +136,21 @@ export default function Sidebar() {
     .map((h) => itemsByHref[h])
     .filter((i): i is typeof NAV_ITEMS[number] => Boolean(i));
 
+  const hubLink = (
+    <Link
+      href="/"
+      onClick={() => setMobileOpen(false)}
+      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+    >
+      <Home className="w-5 h-5 shrink-0" />
+      <span>Home Equity</span>
+    </Link>
+  );
+
   const navList = (
     <nav className="flex-1 flex flex-col gap-1 px-3 py-3 overflow-y-auto">
+      {hubLink}
+      <div className="my-1 border-t border-[var(--border)]" />
       {orderedItems.map((item) => {
         const isActive =
           pathname === item.href || pathname.startsWith(item.href + "/");
@@ -223,7 +237,9 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-[var(--border)]">
-        <Logo collapsed={collapsed} />
+        <Link href="/">
+          <Logo collapsed={collapsed} accentWord="Trade" />
+        </Link>
       </div>
 
       {/* Reorder toggle */}
@@ -255,6 +271,14 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 flex flex-col gap-1 px-3 py-3 overflow-y-auto">
+        <Link
+          href="/"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+        >
+          <Home className="w-5 h-5 shrink-0" />
+          {!collapsed && <span>Home Equity</span>}
+        </Link>
+        <div className="my-1 border-t border-[var(--border)]" />
         {orderedItems.map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + "/");

@@ -178,7 +178,7 @@ export default function TradesListClient({
               Export ({filteredTrades.length})
             </button>
             <Link
-              href="/trades/new"
+              href="/trade/trades/new"
               className="inline-flex items-center gap-2 rounded-lg bg-[#3B82F6] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#3B82F6]/90 transition-colors"
             >
               <Plus className="h-4 w-4" />
@@ -391,7 +391,7 @@ export default function TradesListClient({
                   return (
                     <tr
                       key={trade.id}
-                      onClick={() => router.push(`/trades/${trade.id}`)}
+                      onClick={() => router.push(`/trade/trades/${trade.id}`)}
                       className="border-b border-[var(--border)] last:border-b-0 cursor-pointer hover:bg-[var(--muted)] transition-colors"
                     >
                       <td className="px-4 py-3 font-mono text-[var(--muted-foreground)]">
