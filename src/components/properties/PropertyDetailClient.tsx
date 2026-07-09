@@ -10,9 +10,9 @@ import {
   Loader2,
   FileText,
   MapPin,
-  X,
   Archive,
   ArchiveRestore,
+  MoreVertical,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import YearPicker from "@/components/layout/YearPicker";
@@ -60,6 +60,7 @@ export default function PropertyDetailClient({
   const [deletingProperty, setDeletingProperty] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const isArchived = property.archivedAt !== null;
 
   const [form, setForm] = useState({
@@ -168,8 +169,85 @@ export default function PropertyDetailClient({
             {property.address}
           </p>
         </div>
-        <YearPicker years={availableYears} selected={year} />
+        <div className="flex items-center gap-2">
+          <YearPicker years={availableYears} selected={year} />
+          {/* Actions menu */}
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label="Property actions"
+              className="flex items-center justify-center w-9 h-9 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+            {menuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-1 z-50 w-48 rounded-lg border border-[var(--border)] bg-[var(--card)] shadow-xl py-1">
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleToggleArchive();
+                    }}
+                    disabled={archiving}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-60"
+                  >
+                    {isArchived ? (
+                      <>
+                        <ArchiveRestore className="w-4 h-4" />
+                        Restore property
+                      </>
+                    ) : (
+                      <>
+                        <Archive className="w-4 h-4" />
+                        Archive property
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setConfirmDelete(true);
+                    }}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#FF4D6A] hover:bg-[#FF4D6A]/10 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete property
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Delete confirmation */}
+      {confirmDelete && (
+        <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl border border-[#FF4D6A]/40 bg-[#FF4D6A]/10 px-4 py-3">
+          <span className="text-sm text-[var(--foreground)]">
+            Delete <span className="font-semibold">{property.nickname}</span> and all its entries & tenants? This can&apos;t be undone.
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDeleteProperty}
+              disabled={deletingProperty}
+              className="inline-flex items-center gap-1 rounded-lg bg-[#FF4D6A] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#FF4D6A]/90 disabled:opacity-60"
+            >
+              {deletingProperty && <Loader2 className="w-4 h-4 animate-spin" />}
+              Yes, delete
+            </button>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Archived banner */}
       {isArchived && (
@@ -384,47 +462,6 @@ export default function PropertyDetailClient({
         )}
       </div>
 
-      {/* Danger zone */}
-      <div className="flex justify-end items-center gap-4">
-        {!isArchived && !confirmDelete && (
-          <button
-            onClick={handleToggleArchive}
-            disabled={archiving}
-            className="inline-flex items-center gap-2 text-sm text-[var(--muted-foreground)] hover:text-[#FFB547] transition-colors disabled:opacity-60"
-          >
-            {archiving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Archive className="w-4 h-4" />}
-            Archive property
-          </button>
-        )}
-        {confirmDelete ? (
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-[var(--muted-foreground)]">Delete this property and all entries?</span>
-            <button
-              onClick={handleDeleteProperty}
-              disabled={deletingProperty}
-              className="inline-flex items-center gap-1 rounded-lg bg-[#FF4D6A] px-3 py-1.5 font-medium text-white hover:bg-[#FF4D6A]/90 disabled:opacity-60"
-            >
-              {deletingProperty && <Loader2 className="w-4 h-4 animate-spin" />}
-              Yes, delete
-            </button>
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-            >
-              <X className="w-4 h-4" />
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setConfirmDelete(true)}
-            className="inline-flex items-center gap-2 text-sm text-[var(--muted-foreground)] hover:text-[#FF4D6A] transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-            Delete property
-          </button>
-        )}
-      </div>
     </div>
   );
 }
