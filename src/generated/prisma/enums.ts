@@ -31,3 +31,22 @@ export const LegType = {
 } as const
 
 export type LegType = (typeof LegType)[keyof typeof LegType]
+
+
+export const HomeAccountType = {
+  BOFA_CHECKING: 'BOFA_CHECKING',
+  BOFA_CARD: 'BOFA_CARD',
+  AMEX: 'AMEX',
+  OTHER: 'OTHER'
+} as const
+
+export type HomeAccountType = (typeof HomeAccountType)[keyof typeof HomeAccountType]
+
+
+export const HomeCategoryKind = {
+  SPENDING: 'SPENDING',
+  INCOME: 'INCOME',
+  TRANSFER: 'TRANSFER'
+} as const
+
+export type HomeCategoryKind = (typeof HomeCategoryKind)[keyof typeof HomeCategoryKind]

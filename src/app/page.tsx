@@ -1,5 +1,6 @@
 import { getMonthlyTradeRevExp } from "@/lib/data";
 import { getPropertyMonthlyRevExp } from "@/lib/property-data";
+import { getHomeMonthlyRevExp } from "@/lib/home-data";
 import { prisma } from "@/lib/db";
 import { getAvailableYears, parseYear, resolveSelectedYear } from "@/lib/year";
 import HubClient from "@/components/home/HubClient";
@@ -18,26 +19,28 @@ export default async function HomeEquityPage({
     : [new Date().getFullYear()];
   const year = resolveSelectedYear(parseYear(sp.year), availableYears);
 
-  const [tradeMonthly, propertyMonthly] = await Promise.all([
+  const [tradeMonthly, propertyMonthly, homeMonthly] = await Promise.all([
     getMonthlyTradeRevExp(year),
     getPropertyMonthlyRevExp(year),
+    getHomeMonthlyRevExp(year),
   ]);
 
-  // Per-source monthly revenue & expense. Trade & Properties are live; Home
-  // comes online as that sub-app is built, and simply fills in its figures.
+  // Per-source monthly revenue & expense. All three modules are live and fill
+  // in their own figures as data arrives.
   const zero = { revenue: 0, expense: 0 };
   const monthly = tradeMonthly.map((m, i) => ({
     month: m.month,
     name: m.name,
     trade: { revenue: m.revenue, expense: m.expense },
     properties: propertyMonthly[i] ?? zero,
-    home: zero,
+    home: homeMonthly[i] ?? zero,
   }));
 
   const sumNet = (rows: { revenue: number; expense: number }[]) =>
     rows.reduce((sum, r) => sum + r.revenue - r.expense, 0);
   const tradeTotal = sumNet(tradeMonthly);
   const propertyTotal = sumNet(propertyMonthly);
+  const homeTotal = sumNet(homeMonthly);
 
   const sources = [
     {
@@ -60,9 +63,9 @@ export default async function HomeEquityPage({
       key: "home" as const,
       label: "Hamo Home",
       href: "/home",
-      total: 0,
-      ready: false,
-      blurb: "Household finances rolled into the family equity picture.",
+      total: homeTotal,
+      ready: true,
+      blurb: "Bank & card statements, categorized spending & cash flow.",
     },
   ];
 

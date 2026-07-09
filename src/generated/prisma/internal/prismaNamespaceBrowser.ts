@@ -61,7 +61,12 @@ export const ModelName = {
   MonthlyReview: 'MonthlyReview',
   ErrorDefinition: 'ErrorDefinition',
   TradeError: 'TradeError',
-  AssetLeverage: 'AssetLeverage'
+  AssetLeverage: 'AssetLeverage',
+  HomeAccount: 'HomeAccount',
+  HomeCategory: 'HomeCategory',
+  HomeTransaction: 'HomeTransaction',
+  HomeImport: 'HomeImport',
+  HomeCategoryRule: 'HomeCategoryRule'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -262,6 +267,91 @@ export const AssetLeverageScalarFieldEnum = {
 } as const
 
 export type AssetLeverageScalarFieldEnum = (typeof AssetLeverageScalarFieldEnum)[keyof typeof AssetLeverageScalarFieldEnum]
+
+
+export const HomeAccountScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  name: 'name',
+  type: 'type',
+  last4: 'last4',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeAccountScalarFieldEnum = (typeof HomeAccountScalarFieldEnum)[keyof typeof HomeAccountScalarFieldEnum]
+
+
+export const HomeCategoryScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  name: 'name',
+  parentId: 'parentId',
+  kind: 'kind',
+  color: 'color',
+  sortOrder: 'sortOrder',
+  isSystem: 'isSystem',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeCategoryScalarFieldEnum = (typeof HomeCategoryScalarFieldEnum)[keyof typeof HomeCategoryScalarFieldEnum]
+
+
+export const HomeTransactionScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  homeAccountId: 'homeAccountId',
+  date: 'date',
+  year: 'year',
+  month: 'month',
+  amount: 'amount',
+  description: 'description',
+  rawDescription: 'rawDescription',
+  categoryId: 'categoryId',
+  notes: 'notes',
+  isExcluded: 'isExcluded',
+  excludeReason: 'excludeReason',
+  dedupeGroupId: 'dedupeGroupId',
+  needsReview: 'needsReview',
+  isManual: 'isManual',
+  importId: 'importId',
+  externalKey: 'externalKey',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeTransactionScalarFieldEnum = (typeof HomeTransactionScalarFieldEnum)[keyof typeof HomeTransactionScalarFieldEnum]
+
+
+export const HomeImportScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  homeAccountId: 'homeAccountId',
+  filename: 'filename',
+  source: 'source',
+  rowCount: 'rowCount',
+  addedCount: 'addedCount',
+  duplicateCount: 'duplicateCount',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  createdAt: 'createdAt'
+} as const
+
+export type HomeImportScalarFieldEnum = (typeof HomeImportScalarFieldEnum)[keyof typeof HomeImportScalarFieldEnum]
+
+
+export const HomeCategoryRuleScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  matcher: 'matcher',
+  categoryId: 'categoryId',
+  priority: 'priority',
+  createdAt: 'createdAt'
+} as const
+
+export type HomeCategoryRuleScalarFieldEnum = (typeof HomeCategoryRuleScalarFieldEnum)[keyof typeof HomeCategoryRuleScalarFieldEnum]
 
 
 export const SortOrder = {

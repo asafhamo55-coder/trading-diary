@@ -280,6 +280,40 @@ export type EnumLegTypeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumLegTypeFilter<$PrismaModel>
 }
 
+export type EnumHomeAccountTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeAccountType | Prisma.EnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeAccountType[] | Prisma.ListEnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeAccountType[] | Prisma.ListEnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeAccountTypeFilter<$PrismaModel> | $Enums.HomeAccountType
+}
+
+export type EnumHomeAccountTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeAccountType | Prisma.EnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeAccountType[] | Prisma.ListEnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeAccountType[] | Prisma.ListEnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeAccountTypeWithAggregatesFilter<$PrismaModel> | $Enums.HomeAccountType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHomeAccountTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHomeAccountTypeFilter<$PrismaModel>
+}
+
+export type EnumHomeCategoryKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeCategoryKind | Prisma.EnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeCategoryKind[] | Prisma.ListEnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeCategoryKind[] | Prisma.ListEnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeCategoryKindFilter<$PrismaModel> | $Enums.HomeCategoryKind
+}
+
+export type EnumHomeCategoryKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeCategoryKind | Prisma.EnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeCategoryKind[] | Prisma.ListEnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeCategoryKind[] | Prisma.ListEnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeCategoryKindWithAggregatesFilter<$PrismaModel> | $Enums.HomeCategoryKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHomeCategoryKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHomeCategoryKindFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -546,6 +580,40 @@ export type NestedEnumLegTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLegTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLegTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumHomeAccountTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeAccountType | Prisma.EnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeAccountType[] | Prisma.ListEnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeAccountType[] | Prisma.ListEnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeAccountTypeFilter<$PrismaModel> | $Enums.HomeAccountType
+}
+
+export type NestedEnumHomeAccountTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeAccountType | Prisma.EnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeAccountType[] | Prisma.ListEnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeAccountType[] | Prisma.ListEnumHomeAccountTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeAccountTypeWithAggregatesFilter<$PrismaModel> | $Enums.HomeAccountType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHomeAccountTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHomeAccountTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumHomeCategoryKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeCategoryKind | Prisma.EnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeCategoryKind[] | Prisma.ListEnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeCategoryKind[] | Prisma.ListEnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeCategoryKindFilter<$PrismaModel> | $Enums.HomeCategoryKind
+}
+
+export type NestedEnumHomeCategoryKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeCategoryKind | Prisma.EnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeCategoryKind[] | Prisma.ListEnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeCategoryKind[] | Prisma.ListEnumHomeCategoryKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeCategoryKindWithAggregatesFilter<$PrismaModel> | $Enums.HomeCategoryKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHomeCategoryKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHomeCategoryKindFilter<$PrismaModel>
 }
 
 

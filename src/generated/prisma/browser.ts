@@ -72,3 +72,28 @@ export type TradeError = Prisma.TradeErrorModel
  * 
  */
 export type AssetLeverage = Prisma.AssetLeverageModel
+/**
+ * Model HomeAccount
+ * 
+ */
+export type HomeAccount = Prisma.HomeAccountModel
+/**
+ * Model HomeCategory
+ * 
+ */
+export type HomeCategory = Prisma.HomeCategoryModel
+/**
+ * Model HomeTransaction
+ * 
+ */
+export type HomeTransaction = Prisma.HomeTransactionModel
+/**
+ * Model HomeImport
+ * 
+ */
+export type HomeImport = Prisma.HomeImportModel
+/**
+ * Model HomeCategoryRule
+ * 
+ */
+export type HomeCategoryRule = Prisma.HomeCategoryRuleModel

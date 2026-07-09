@@ -394,7 +394,12 @@ export const ModelName = {
   MonthlyReview: 'MonthlyReview',
   ErrorDefinition: 'ErrorDefinition',
   TradeError: 'TradeError',
-  AssetLeverage: 'AssetLeverage'
+  AssetLeverage: 'AssetLeverage',
+  HomeAccount: 'HomeAccount',
+  HomeCategory: 'HomeCategory',
+  HomeTransaction: 'HomeTransaction',
+  HomeImport: 'HomeImport',
+  HomeCategoryRule: 'HomeCategoryRule'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -410,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "account" | "property" | "tenant" | "propertyTransaction" | "fundTransaction" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage"
+    modelProps: "account" | "property" | "tenant" | "propertyTransaction" | "fundTransaction" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage" | "homeAccount" | "homeCategory" | "homeTransaction" | "homeImport" | "homeCategoryRule"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1228,6 +1233,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    HomeAccount: {
+      payload: Prisma.$HomeAccountPayload<ExtArgs>
+      fields: Prisma.HomeAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload>
+        }
+        findMany: {
+          args: Prisma.HomeAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload>[]
+        }
+        create: {
+          args: Prisma.HomeAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload>
+        }
+        createMany: {
+          args: Prisma.HomeAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload>
+        }
+        update: {
+          args: Prisma.HomeAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeAccount>
+        }
+        groupBy: {
+          args: Prisma.HomeAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeAccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeCategory: {
+      payload: Prisma.$HomeCategoryPayload<ExtArgs>
+      fields: Prisma.HomeCategoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeCategoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeCategoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeCategoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeCategoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload>
+        }
+        findMany: {
+          args: Prisma.HomeCategoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload>[]
+        }
+        create: {
+          args: Prisma.HomeCategoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload>
+        }
+        createMany: {
+          args: Prisma.HomeCategoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeCategoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeCategoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload>
+        }
+        update: {
+          args: Prisma.HomeCategoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeCategoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeCategoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeCategoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeCategoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeCategoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeCategory>
+        }
+        groupBy: {
+          args: Prisma.HomeCategoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeCategoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeCategoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeCategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeTransaction: {
+      payload: Prisma.$HomeTransactionPayload<ExtArgs>
+      fields: Prisma.HomeTransactionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeTransactionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeTransactionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeTransactionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeTransactionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload>
+        }
+        findMany: {
+          args: Prisma.HomeTransactionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload>[]
+        }
+        create: {
+          args: Prisma.HomeTransactionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload>
+        }
+        createMany: {
+          args: Prisma.HomeTransactionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeTransactionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeTransactionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload>
+        }
+        update: {
+          args: Prisma.HomeTransactionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeTransactionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeTransactionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeTransactionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeTransactionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeTransactionPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeTransactionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeTransaction>
+        }
+        groupBy: {
+          args: Prisma.HomeTransactionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeTransactionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeTransactionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeTransactionCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeImport: {
+      payload: Prisma.$HomeImportPayload<ExtArgs>
+      fields: Prisma.HomeImportFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeImportFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeImportFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeImportFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeImportFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload>
+        }
+        findMany: {
+          args: Prisma.HomeImportFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload>[]
+        }
+        create: {
+          args: Prisma.HomeImportCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload>
+        }
+        createMany: {
+          args: Prisma.HomeImportCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeImportCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeImportDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload>
+        }
+        update: {
+          args: Prisma.HomeImportUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeImportDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeImportUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeImportUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeImportUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeImportPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeImportAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeImport>
+        }
+        groupBy: {
+          args: Prisma.HomeImportGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeImportGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeImportCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeImportCountAggregateOutputType> | number
+        }
+      }
+    }
+    HomeCategoryRule: {
+      payload: Prisma.$HomeCategoryRulePayload<ExtArgs>
+      fields: Prisma.HomeCategoryRuleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeCategoryRuleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeCategoryRuleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload>
+        }
+        findFirst: {
+          args: Prisma.HomeCategoryRuleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeCategoryRuleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload>
+        }
+        findMany: {
+          args: Prisma.HomeCategoryRuleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload>[]
+        }
+        create: {
+          args: Prisma.HomeCategoryRuleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload>
+        }
+        createMany: {
+          args: Prisma.HomeCategoryRuleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeCategoryRuleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload>[]
+        }
+        delete: {
+          args: Prisma.HomeCategoryRuleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload>
+        }
+        update: {
+          args: Prisma.HomeCategoryRuleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeCategoryRuleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeCategoryRuleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeCategoryRuleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeCategoryRuleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeCategoryRulePayload>
+        }
+        aggregate: {
+          args: Prisma.HomeCategoryRuleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeCategoryRule>
+        }
+        groupBy: {
+          args: Prisma.HomeCategoryRuleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeCategoryRuleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeCategoryRuleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeCategoryRuleCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1451,6 +1826,91 @@ export const AssetLeverageScalarFieldEnum = {
 export type AssetLeverageScalarFieldEnum = (typeof AssetLeverageScalarFieldEnum)[keyof typeof AssetLeverageScalarFieldEnum]
 
 
+export const HomeAccountScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  name: 'name',
+  type: 'type',
+  last4: 'last4',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeAccountScalarFieldEnum = (typeof HomeAccountScalarFieldEnum)[keyof typeof HomeAccountScalarFieldEnum]
+
+
+export const HomeCategoryScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  name: 'name',
+  parentId: 'parentId',
+  kind: 'kind',
+  color: 'color',
+  sortOrder: 'sortOrder',
+  isSystem: 'isSystem',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeCategoryScalarFieldEnum = (typeof HomeCategoryScalarFieldEnum)[keyof typeof HomeCategoryScalarFieldEnum]
+
+
+export const HomeTransactionScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  homeAccountId: 'homeAccountId',
+  date: 'date',
+  year: 'year',
+  month: 'month',
+  amount: 'amount',
+  description: 'description',
+  rawDescription: 'rawDescription',
+  categoryId: 'categoryId',
+  notes: 'notes',
+  isExcluded: 'isExcluded',
+  excludeReason: 'excludeReason',
+  dedupeGroupId: 'dedupeGroupId',
+  needsReview: 'needsReview',
+  isManual: 'isManual',
+  importId: 'importId',
+  externalKey: 'externalKey',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeTransactionScalarFieldEnum = (typeof HomeTransactionScalarFieldEnum)[keyof typeof HomeTransactionScalarFieldEnum]
+
+
+export const HomeImportScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  homeAccountId: 'homeAccountId',
+  filename: 'filename',
+  source: 'source',
+  rowCount: 'rowCount',
+  addedCount: 'addedCount',
+  duplicateCount: 'duplicateCount',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  createdAt: 'createdAt'
+} as const
+
+export type HomeImportScalarFieldEnum = (typeof HomeImportScalarFieldEnum)[keyof typeof HomeImportScalarFieldEnum]
+
+
+export const HomeCategoryRuleScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  matcher: 'matcher',
+  categoryId: 'categoryId',
+  priority: 'priority',
+  createdAt: 'createdAt'
+} as const
+
+export type HomeCategoryRuleScalarFieldEnum = (typeof HomeCategoryRuleScalarFieldEnum)[keyof typeof HomeCategoryRuleScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1585,6 +2045,34 @@ export type EnumLegTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMo
 export type ListEnumLegTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegType[]'>
     
 
+
+/**
+ * Reference to a field of type 'HomeAccountType'
+ */
+export type EnumHomeAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeAccountType'>
+    
+
+
+/**
+ * Reference to a field of type 'HomeAccountType[]'
+ */
+export type ListEnumHomeAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeAccountType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'HomeCategoryKind'
+ */
+export type EnumHomeCategoryKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeCategoryKind'>
+    
+
+
+/**
+ * Reference to a field of type 'HomeCategoryKind[]'
+ */
+export type ListEnumHomeCategoryKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeCategoryKind[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -1691,6 +2179,11 @@ export type GlobalOmitConfig = {
   errorDefinition?: Prisma.ErrorDefinitionOmit
   tradeError?: Prisma.TradeErrorOmit
   assetLeverage?: Prisma.AssetLeverageOmit
+  homeAccount?: Prisma.HomeAccountOmit
+  homeCategory?: Prisma.HomeCategoryOmit
+  homeTransaction?: Prisma.HomeTransactionOmit
+  homeImport?: Prisma.HomeImportOmit
+  homeCategoryRule?: Prisma.HomeCategoryRuleOmit
 }
 
 /* Types for Logging */

@@ -242,3 +242,125 @@ model AssetLeverage {
 
   @@unique([accountId, symbol])
 }
+
+// ── Hamo Home ──────────────────────────────────────────────────────
+// Household finance: import bank & card statements, de-duplicate
+// card-payment transfers, categorize (two-level), and analyze spending.
+// `accountId` is the owning Account.id, stored as a plain field (no Prisma
+// relation) to keep this module decoupled from the trading models.
+
+enum HomeAccountType {
+  BOFA_CHECKING
+  BOFA_CARD
+  AMEX
+  OTHER
+}
+
+enum HomeCategoryKind {
+  SPENDING
+  INCOME
+  TRANSFER // internal transfers / card payments — excluded from spend
+}
+
+model HomeAccount {
+  id         String          @id @default(cuid())
+  accountId  String
+  name       String
+  type       HomeAccountType
+  last4      String?
+  archivedAt DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  transactions HomeTransaction[]
+  imports      HomeImport[]
+
+  @@index([accountId])
+}
+
+model HomeCategory {
+  id        String           @id @default(cuid())
+  accountId String
+  name      String
+  parentId  String?
+  parent    HomeCategory?    @relation("HomeCategoryTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children  HomeCategory[]   @relation("HomeCategoryTree")
+  kind      HomeCategoryKind @default(SPENDING)
+  color     String?
+  sortOrder Int              @default(0)
+  isSystem  Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  transactions HomeTransaction[]
+  rules        HomeCategoryRule[]
+
+  @@index([accountId])
+}
+
+model HomeTransaction {
+  id             String       @id @default(cuid())
+  accountId      String
+  homeAccountId  String
+  homeAccount    HomeAccount  @relation(fields: [homeAccountId], references: [id], onDelete: Cascade)
+
+  date           DateTime
+  year           Int
+  month          Int
+  amount         Float // signed: negative = money out, positive = money in
+  description    String // cleaned merchant / description
+  rawDescription String // original statement text (never lost)
+
+  categoryId     String?
+  category       HomeCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  notes          String?
+  isExcluded     Boolean      @default(false) // transfers / card payments removed from spend
+  excludeReason  String?
+  dedupeGroupId  String? // links a bank card-payment to its card-side offset
+  needsReview    Boolean      @default(false)
+  isManual       Boolean      @default(false) // user-added, not imported
+
+  importId       String?
+  import         HomeImport?  @relation(fields: [importId], references: [id], onDelete: SetNull)
+  externalKey    String? // idempotency key for imported rows
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([accountId, date])
+  @@index([accountId, year, month])
+  @@index([homeAccountId])
+  @@index([externalKey])
+}
+
+model HomeImport {
+  id             String          @id @default(cuid())
+  accountId      String
+  homeAccountId  String
+  homeAccount    HomeAccount     @relation(fields: [homeAccountId], references: [id], onDelete: Cascade)
+  filename       String
+  source         HomeAccountType
+  rowCount       Int             @default(0)
+  addedCount     Int             @default(0)
+  duplicateCount Int             @default(0)
+  periodStart    DateTime?
+  periodEnd      DateTime?
+  createdAt      DateTime        @default(now())
+
+  transactions HomeTransaction[]
+
+  @@index([accountId])
+}
+
+model HomeCategoryRule {
+  id         String       @id @default(cuid())
+  accountId  String
+  matcher    String // lowercased substring matched against rawDescription
+  categoryId String
+  category   HomeCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  priority   Int          @default(0)
+  createdAt  DateTime     @default(now())
+
+  @@index([accountId])
+}
