@@ -39,6 +39,11 @@ export type PropertyMinAggregateOutputType = {
   accountId: string | null
   nickname: string | null
   address: string | null
+  street: string | null
+  unit: string | null
+  city: string | null
+  state: string | null
+  zip: string | null
   purchasePrice: number | null
   purchaseDate: Date | null
   notes: string | null
@@ -52,6 +57,11 @@ export type PropertyMaxAggregateOutputType = {
   accountId: string | null
   nickname: string | null
   address: string | null
+  street: string | null
+  unit: string | null
+  city: string | null
+  state: string | null
+  zip: string | null
   purchasePrice: number | null
   purchaseDate: Date | null
   notes: string | null
@@ -65,6 +75,11 @@ export type PropertyCountAggregateOutputType = {
   accountId: number
   nickname: number
   address: number
+  street: number
+  unit: number
+  city: number
+  state: number
+  zip: number
   purchasePrice: number
   purchaseDate: number
   notes: number
@@ -88,6 +103,11 @@ export type PropertyMinAggregateInputType = {
   accountId?: true
   nickname?: true
   address?: true
+  street?: true
+  unit?: true
+  city?: true
+  state?: true
+  zip?: true
   purchasePrice?: true
   purchaseDate?: true
   notes?: true
@@ -101,6 +121,11 @@ export type PropertyMaxAggregateInputType = {
   accountId?: true
   nickname?: true
   address?: true
+  street?: true
+  unit?: true
+  city?: true
+  state?: true
+  zip?: true
   purchasePrice?: true
   purchaseDate?: true
   notes?: true
@@ -114,6 +139,11 @@ export type PropertyCountAggregateInputType = {
   accountId?: true
   nickname?: true
   address?: true
+  street?: true
+  unit?: true
+  city?: true
+  state?: true
+  zip?: true
   purchasePrice?: true
   purchaseDate?: true
   notes?: true
@@ -214,6 +244,11 @@ export type PropertyGroupByOutputType = {
   accountId: string
   nickname: string
   address: string
+  street: string | null
+  unit: string | null
+  city: string | null
+  state: string | null
+  zip: string | null
   purchasePrice: number | null
   purchaseDate: Date | null
   notes: string | null
@@ -250,6 +285,11 @@ export type PropertyWhereInput = {
   accountId?: Prisma.StringFilter<"Property"> | string
   nickname?: Prisma.StringFilter<"Property"> | string
   address?: Prisma.StringFilter<"Property"> | string
+  street?: Prisma.StringNullableFilter<"Property"> | string | null
+  unit?: Prisma.StringNullableFilter<"Property"> | string | null
+  city?: Prisma.StringNullableFilter<"Property"> | string | null
+  state?: Prisma.StringNullableFilter<"Property"> | string | null
+  zip?: Prisma.StringNullableFilter<"Property"> | string | null
   purchasePrice?: Prisma.FloatNullableFilter<"Property"> | number | null
   purchaseDate?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
@@ -266,6 +306,11 @@ export type PropertyOrderByWithRelationInput = {
   accountId?: Prisma.SortOrder
   nickname?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  street?: Prisma.SortOrderInput | Prisma.SortOrder
+  unit?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  state?: Prisma.SortOrderInput | Prisma.SortOrder
+  zip?: Prisma.SortOrderInput | Prisma.SortOrder
   purchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -285,6 +330,11 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   accountId?: Prisma.StringFilter<"Property"> | string
   nickname?: Prisma.StringFilter<"Property"> | string
   address?: Prisma.StringFilter<"Property"> | string
+  street?: Prisma.StringNullableFilter<"Property"> | string | null
+  unit?: Prisma.StringNullableFilter<"Property"> | string | null
+  city?: Prisma.StringNullableFilter<"Property"> | string | null
+  state?: Prisma.StringNullableFilter<"Property"> | string | null
+  zip?: Prisma.StringNullableFilter<"Property"> | string | null
   purchasePrice?: Prisma.FloatNullableFilter<"Property"> | number | null
   purchaseDate?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
@@ -301,6 +351,11 @@ export type PropertyOrderByWithAggregationInput = {
   accountId?: Prisma.SortOrder
   nickname?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  street?: Prisma.SortOrderInput | Prisma.SortOrder
+  unit?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  state?: Prisma.SortOrderInput | Prisma.SortOrder
+  zip?: Prisma.SortOrderInput | Prisma.SortOrder
   purchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -322,6 +377,11 @@ export type PropertyScalarWhereWithAggregatesInput = {
   accountId?: Prisma.StringWithAggregatesFilter<"Property"> | string
   nickname?: Prisma.StringWithAggregatesFilter<"Property"> | string
   address?: Prisma.StringWithAggregatesFilter<"Property"> | string
+  street?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  unit?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  city?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  state?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
+  zip?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   purchasePrice?: Prisma.FloatNullableWithAggregatesFilter<"Property"> | number | null
   purchaseDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
@@ -334,6 +394,11 @@ export type PropertyCreateInput = {
   id?: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -350,6 +415,11 @@ export type PropertyUncheckedCreateInput = {
   accountId: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -364,6 +434,11 @@ export type PropertyUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -380,6 +455,11 @@ export type PropertyUncheckedUpdateInput = {
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -395,6 +475,11 @@ export type PropertyCreateManyInput = {
   accountId: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -407,6 +492,11 @@ export type PropertyUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -420,6 +510,11 @@ export type PropertyUncheckedUpdateManyInput = {
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -443,6 +538,11 @@ export type PropertyCountOrderByAggregateInput = {
   accountId?: Prisma.SortOrder
   nickname?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  street?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  zip?: Prisma.SortOrder
   purchasePrice?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -460,6 +560,11 @@ export type PropertyMaxOrderByAggregateInput = {
   accountId?: Prisma.SortOrder
   nickname?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  street?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  zip?: Prisma.SortOrder
   purchasePrice?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -473,6 +578,11 @@ export type PropertyMinOrderByAggregateInput = {
   accountId?: Prisma.SortOrder
   nickname?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  street?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  zip?: Prisma.SortOrder
   purchasePrice?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -532,6 +642,10 @@ export type PropertyUncheckedUpdateManyWithoutAccountNestedInput = {
   deleteMany?: Prisma.PropertyScalarWhereInput | Prisma.PropertyScalarWhereInput[]
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
 export type NullableFloatFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -542,10 +656,6 @@ export type NullableFloatFieldUpdateOperationsInput = {
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
-}
-
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
 }
 
 export type PropertyCreateNestedOneWithoutTenantsInput = {
@@ -580,6 +690,11 @@ export type PropertyCreateWithoutAccountInput = {
   id?: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -594,6 +709,11 @@ export type PropertyUncheckedCreateWithoutAccountInput = {
   id?: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -638,6 +758,11 @@ export type PropertyScalarWhereInput = {
   accountId?: Prisma.StringFilter<"Property"> | string
   nickname?: Prisma.StringFilter<"Property"> | string
   address?: Prisma.StringFilter<"Property"> | string
+  street?: Prisma.StringNullableFilter<"Property"> | string | null
+  unit?: Prisma.StringNullableFilter<"Property"> | string | null
+  city?: Prisma.StringNullableFilter<"Property"> | string | null
+  state?: Prisma.StringNullableFilter<"Property"> | string | null
+  zip?: Prisma.StringNullableFilter<"Property"> | string | null
   purchasePrice?: Prisma.FloatNullableFilter<"Property"> | number | null
   purchaseDate?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
@@ -650,6 +775,11 @@ export type PropertyCreateWithoutTenantsInput = {
   id?: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -665,6 +795,11 @@ export type PropertyUncheckedCreateWithoutTenantsInput = {
   accountId: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -694,6 +829,11 @@ export type PropertyUpdateWithoutTenantsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -709,6 +849,11 @@ export type PropertyUncheckedUpdateWithoutTenantsInput = {
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -722,6 +867,11 @@ export type PropertyCreateWithoutTransactionsInput = {
   id?: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -737,6 +887,11 @@ export type PropertyUncheckedCreateWithoutTransactionsInput = {
   accountId: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -766,6 +921,11 @@ export type PropertyUpdateWithoutTransactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -781,6 +941,11 @@ export type PropertyUncheckedUpdateWithoutTransactionsInput = {
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -794,6 +959,11 @@ export type PropertyCreateManyAccountInput = {
   id?: string
   nickname: string
   address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
   purchasePrice?: number | null
   purchaseDate?: Date | string | null
   notes?: string | null
@@ -806,6 +976,11 @@ export type PropertyUpdateWithoutAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -820,6 +995,11 @@ export type PropertyUncheckedUpdateWithoutAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -834,6 +1014,11 @@ export type PropertyUncheckedUpdateManyWithoutAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nickname?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -887,6 +1072,11 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   accountId?: boolean
   nickname?: boolean
   address?: boolean
+  street?: boolean
+  unit?: boolean
+  city?: boolean
+  state?: boolean
+  zip?: boolean
   purchasePrice?: boolean
   purchaseDate?: boolean
   notes?: boolean
@@ -904,6 +1094,11 @@ export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   accountId?: boolean
   nickname?: boolean
   address?: boolean
+  street?: boolean
+  unit?: boolean
+  city?: boolean
+  state?: boolean
+  zip?: boolean
   purchasePrice?: boolean
   purchaseDate?: boolean
   notes?: boolean
@@ -918,6 +1113,11 @@ export type PropertySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   accountId?: boolean
   nickname?: boolean
   address?: boolean
+  street?: boolean
+  unit?: boolean
+  city?: boolean
+  state?: boolean
+  zip?: boolean
   purchasePrice?: boolean
   purchaseDate?: boolean
   notes?: boolean
@@ -932,6 +1132,11 @@ export type PropertySelectScalar = {
   accountId?: boolean
   nickname?: boolean
   address?: boolean
+  street?: boolean
+  unit?: boolean
+  city?: boolean
+  state?: boolean
+  zip?: boolean
   purchasePrice?: boolean
   purchaseDate?: boolean
   notes?: boolean
@@ -940,7 +1145,7 @@ export type PropertySelectScalar = {
   updatedAt?: boolean
 }
 
-export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "nickname" | "address" | "purchasePrice" | "purchaseDate" | "notes" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
+export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "nickname" | "address" | "street" | "unit" | "city" | "state" | "zip" | "purchasePrice" | "purchaseDate" | "notes" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
 export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   transactions?: boolean | Prisma.Property$transactionsArgs<ExtArgs>
@@ -966,6 +1171,11 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     accountId: string
     nickname: string
     address: string
+    street: string | null
+    unit: string | null
+    city: string | null
+    state: string | null
+    zip: string | null
     purchasePrice: number | null
     purchaseDate: Date | null
     notes: string | null
@@ -1402,6 +1612,11 @@ export interface PropertyFieldRefs {
   readonly accountId: Prisma.FieldRef<"Property", 'String'>
   readonly nickname: Prisma.FieldRef<"Property", 'String'>
   readonly address: Prisma.FieldRef<"Property", 'String'>
+  readonly street: Prisma.FieldRef<"Property", 'String'>
+  readonly unit: Prisma.FieldRef<"Property", 'String'>
+  readonly city: Prisma.FieldRef<"Property", 'String'>
+  readonly state: Prisma.FieldRef<"Property", 'String'>
+  readonly zip: Prisma.FieldRef<"Property", 'String'>
   readonly purchasePrice: Prisma.FieldRef<"Property", 'Float'>
   readonly purchaseDate: Prisma.FieldRef<"Property", 'DateTime'>
   readonly notes: Prisma.FieldRef<"Property", 'String'>

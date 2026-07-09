@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { jsonResponse, errorResponse, getAccount } from "@/lib/api-helpers";
 import { createPropertySchema } from "@/lib/validators";
+import { composeAddress } from "@/lib/property";
 
 // GET /api/properties — list all properties for the account
 export async function GET() {
@@ -28,11 +29,20 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return errorResponse(parsed.error.message);
 
     const data = parsed.data;
+    const composed = composeAddress(data);
+    const address = composed || (data.address ?? "").trim();
+    // No nickname field anymore — derive a stable label from the address.
+    const nickname = (data.street ?? "").trim() || address || "Property";
     const property = await prisma.property.create({
       data: {
         accountId: account.id,
-        nickname: data.nickname,
-        address: data.address,
+        nickname,
+        address,
+        street: data.street ?? null,
+        unit: data.unit ?? null,
+        city: data.city ?? null,
+        state: data.state ?? null,
+        zip: data.zip ?? null,
         purchasePrice: data.purchasePrice ?? null,
         purchaseDate: data.purchaseDate ?? null,
         notes: data.notes ?? null,

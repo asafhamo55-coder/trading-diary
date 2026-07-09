@@ -1,6 +1,6 @@
 import { getProperties, getPropertyYears } from "@/lib/property-data";
 import { parseYear, resolveSelectedYear } from "@/lib/year";
-import { summarizeYear } from "@/lib/property";
+import { summarizeYear, propertyTitle } from "@/lib/property";
 import PropertiesClient from "@/components/properties/PropertiesClient";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export default async function PropertiesPage({
     const summary = summarizeYear(p.transactions, year);
     return {
       id: p.id,
-      nickname: p.nickname,
+      title: propertyTitle(p),
       address: p.address,
       archived: p.archivedAt !== null,
       txCount: p.transactions.filter((t) => t.year === year).length,

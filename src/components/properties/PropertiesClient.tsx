@@ -18,7 +18,7 @@ import YearPicker from "@/components/layout/YearPicker";
 
 interface Row {
   id: string;
-  nickname: string;
+  title: string;
   address: string;
   archived: boolean;
   txCount: number;
@@ -41,8 +41,11 @@ export default function PropertiesClient({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    nickname: "",
-    address: "",
+    street: "",
+    unit: "",
+    city: "",
+    state: "",
+    zip: "",
     purchasePrice: "",
     purchaseDate: "",
   });
@@ -80,8 +83,11 @@ export default function PropertiesClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nickname: form.nickname,
-          address: form.address,
+          street: form.street,
+          unit: form.unit || null,
+          city: form.city || null,
+          state: form.state || null,
+          zip: form.zip || null,
           purchasePrice: form.purchasePrice ? Number(form.purchasePrice) : null,
           purchaseDate: form.purchaseDate || null,
         }),
@@ -90,7 +96,15 @@ export default function PropertiesClient({
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Failed to add property");
       }
-      setForm({ nickname: "", address: "", purchasePrice: "", purchaseDate: "" });
+      setForm({
+        street: "",
+        unit: "",
+        city: "",
+        state: "",
+        zip: "",
+        purchasePrice: "",
+        purchaseDate: "",
+      });
       setAdding(false);
       router.refresh();
     } catch (err) {
@@ -146,44 +160,81 @@ export default function PropertiesClient({
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Name">
-              <input
-                required
-                value={form.nickname}
-                onChange={(e) => setForm({ ...form, nickname: e.target.value })}
-                placeholder="e.g. Maple St Duplex"
-                className={inputCls}
-              />
-            </Field>
-            <Field label="Address">
-              <input
-                required
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-                placeholder="123 Maple St, City, ST"
-                className={inputCls}
-              />
-            </Field>
-            <Field label="Purchase price (optional)">
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.purchasePrice}
-                onChange={(e) => setForm({ ...form, purchasePrice: e.target.value })}
-                placeholder="450000"
-                className={inputCls}
-              />
-            </Field>
-            <Field label="Purchase date (optional)">
-              <input
-                type="date"
-                value={form.purchaseDate}
-                onChange={(e) => setForm({ ...form, purchaseDate: e.target.value })}
-                className={inputCls}
-              />
-            </Field>
+          <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
+            <div className="sm:col-span-4">
+              <Field label="Street & number">
+                <input
+                  required
+                  value={form.street}
+                  onChange={(e) => setForm({ ...form, street: e.target.value })}
+                  placeholder="123 Maple St"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label="Unit # (optional)">
+                <input
+                  value={form.unit}
+                  onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                  placeholder="4B"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-3">
+              <Field label="City">
+                <input
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  placeholder="Springfield"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-1">
+              <Field label="State">
+                <input
+                  value={form.state}
+                  onChange={(e) => setForm({ ...form, state: e.target.value })}
+                  placeholder="CA"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label="ZIP code">
+                <input
+                  value={form.zip}
+                  onChange={(e) => setForm({ ...form, zip: e.target.value })}
+                  placeholder="90210"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-3">
+              <Field label="Purchase price (optional)">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.purchasePrice}
+                  onChange={(e) => setForm({ ...form, purchasePrice: e.target.value })}
+                  placeholder="450000"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-3">
+              <Field label="Purchase date (optional)">
+                <input
+                  type="date"
+                  value={form.purchaseDate}
+                  onChange={(e) => setForm({ ...form, purchaseDate: e.target.value })}
+                  className={inputCls}
+                />
+              </Field>
+            </div>
           </div>
           {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
           <div className="flex justify-end">
@@ -296,7 +347,7 @@ function PropertyCard({
         <div className="mb-3 pr-9">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-[var(--foreground)] truncate">
-              {r.nickname}
+              {r.title}
             </h3>
             {r.archived && (
               <span className="text-[10px] font-medium uppercase tracking-wider rounded px-1.5 py-0.5 bg-[var(--muted)] text-[var(--muted-foreground)]">

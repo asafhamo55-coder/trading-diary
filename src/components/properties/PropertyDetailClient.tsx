@@ -13,6 +13,8 @@ import {
   Archive,
   ArchiveRestore,
   MoreVertical,
+  Pencil,
+  Home,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import YearPicker from "@/components/layout/YearPicker";
@@ -29,8 +31,13 @@ import {
 
 interface PropertyInfo {
   id: string;
-  nickname: string;
+  title: string;
   address: string;
+  street: string | null;
+  unit: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
   purchasePrice: number | null;
   purchaseDate: string | null;
   notes: string | null;
@@ -62,6 +69,65 @@ export default function PropertyDetailClient({
   const [archiving, setArchiving] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const isArchived = property.archivedAt !== null;
+
+  // Editable property details (address parts + purchase info).
+  const [editingDetails, setEditingDetails] = useState(false);
+  const [savingDetails, setSavingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
+  const [details, setDetails] = useState({
+    street: property.street ?? "",
+    unit: property.unit ?? "",
+    city: property.city ?? "",
+    state: property.state ?? "",
+    zip: property.zip ?? "",
+    purchasePrice: property.purchasePrice != null ? String(property.purchasePrice) : "",
+    purchaseDate: property.purchaseDate ?? "",
+  });
+
+  function cancelEditDetails() {
+    setDetails({
+      street: property.street ?? "",
+      unit: property.unit ?? "",
+      city: property.city ?? "",
+      state: property.state ?? "",
+      zip: property.zip ?? "",
+      purchasePrice: property.purchasePrice != null ? String(property.purchasePrice) : "",
+      purchaseDate: property.purchaseDate ?? "",
+    });
+    setDetailsError(null);
+    setEditingDetails(false);
+  }
+
+  async function handleSaveDetails(e: React.FormEvent) {
+    e.preventDefault();
+    setDetailsError(null);
+    setSavingDetails(true);
+    try {
+      const res = await fetch(`/api/properties/${property.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          street: details.street,
+          unit: details.unit || null,
+          city: details.city || null,
+          state: details.state || null,
+          zip: details.zip || null,
+          purchasePrice: details.purchasePrice ? Number(details.purchasePrice) : null,
+          purchaseDate: details.purchaseDate || null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Failed to save details");
+      }
+      setEditingDetails(false);
+      router.refresh();
+    } catch (err) {
+      setDetailsError(err instanceof Error ? err.message : "Failed to save details");
+    } finally {
+      setSavingDetails(false);
+    }
+  }
 
   const [form, setForm] = useState({
     date: "",
@@ -162,7 +228,7 @@ export default function PropertyDetailClient({
             All properties
           </Link>
           <h1 className="text-2xl font-bold text-[var(--foreground)] truncate">
-            {property.nickname}
+            {property.title}
           </h1>
           <p className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] mt-0.5">
             <MapPin className="w-3.5 h-3.5 shrink-0" />
@@ -228,7 +294,7 @@ export default function PropertyDetailClient({
       {confirmDelete && (
         <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl border border-[#FF4D6A]/40 bg-[#FF4D6A]/10 px-4 py-3">
           <span className="text-sm text-[var(--foreground)]">
-            Delete <span className="font-semibold">{property.nickname}</span> and all its entries & tenants? This can&apos;t be undone.
+            Delete <span className="font-semibold">{property.title}</span> and all its entries & tenants? This can&apos;t be undone.
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -265,6 +331,143 @@ export default function PropertyDetailClient({
           </button>
         </div>
       )}
+
+      {/* Property details — structured address + purchase info */}
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Home className="w-4 h-4 text-[#FFB547]" />
+            <h3 className="text-sm font-semibold text-[var(--foreground)]">
+              Property details
+            </h3>
+          </div>
+          {!editingDetails && (
+            <button
+              onClick={() => setEditingDetails(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
+            </button>
+          )}
+        </div>
+
+        {editingDetails ? (
+          <form onSubmit={handleSaveDetails} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
+              <div className="sm:col-span-4">
+                <Field label="Street & number">
+                  <input
+                    required
+                    value={details.street}
+                    onChange={(e) => setDetails({ ...details, street: e.target.value })}
+                    placeholder="123 Maple St"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-2">
+                <Field label="Unit #">
+                  <input
+                    value={details.unit}
+                    onChange={(e) => setDetails({ ...details, unit: e.target.value })}
+                    placeholder="4B"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-3">
+                <Field label="City">
+                  <input
+                    value={details.city}
+                    onChange={(e) => setDetails({ ...details, city: e.target.value })}
+                    placeholder="Springfield"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-1">
+                <Field label="State">
+                  <input
+                    value={details.state}
+                    onChange={(e) => setDetails({ ...details, state: e.target.value })}
+                    placeholder="CA"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-2">
+                <Field label="ZIP code">
+                  <input
+                    value={details.zip}
+                    onChange={(e) => setDetails({ ...details, zip: e.target.value })}
+                    placeholder="90210"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-3">
+                <Field label="Purchase price">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={details.purchasePrice}
+                    onChange={(e) => setDetails({ ...details, purchasePrice: e.target.value })}
+                    placeholder="450000"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-3">
+                <Field label="Purchase date">
+                  <input
+                    type="date"
+                    value={details.purchaseDate}
+                    onChange={(e) => setDetails({ ...details, purchaseDate: e.target.value })}
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+            </div>
+            {detailsError && <p className="text-sm text-[#FF4D6A]">{detailsError}</p>}
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelEditDetails}
+                className="inline-flex items-center rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingDetails}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#FFB547] px-4 py-2 text-sm font-medium text-[#0C0F14] hover:bg-[#FFB547]/90 transition-colors disabled:opacity-60"
+              >
+                {savingDetails && <Loader2 className="w-4 h-4 animate-spin" />}
+                Save details
+              </button>
+            </div>
+          </form>
+        ) : (
+          <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+            <DetailItem label="Street & number" value={property.street} />
+            <DetailItem label="Unit #" value={property.unit} />
+            <DetailItem label="City" value={property.city} />
+            <DetailItem label="State" value={property.state} />
+            <DetailItem label="ZIP code" value={property.zip} />
+            <DetailItem
+              label="Purchase price"
+              value={
+                property.purchasePrice != null
+                  ? formatCurrency(property.purchasePrice)
+                  : null
+              }
+            />
+            <DetailItem label="Purchase date" value={property.purchaseDate} />
+          </dl>
+        )}
+      </div>
 
       {/* Tenants */}
       <TenantsSection
@@ -477,6 +680,22 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       </span>
       {children}
     </label>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div>
+      <dt className="text-xs font-medium text-[var(--muted-foreground)]">{label}</dt>
+      <dd
+        className={cn(
+          "text-sm mt-0.5",
+          value ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]"
+        )}
+      >
+        {value || "—"}
+      </dd>
+    </div>
   );
 }
 

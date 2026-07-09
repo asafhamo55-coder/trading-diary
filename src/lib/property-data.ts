@@ -65,6 +65,11 @@ function serializeProperty(p: {
   id: string;
   nickname: string;
   address: string;
+  street: string | null;
+  unit: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
   purchasePrice: number | null;
   purchaseDate: Date | null;
   notes: string | null;
@@ -74,6 +79,11 @@ function serializeProperty(p: {
     id: p.id,
     nickname: p.nickname,
     address: p.address,
+    street: p.street,
+    unit: p.unit,
+    city: p.city,
+    state: p.state,
+    zip: p.zip,
     purchasePrice: p.purchasePrice,
     purchaseDate: p.purchaseDate ? toDateStr(p.purchaseDate) : null,
     notes: p.notes,

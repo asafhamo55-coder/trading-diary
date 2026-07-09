@@ -33,6 +33,12 @@ export async function ensurePropertySchema(): Promise<void> {
   await prisma.$executeRawUnsafe(
     `ALTER TABLE "Property" ADD COLUMN IF NOT EXISTS "archivedAt" TIMESTAMP(3)`
   );
+  // Structured address parts (added after the original single `address` field).
+  for (const col of ["street", "unit", "city", "state", "zip"]) {
+    await prisma.$executeRawUnsafe(
+      `ALTER TABLE "Property" ADD COLUMN IF NOT EXISTS "${col}" TEXT`
+    );
+  }
 
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "PropertyTransaction" (

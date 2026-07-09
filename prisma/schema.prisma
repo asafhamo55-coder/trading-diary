@@ -35,7 +35,12 @@ model Property {
   account       Account  @relation(fields: [accountId], references: [id])
 
   nickname      String
-  address       String
+  address       String     // full one-line address (composed from the parts below; also the import idempotency key)
+  street        String?    // street number + name, e.g. "123 Maple St"
+  unit          String?    // apartment / unit #, e.g. "4B"
+  city          String?
+  state         String?    // state / province, e.g. "CA"
+  zip           String?    // postal / ZIP code
   purchasePrice Float?
   purchaseDate  DateTime?
   notes         String?

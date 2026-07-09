@@ -89,9 +89,15 @@ export const bulkImportSchema = z.object({
 
 // ── Hamo Properties ────────────────────────────────────────────────
 
-export const createPropertySchema = z.object({
-  nickname: z.string().min(1, "Name is required").max(80),
-  address: z.string().min(1, "Address is required").max(200),
+const propertyBaseSchema = z.object({
+  // Structured address parts. The single-line `address` is composed from these
+  // server-side; it may also be sent directly (e.g. by the importer).
+  street: z.string().max(200).optional().nullable(),
+  unit: z.string().max(40).optional().nullable(),
+  city: z.string().max(120).optional().nullable(),
+  state: z.string().max(60).optional().nullable(),
+  zip: z.string().max(20).optional().nullable(),
+  address: z.string().max(200).optional().nullable(),
   purchasePrice: z.number().nonnegative().optional().nullable(),
   purchaseDate: z
     .string()
@@ -101,7 +107,12 @@ export const createPropertySchema = z.object({
   notes: z.string().max(1000).optional().nullable(),
 });
 
-export const updatePropertySchema = createPropertySchema
+export const createPropertySchema = propertyBaseSchema.refine(
+  (d) => Boolean((d.street ?? "").trim() || (d.city ?? "").trim() || (d.address ?? "").trim()),
+  { message: "Enter at least a street or city", path: ["street"] }
+);
+
+export const updatePropertySchema = propertyBaseSchema
   .partial()
   .extend({ archived: z.boolean().optional() });
 

@@ -62,10 +62,50 @@ export interface PropertyDTO {
   id: string;
   nickname: string;
   address: string;
+  street: string | null;
+  unit: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
   purchasePrice: number | null;
   purchaseDate: string | null;
   notes: string | null;
   archivedAt: string | null;
+}
+
+/** Structured address parts. */
+export interface AddressParts {
+  street?: string | null;
+  unit?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+}
+
+/** Compose a single-line address from its parts, skipping any that are blank. */
+export function composeAddress(p: AddressParts): string {
+  const s = (v?: string | null) => (v ?? "").trim();
+  const line1 = [s(p.street), s(p.unit) ? `#${s(p.unit)}` : ""]
+    .filter(Boolean)
+    .join(" ");
+  const cityState = [s(p.city), [s(p.state), s(p.zip)].filter(Boolean).join(" ")]
+    .filter(Boolean)
+    .join(", ");
+  return [line1, cityState].filter(Boolean).join(", ");
+}
+
+/** Display title for a property now that there's no nickname: street, else the full address. */
+export function propertyTitle(p: {
+  street?: string | null;
+  address?: string | null;
+  nickname?: string | null;
+}): string {
+  return (
+    (p.street ?? "").trim() ||
+    (p.address ?? "").trim() ||
+    (p.nickname ?? "").trim() ||
+    "Property"
+  );
 }
 
 export interface TenantDTO {

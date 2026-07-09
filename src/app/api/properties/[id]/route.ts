@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { jsonResponse, errorResponse, getAccount } from "@/lib/api-helpers";
 import { updatePropertySchema } from "@/lib/validators";
+import { composeAddress } from "@/lib/property";
 
 async function ownedProperty(id: string) {
   const account = await getAccount();
@@ -43,11 +44,33 @@ export async function PATCH(
     if (!parsed.success) return errorResponse(parsed.error.message);
     const data = parsed.data;
 
+    // If any address part changed, recompose the single-line address + label
+    // from the merged (existing + incoming) parts.
+    const partKeys = ["street", "unit", "city", "state", "zip", "address"] as const;
+    const addressTouched = partKeys.some((k) => data[k] !== undefined);
+    const pick = (k: (typeof partKeys)[number]) =>
+      data[k] !== undefined ? data[k] : (existing as Record<string, unknown>)[k];
+    const merged = {
+      street: pick("street") as string | null,
+      unit: pick("unit") as string | null,
+      city: pick("city") as string | null,
+      state: pick("state") as string | null,
+      zip: pick("zip") as string | null,
+    };
+    const composed = composeAddress(merged);
+    const address =
+      (data.address ?? "").trim() ? (data.address as string).trim() : composed || existing.address;
+    const nickname = (merged.street ?? "").trim() || address || existing.nickname;
+
     const property = await prisma.property.update({
       where: { id },
       data: {
-        ...(data.nickname !== undefined ? { nickname: data.nickname } : {}),
-        ...(data.address !== undefined ? { address: data.address } : {}),
+        ...(data.street !== undefined ? { street: data.street } : {}),
+        ...(data.unit !== undefined ? { unit: data.unit } : {}),
+        ...(data.city !== undefined ? { city: data.city } : {}),
+        ...(data.state !== undefined ? { state: data.state } : {}),
+        ...(data.zip !== undefined ? { zip: data.zip } : {}),
+        ...(addressTouched ? { address, nickname } : {}),
         ...(data.purchasePrice !== undefined ? { purchasePrice: data.purchasePrice } : {}),
         ...(data.purchaseDate !== undefined ? { purchaseDate: data.purchaseDate } : {}),
         ...(data.notes !== undefined ? { notes: data.notes } : {}),

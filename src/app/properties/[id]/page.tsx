@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getPropertyById } from "@/lib/property-data";
 import { parseYear, resolveSelectedYear } from "@/lib/year";
-import { summarizeYear } from "@/lib/property";
+import { summarizeYear, propertyTitle } from "@/lib/property";
 import PropertyDetailClient from "@/components/properties/PropertyDetailClient";
 
 export const dynamic = "force-dynamic";
@@ -33,8 +33,13 @@ export default async function PropertyDetailPage({
     <PropertyDetailClient
       property={{
         id: property.id,
-        nickname: property.nickname,
+        title: propertyTitle(property),
         address: property.address,
+        street: property.street,
+        unit: property.unit,
+        city: property.city,
+        state: property.state,
+        zip: property.zip,
         purchasePrice: property.purchasePrice,
         purchaseDate: property.purchaseDate,
         notes: property.notes,
