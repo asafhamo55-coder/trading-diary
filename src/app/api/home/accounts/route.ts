@@ -42,6 +42,9 @@ export async function POST(req: NextRequest) {
     return jsonResponse(created, 201);
   } catch (error) {
     console.error("Create home account error:", error);
-    return errorResponse("Failed to create account", 500);
+    return errorResponse(
+      `Failed to create account: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500
+    );
   }
 }

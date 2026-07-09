@@ -125,11 +125,13 @@ export async function ensureHomeSchema(): Promise<void> {
   );
 
   // Foreign keys (guarded — ADD CONSTRAINT has no IF NOT EXISTS).
+  // The statement MUST end with a semicolon: it runs inside a PL/pgSQL DO
+  // block, where every statement is semicolon-terminated.
   const fk = async (name: string, sql: string) => {
     await prisma.$executeRawUnsafe(`
       DO $$ BEGIN
         IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '${name}') THEN
-          ${sql}
+          ${sql};
         END IF;
       END $$
     `);
