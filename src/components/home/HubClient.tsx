@@ -2,19 +2,42 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { ArrowUpRight, TrendingUp, Lock, BarChart3 } from "lucide-react";
+import { ArrowUpRight, TrendingUp, Lock, BarChart3, CalendarDays } from "lucide-react";
 import EChart from "@/components/charts/EChart";
 import type { EChartsCoreOption } from "echarts/core";
 import { cn, formatCurrency } from "@/lib/utils";
 import Logo from "@/components/layout/Logo";
 import YearPicker from "@/components/layout/YearPicker";
 
+interface RevExp {
+  revenue: number;
+  expense: number;
+}
+
 interface MonthlyRow {
   month: number;
   name: string;
-  trade: number;
-  properties: number;
-  home: number;
+  trade: RevExp;
+  properties: RevExp;
+  home: RevExp;
+}
+
+const MODULES: { key: "trade" | "properties" | "home"; label: string }[] = [
+  { key: "trade", label: "Trade" },
+  { key: "properties", label: "Properties" },
+  { key: "home", label: "Home" },
+];
+
+function net(r: RevExp): number {
+  return r.revenue - r.expense;
+}
+
+// Compact currency for the dense monthly grid: no cents, sign-prefixed.
+function fmtCompact(value: number): string {
+  const rounded = Math.round(value);
+  if (rounded === 0) return "—";
+  const sign = rounded > 0 ? "+" : "−";
+  return `${sign}$${Math.abs(rounded).toLocaleString("en-US")}`;
 }
 
 interface SourceRow {
@@ -46,7 +69,7 @@ export default function HubClient({
   const grandTotal = sources.reduce((sum, s) => sum + s.total, 0);
 
   const netByMonth = useMemo(
-    () => monthly.map((m) => m.trade + m.properties + m.home),
+    () => monthly.map((m) => net(m.trade) + net(m.properties) + net(m.home)),
     [monthly]
   );
 
@@ -66,7 +89,7 @@ export default function HubClient({
       name: s.name,
       type: "bar" as const,
       stack: "net",
-      data: monthly.map((m) => m[s.key]),
+      data: monthly.map((m) => net(m[s.key])),
       itemStyle: { color: SOURCE_COLORS[s.key], borderRadius: [0, 0, 0, 0] },
       barMaxWidth: 28,
       animation: false,
@@ -243,6 +266,94 @@ export default function HubClient({
             <div key={s.key}>{card}</div>
           );
         })}
+      </div>
+
+      {/* Annual breakdown — one square per month, revenue & expense per module */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <CalendarDays className="w-4 h-4 text-[#3B82F6]" />
+          <h3 className="text-sm font-semibold text-[var(--foreground)]">
+            Monthly Breakdown · {year}
+          </h3>
+          <span className="text-xs text-[var(--muted-foreground)]">
+            · revenue & expense per module
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {monthly.map((m) => {
+            const monthNet = net(m.trade) + net(m.properties) + net(m.home);
+            const active =
+              m.trade.revenue !== 0 ||
+              m.trade.expense !== 0 ||
+              m.properties.revenue !== 0 ||
+              m.properties.expense !== 0 ||
+              m.home.revenue !== 0 ||
+              m.home.expense !== 0;
+            return (
+              <div
+                key={m.month}
+                className={cn(
+                  "bg-[var(--card)] border border-[var(--border)] rounded-xl p-4",
+                  !active && "opacity-60"
+                )}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-[var(--foreground)]">
+                    {m.name}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-sm font-bold font-data",
+                      monthNet > 0
+                        ? "text-[#00D68F]"
+                        : monthNet < 0
+                          ? "text-[#FF4D6A]"
+                          : "text-[var(--muted-foreground)]"
+                    )}
+                  >
+                    {fmtCompact(monthNet)}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {MODULES.map((mod) => {
+                    const rx = m[mod.key];
+                    return (
+                      <div
+                        key={mod.key}
+                        className="flex items-center justify-between gap-2 text-xs"
+                      >
+                        <span className="flex items-center gap-1.5 min-w-0 text-[var(--muted-foreground)]">
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ background: SOURCE_COLORS[mod.key] }}
+                          />
+                          <span className="truncate">{mod.label}</span>
+                        </span>
+                        <span className="flex items-center gap-2 font-data shrink-0 tabular-nums">
+                          <span className="text-[#00D68F]">
+                            {rx.revenue ? `$${Math.round(rx.revenue).toLocaleString("en-US")}` : "—"}
+                          </span>
+                          <span className="text-[#FF4D6A]">
+                            {rx.expense ? `−$${Math.round(rx.expense).toLocaleString("en-US")}` : "—"}
+                          </span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-4 mt-3 text-[11px] text-[var(--muted-foreground)]">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#00D68F]" /> Revenue
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#FF4D6A]" /> Expense
+          </span>
+          <span>· net shown top-right of each month</span>
+        </div>
       </div>
 
       {/* Monthly equity chart */}

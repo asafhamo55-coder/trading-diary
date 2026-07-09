@@ -190,6 +190,30 @@ export async function getPropertyMonthlyNet(year: number): Promise<number[]> {
   }
 }
 
+/** Income (revenue) and expenses per calendar month for the year, across all properties. */
+export async function getPropertyMonthlyRevExp(
+  year: number
+): Promise<{ revenue: number; expense: number }[]> {
+  const rows = Array.from({ length: 12 }, () => ({ revenue: 0, expense: 0 }));
+  try {
+    const accountId = await firstAccountId();
+    if (!accountId) return rows;
+    const txs = await prisma.propertyTransaction.findMany({
+      where: { year, property: { accountId } },
+      select: { month: true, type: true, amount: true },
+    });
+    for (const t of txs) {
+      const idx = t.month - 1;
+      if (idx < 0 || idx > 11) continue;
+      if (t.type === "INCOME") rows[idx].revenue += t.amount;
+      else rows[idx].expense += t.amount;
+    }
+    return rows;
+  } catch {
+    return rows;
+  }
+}
+
 export async function getPropertyYearNet(year: number): Promise<number> {
   const monthly = await getPropertyMonthlyNet(year);
   return monthly.reduce((sum, n) => sum + n, 0);

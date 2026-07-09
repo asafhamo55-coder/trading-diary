@@ -1,5 +1,5 @@
-import { getMonthlyPnL } from "@/lib/data";
-import { getPropertyMonthlyNet } from "@/lib/property-data";
+import { getMonthlyTradeRevExp } from "@/lib/data";
+import { getPropertyMonthlyRevExp } from "@/lib/property-data";
 import { prisma } from "@/lib/db";
 import { getAvailableYears, parseYear, resolveSelectedYear } from "@/lib/year";
 import HubClient from "@/components/home/HubClient";
@@ -19,22 +19,25 @@ export default async function HomeEquityPage({
   const year = resolveSelectedYear(parseYear(sp.year), availableYears);
 
   const [tradeMonthly, propertyMonthly] = await Promise.all([
-    getMonthlyPnL(year),
-    getPropertyMonthlyNet(year),
+    getMonthlyTradeRevExp(year),
+    getPropertyMonthlyRevExp(year),
   ]);
 
-  // Per-source monthly net. Trade & Properties are live; Home comes online as
-  // that sub-app is built, and simply adds another series here.
+  // Per-source monthly revenue & expense. Trade & Properties are live; Home
+  // comes online as that sub-app is built, and simply fills in its figures.
+  const zero = { revenue: 0, expense: 0 };
   const monthly = tradeMonthly.map((m, i) => ({
     month: m.month,
     name: m.name,
-    trade: m.pnl,
-    properties: propertyMonthly[i] ?? 0,
-    home: 0,
+    trade: { revenue: m.revenue, expense: m.expense },
+    properties: propertyMonthly[i] ?? zero,
+    home: zero,
   }));
 
-  const tradeTotal = tradeMonthly.reduce((sum, m) => sum + m.pnl, 0);
-  const propertyTotal = propertyMonthly.reduce((sum, n) => sum + n, 0);
+  const sumNet = (rows: { revenue: number; expense: number }[]) =>
+    rows.reduce((sum, r) => sum + r.revenue - r.expense, 0);
+  const tradeTotal = sumNet(tradeMonthly);
+  const propertyTotal = sumNet(propertyMonthly);
 
   const sources = [
     {

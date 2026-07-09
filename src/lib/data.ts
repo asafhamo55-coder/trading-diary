@@ -267,6 +267,55 @@ export async function getMonthlyPnL(year?: number | null) {
   }
 }
 
+// Revenue / expense split of realized trade P&L per calendar month.
+// Trades have no literal revenue or expense — P&L is a net figure — so we map
+// winning-trade profit to "revenue" and losing-trade loss (as a positive
+// magnitude) to "expense". revenue − expense equals the month's realized P&L.
+export async function getMonthlyTradeRevExp(
+  year?: number | null
+): Promise<{ month: number; name: string; revenue: number; expense: number }[]> {
+  const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const rows = MONTH_NAMES.map((name, i) => ({ month: i + 1, name, revenue: 0, expense: 0 }));
+  try {
+    const account = await prisma.account.findFirst();
+    if (!account) {
+      for (const m of getDemoMonthlyPnL()) {
+        if (m.pnl >= 0) rows[m.month - 1].revenue += m.pnl;
+        else rows[m.month - 1].expense += -m.pnl;
+      }
+      return rows;
+    }
+
+    const where: Record<string, unknown> = { accountId: account.id };
+    const dateFilter = tradeDateYearFilter(year ?? undefined);
+    if (dateFilter) where.tradeDate = dateFilter;
+    const trades = await prisma.trade.findMany({
+      where,
+      select: {
+        month: true,
+        totalPnL: true,
+        isCompleted: true,
+        totalShares: true,
+        sharesInProcess: true,
+      },
+    });
+    for (const t of trades) {
+      if (!hasRealizedPnL(t) || t.totalPnL === null) continue;
+      const idx = t.month - 1;
+      if (idx < 0 || idx > 11) continue;
+      if (t.totalPnL >= 0) rows[idx].revenue += t.totalPnL;
+      else rows[idx].expense += -t.totalPnL;
+    }
+    return rows;
+  } catch {
+    for (const m of getDemoMonthlyPnL()) {
+      if (m.pnl >= 0) rows[m.month - 1].revenue += m.pnl;
+      else rows[m.month - 1].expense += -m.pnl;
+    }
+    return rows;
+  }
+}
+
 export async function getRecentTrades(limit = 5, year?: number | null) {
   try {
     const account = await prisma.account.findFirst();
