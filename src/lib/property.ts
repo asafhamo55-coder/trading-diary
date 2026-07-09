@@ -65,6 +65,7 @@ export interface PropertyDTO {
   purchasePrice: number | null;
   purchaseDate: string | null;
   notes: string | null;
+  archivedAt: string | null;
 }
 
 export interface TenantDTO {

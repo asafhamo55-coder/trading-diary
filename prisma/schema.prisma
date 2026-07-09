@@ -39,6 +39,7 @@ model Property {
   purchasePrice Float?
   purchaseDate  DateTime?
   notes         String?
+  archivedAt    DateTime?  // null = active; set = archived (hidden from active list)
 
   transactions  PropertyTransaction[]
   tenants       Tenant[]

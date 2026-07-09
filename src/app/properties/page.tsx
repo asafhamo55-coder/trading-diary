@@ -26,6 +26,7 @@ export default async function PropertiesPage({
       id: p.id,
       nickname: p.nickname,
       address: p.address,
+      archived: p.archivedAt !== null,
       txCount: p.transactions.filter((t) => t.year === year).length,
       income: summary.income,
       expenses: summary.expenses,

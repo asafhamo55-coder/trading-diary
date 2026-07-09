@@ -11,6 +11,8 @@ import {
   FileText,
   MapPin,
   X,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import YearPicker from "@/components/layout/YearPicker";
@@ -32,6 +34,7 @@ interface PropertyInfo {
   purchasePrice: number | null;
   purchaseDate: string | null;
   notes: string | null;
+  archivedAt: string | null;
 }
 
 export default function PropertyDetailClient({
@@ -56,6 +59,8 @@ export default function PropertyDetailClient({
   const [error, setError] = useState<string | null>(null);
   const [deletingProperty, setDeletingProperty] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+  const isArchived = property.archivedAt !== null;
 
   const [form, setForm] = useState({
     date: "",
@@ -114,6 +119,20 @@ export default function PropertyDetailClient({
     }
   }
 
+  async function handleToggleArchive() {
+    setArchiving(true);
+    try {
+      const res = await fetch(`/api/properties/${property.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archived: !isArchived }),
+      });
+      if (res.ok) router.refresh();
+    } finally {
+      setArchiving(false);
+    }
+  }
+
   async function handleDeleteProperty() {
     setDeletingProperty(true);
     try {
@@ -151,6 +170,23 @@ export default function PropertyDetailClient({
         </div>
         <YearPicker years={availableYears} selected={year} />
       </div>
+
+      {/* Archived banner */}
+      {isArchived && (
+        <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl border border-[var(--border)] bg-[var(--muted)] px-4 py-3">
+          <span className="text-sm text-[var(--muted-foreground)]">
+            This property is <span className="font-medium text-[var(--foreground)]">archived</span> — hidden from the active list, but all records are preserved.
+          </span>
+          <button
+            onClick={handleToggleArchive}
+            disabled={archiving}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#FFB547] px-3 py-1.5 text-sm font-medium text-[#0C0F14] hover:bg-[#FFB547]/90 transition-colors disabled:opacity-60"
+          >
+            {archiving ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArchiveRestore className="w-4 h-4" />}
+            Restore
+          </button>
+        </div>
+      )}
 
       {/* Tenants */}
       <TenantsSection
@@ -349,7 +385,17 @@ export default function PropertyDetailClient({
       </div>
 
       {/* Danger zone */}
-      <div className="flex justify-end">
+      <div className="flex justify-end items-center gap-4">
+        {!isArchived && !confirmDelete && (
+          <button
+            onClick={handleToggleArchive}
+            disabled={archiving}
+            className="inline-flex items-center gap-2 text-sm text-[var(--muted-foreground)] hover:text-[#FFB547] transition-colors disabled:opacity-60"
+          >
+            {archiving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Archive className="w-4 h-4" />}
+            Archive property
+          </button>
+        )}
         {confirmDelete ? (
           <div className="flex items-center gap-2 text-sm">
             <span className="text-[var(--muted-foreground)]">Delete this property and all entries?</span>

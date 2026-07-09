@@ -101,7 +101,9 @@ export const createPropertySchema = z.object({
   notes: z.string().max(1000).optional().nullable(),
 });
 
-export const updatePropertySchema = createPropertySchema.partial();
+export const updatePropertySchema = createPropertySchema
+  .partial()
+  .extend({ archived: z.boolean().optional() });
 
 export const propertyTxTypeSchema = z.enum(["INCOME", "EXPENSE"]);
 

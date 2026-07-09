@@ -7,6 +7,22 @@ import type {
   TenantDTO,
 } from "./property";
 import { signedAmount } from "./property";
+import { ensurePropertySchema } from "./property-schema";
+
+// Run a Prisma read; if it fails because the schema isn't present yet (fresh
+// deploy, pre-migration), ensure the schema idempotently and retry once.
+async function withSchemaHeal<T>(run: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await run();
+  } catch {
+    try {
+      await ensurePropertySchema();
+      return await run();
+    } catch {
+      return fallback;
+    }
+  }
+}
 
 async function firstAccountId(): Promise<string | null> {
   try {
@@ -52,6 +68,7 @@ function serializeProperty(p: {
   purchasePrice: number | null;
   purchaseDate: Date | null;
   notes: string | null;
+  archivedAt: Date | null;
 }): PropertyDTO {
   return {
     id: p.id,
@@ -60,6 +77,7 @@ function serializeProperty(p: {
     purchasePrice: p.purchasePrice,
     purchaseDate: p.purchaseDate ? toDateStr(p.purchaseDate) : null,
     notes: p.notes,
+    archivedAt: p.archivedAt ? p.archivedAt.toISOString() : null,
   };
 }
 
@@ -118,7 +136,7 @@ async function tenantsByProperty(
 }
 
 export async function getProperties(): Promise<PropertyWithTx[]> {
-  try {
+  return withSchemaHeal(async () => {
     const accountId = await firstAccountId();
     if (!accountId) return [];
     const properties = await prisma.property.findMany({
@@ -132,14 +150,11 @@ export async function getProperties(): Promise<PropertyWithTx[]> {
       transactions: p.transactions.map(serializeTx),
       tenants: tenants.get(p.id) ?? [],
     }));
-  } catch {
-    // Table may not exist yet (pre-migration) — degrade to empty.
-    return [];
-  }
+  }, []);
 }
 
 export async function getPropertyById(id: string): Promise<PropertyWithTx | null> {
-  try {
+  return withSchemaHeal(async () => {
     const accountId = await firstAccountId();
     if (!accountId) return null;
     const p = await prisma.property.findFirst({
@@ -153,9 +168,7 @@ export async function getPropertyById(id: string): Promise<PropertyWithTx | null
       transactions: p.transactions.map(serializeTx),
       tenants: tenants.get(p.id) ?? [],
     };
-  } catch {
-    return null;
-  }
+  }, null);
 }
 
 /** Net (income − expenses) per calendar month for the given year, across all properties. */

@@ -103,6 +103,7 @@ export const PropertyScalarFieldEnum = {
   purchasePrice: 'purchasePrice',
   purchaseDate: 'purchaseDate',
   notes: 'notes',
+  archivedAt: 'archivedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

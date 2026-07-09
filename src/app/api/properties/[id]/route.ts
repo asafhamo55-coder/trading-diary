@@ -51,6 +51,9 @@ export async function PATCH(
         ...(data.purchasePrice !== undefined ? { purchasePrice: data.purchasePrice } : {}),
         ...(data.purchaseDate !== undefined ? { purchaseDate: data.purchaseDate } : {}),
         ...(data.notes !== undefined ? { notes: data.notes } : {}),
+        ...(data.archived !== undefined
+          ? { archivedAt: data.archived ? new Date() : null }
+          : {}),
       },
       include: { transactions: { orderBy: { date: "desc" } } },
     });

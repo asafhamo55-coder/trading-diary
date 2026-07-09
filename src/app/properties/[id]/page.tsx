@@ -38,6 +38,7 @@ export default async function PropertyDetailPage({
         purchasePrice: property.purchasePrice,
         purchaseDate: property.purchaseDate,
         notes: property.notes,
+        archivedAt: property.archivedAt,
       }}
       year={year}
       availableYears={availableYears}
