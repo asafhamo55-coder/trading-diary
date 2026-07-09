@@ -104,6 +104,94 @@ export default function AssetsClient({
     });
   }, [trades]);
 
+  const dailyPnL = useMemo(() => {
+    const realized = trades.filter((t) => {
+      if (t.isCompleted && t.totalPnL !== null) return true;
+      const total = t.totalShares ?? 0;
+      const open = t.sharesInProcess ?? 0;
+      return total > 0 && open < total && t.totalPnL !== null;
+    });
+    const byDay = new Map<string, number>();
+    for (const t of realized) {
+      const day = t.tradeDate.slice(0, 10);
+      byDay.set(day, (byDay.get(day) ?? 0) + (t.totalPnL ?? 0));
+    }
+    return Array.from(byDay.entries())
+      .map(([date, pnl]) => ({ date, pnl }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [trades]);
+
+  const dailyOption = useMemo<EChartsCoreOption>(() => {
+    return {
+      grid: { left: 56, right: 12, top: 32, bottom: 24, containLabel: false },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: "#0C0F14",
+        borderColor: "#2A3040",
+        borderWidth: 1,
+        textStyle: { color: "#E8ECF4", fontSize: 12 },
+        axisPointer: { type: "shadow", shadowStyle: { color: `${v.accent}10` } },
+        formatter: (params: unknown) => {
+          const arr = Array.isArray(params) ? params : [params];
+          const p = arr[0] as { name: string; value: number };
+          const val = Number(p.value) || 0;
+          return `<div style="color:#8892A6;font-size:11px;margin-bottom:4px">${p.name}</div>` +
+            `<div style="color:${val >= 0 ? "#00D68F" : "#FF4D6A"}"><b>${val >= 0 ? "+" : ""}${formatCurrency(val)}</b></div>`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: dailyPnL.map((d) => d.date),
+        axisLine: { lineStyle: { color: "#2A3040" } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: "#8892A6",
+          fontSize: 11,
+          hideOverlap: true,
+          formatter: (val: string) => val.slice(5),
+        },
+      },
+      yAxis: {
+        type: "value",
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { color: "#2A3040", type: "dashed" } },
+        axisLabel: {
+          color: "#8892A6",
+          fontSize: 11,
+          formatter: (val: number) =>
+            val === 0 ? "0" : `$${Math.round(val / 100) / 10}k`,
+        },
+      },
+      series: [
+        {
+          name: "P&L",
+          type: "bar",
+          data: dailyPnL.map((d) => ({
+            value: d.pnl,
+            itemStyle: {
+              color:
+                d.pnl > 0
+                  ? "rgba(0,214,143,0.75)"
+                  : d.pnl < 0
+                  ? "rgba(255,77,106,0.75)"
+                  : "#2A3040",
+              borderRadius: [4, 4, 0, 0],
+            },
+          })),
+          markLine: {
+            silent: true,
+            symbol: "none",
+            lineStyle: { color: "#2A3040", type: "solid" },
+            data: [{ yAxis: 0 }],
+            label: { show: false },
+          },
+          animation: false,
+        },
+      ],
+    };
+  }, [dailyPnL, v.accent]);
+
   const monthlyOption = useMemo<EChartsCoreOption>(() => {
     return {
       grid: { left: 56, right: 12, top: 32, bottom: 24, containLabel: false },
@@ -372,6 +460,27 @@ export default function AssetsClient({
               </div>
               <div className="h-56">
                 <EChart option={monthlyOption} />
+              </div>
+            </div>
+          )}
+
+          {/* Daily P&L Bar Chart (1-day resolution) */}
+          {dailyPnL.length > 0 && (
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3
+                  className="w-4 h-4"
+                  style={{ color: v.accent }}
+                />
+                <h3 className="text-sm font-semibold text-[var(--foreground)]">
+                  Daily P&L
+                </h3>
+                <span className="text-xs text-[var(--muted-foreground)]">
+                  · gain/loss per day
+                </span>
+              </div>
+              <div className="h-56">
+                <EChart option={dailyOption} />
               </div>
             </div>
           )}
