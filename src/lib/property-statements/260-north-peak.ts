@@ -9,8 +9,11 @@
 // Property & Units: 260 North Peak Drive (Single-family)
 //
 // Every "Date paid / Category / Sub-category / Payer-Payee / Money in / Money out"
-// line from the spreadsheet is reproduced below in source order. The March 10th
-// block of six identical mortgage payments is present exactly as in the source.
+// line from the spreadsheet is reproduced below in source order — EXCEPT the
+// March 10th block of six identical mortgage payments, which is a portal export
+// artifact (the source file duplicated one payment six times). March's real
+// mortgage payment is the Mar 1 entry, matching every other month's cadence, so
+// the six Mar 10 duplicates are omitted. One mortgage expense per month remains.
 
 import type { PropertyStatement } from "../property-import";
 
@@ -43,12 +46,6 @@ export const NORTH_PEAK_STATEMENT: PropertyStatement = {
     { date: "2026-02-15", rawCategory: "Maintenance", subCategory: "Pest Control", payee: "Einat Hamo", moneyIn: 0, moneyOut: 237.5 },
     { date: "2026-02-27", rawCategory: "Rent", subCategory: "–", payee: "Sarah Thorson", moneyIn: 5000, moneyOut: 0 },
     { date: "2026-03-01", rawCategory: "Mortgage and Loans", subCategory: "–", payee: "Einat Hamo", moneyIn: 0, moneyOut: 2735.06 },
-    { date: "2026-03-10", rawCategory: "Mortgage and Loans", subCategory: "–", payee: "Einat Hamo", moneyIn: 0, moneyOut: 2735.06 },
-    { date: "2026-03-10", rawCategory: "Mortgage and Loans", subCategory: "–", payee: "Einat Hamo", moneyIn: 0, moneyOut: 2735.06 },
-    { date: "2026-03-10", rawCategory: "Mortgage and Loans", subCategory: "–", payee: "Einat Hamo", moneyIn: 0, moneyOut: 2735.06 },
-    { date: "2026-03-10", rawCategory: "Mortgage and Loans", subCategory: "–", payee: "Einat Hamo", moneyIn: 0, moneyOut: 2735.06 },
-    { date: "2026-03-10", rawCategory: "Mortgage and Loans", subCategory: "–", payee: "Einat Hamo", moneyIn: 0, moneyOut: 2735.06 },
-    { date: "2026-03-10", rawCategory: "Mortgage and Loans", subCategory: "–", payee: "Einat Hamo", moneyIn: 0, moneyOut: 2735.06 },
     { date: "2026-03-10", rawCategory: "Tenant charges & fees", subCategory: "Electricity fee", payee: "Sarah Thorson", moneyIn: 142.79, moneyOut: 0 },
     { date: "2026-03-11", rawCategory: "Tenant charges & fees", subCategory: "Electricity fee", payee: "Sarah Thorson", moneyIn: 178.71, moneyOut: 0 },
     { date: "2026-03-14", rawCategory: "Tenant charges & fees", subCategory: "Electricity fee", payee: "Sarah Thorson", moneyIn: 178.71, moneyOut: 0 },
