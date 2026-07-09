@@ -87,6 +87,37 @@ export const bulkImportSchema = z.object({
   year: z.number().int().default(() => new Date().getFullYear()),
 });
 
+// ── Hamo Properties ────────────────────────────────────────────────
+
+export const createPropertySchema = z.object({
+  nickname: z.string().min(1, "Name is required").max(80),
+  address: z.string().min(1, "Address is required").max(200),
+  purchasePrice: z.number().nonnegative().optional().nullable(),
+  purchaseDate: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((s) => (s ? new Date(s) : null)),
+  notes: z.string().max(1000).optional().nullable(),
+});
+
+export const updatePropertySchema = createPropertySchema.partial();
+
+export const propertyTxTypeSchema = z.enum(["INCOME", "EXPENSE"]);
+
+export const createPropertyTransactionSchema = z.object({
+  date: z.string().min(1, "Date is required"),
+  type: propertyTxTypeSchema,
+  category: z.string().min(1, "Category is required"),
+  amount: z.number().positive("Amount must be positive"),
+  description: z.string().max(300).optional().nullable(),
+});
+
+export type CreatePropertyInput = z.infer<typeof createPropertySchema>;
+export type CreatePropertyTransactionInput = z.infer<
+  typeof createPropertyTransactionSchema
+>;
+
 export type CreateTradeInput = z.infer<typeof createTradeSchema>;
 export type UpdateTradeInput = z.infer<typeof updateTradeSchema>;
 export type MonthlyReviewInput = z.infer<typeof monthlyReviewSchema>;

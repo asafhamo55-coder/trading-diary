@@ -23,6 +23,53 @@ model Account {
   errorDefinitions  ErrorDefinition[]
   assetLeverages    AssetLeverage[]
   fundTransactions  FundTransaction[]
+  properties        Property[]
+}
+
+// ── Hamo Properties ────────────────────────────────────────────────
+// Minimal real-estate bookkeeping to support tax filing (Schedule E).
+
+model Property {
+  id            String   @id @default(cuid())
+  accountId     String
+  account       Account  @relation(fields: [accountId], references: [id])
+
+  nickname      String
+  address       String
+  purchasePrice Float?
+  purchaseDate  DateTime?
+  notes         String?
+
+  transactions  PropertyTransaction[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([accountId])
+}
+
+model PropertyTransaction {
+  id          String             @id @default(cuid())
+  propertyId  String
+  property    Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  date        DateTime
+  year        Int
+  month       Int
+  type        PropertyTxType
+  category    String
+  amount      Float              // always positive; sign implied by `type`
+  description String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([propertyId, date])
+  @@index([propertyId, year])
+}
+
+enum PropertyTxType {
+  INCOME
+  EXPENSE
 }
 
 model FundTransaction {

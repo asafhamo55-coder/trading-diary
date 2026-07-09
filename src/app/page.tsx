@@ -1,4 +1,5 @@
 import { getMonthlyPnL } from "@/lib/data";
+import { getPropertyMonthlyNet } from "@/lib/property-data";
 import { prisma } from "@/lib/db";
 import { getAvailableYears, parseYear, resolveSelectedYear } from "@/lib/year";
 import HubClient from "@/components/home/HubClient";
@@ -17,19 +18,23 @@ export default async function HomeEquityPage({
     : [new Date().getFullYear()];
   const year = resolveSelectedYear(parseYear(sp.year), availableYears);
 
-  const tradeMonthly = await getMonthlyPnL(year);
+  const [tradeMonthly, propertyMonthly] = await Promise.all([
+    getMonthlyPnL(year),
+    getPropertyMonthlyNet(year),
+  ]);
 
-  // Per-source monthly net. Trade is live today; Properties & Home come online
-  // as those sub-apps are built, and simply add more series here.
-  const monthly = tradeMonthly.map((m) => ({
+  // Per-source monthly net. Trade & Properties are live; Home comes online as
+  // that sub-app is built, and simply adds another series here.
+  const monthly = tradeMonthly.map((m, i) => ({
     month: m.month,
     name: m.name,
     trade: m.pnl,
-    properties: 0,
+    properties: propertyMonthly[i] ?? 0,
     home: 0,
   }));
 
   const tradeTotal = tradeMonthly.reduce((sum, m) => sum + m.pnl, 0);
+  const propertyTotal = propertyMonthly.reduce((sum, n) => sum + n, 0);
 
   const sources = [
     {
@@ -44,8 +49,8 @@ export default async function HomeEquityPage({
       key: "properties" as const,
       label: "Hamo Properties",
       href: "/properties",
-      total: 0,
-      ready: false,
+      total: propertyTotal,
+      ready: true,
       blurb: "Rental income, expenses & mortgage — tax-form ready.",
     },
     {

@@ -425,10 +425,6 @@ export type FundTransactionUncheckedUpdateManyWithoutAccountNestedInput = {
   deleteMany?: Prisma.FundTransactionScalarWhereInput | Prisma.FundTransactionScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type FundTransactionCreateWithoutAccountInput = {
   id?: string
   amount: number

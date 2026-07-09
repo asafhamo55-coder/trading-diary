@@ -9,6 +9,14 @@
 * 🟢 You can import this file directly.
 */
 
+export const PropertyTxType = {
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE'
+} as const
+
+export type PropertyTxType = (typeof PropertyTxType)[keyof typeof PropertyTxType]
+
+
 export const Direction = {
   LONG: 'LONG',
   SHORT: 'SHORT'

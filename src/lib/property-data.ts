@@ -1,0 +1,138 @@
+// Server-side data fetching for Hamo Properties.
+import { prisma } from "./db";
+import type { PropertyDTO, PropertyTransactionDTO, PropertyTxType } from "./property";
+import { signedAmount } from "./property";
+
+async function firstAccountId(): Promise<string | null> {
+  try {
+    const account = await prisma.account.findFirst();
+    return account?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function toDateStr(d: Date | string): string {
+  return d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10);
+}
+
+function serializeTx(t: {
+  id: string;
+  propertyId: string;
+  date: Date;
+  year: number;
+  month: number;
+  type: PropertyTxType;
+  category: string;
+  amount: number;
+  description: string | null;
+}): PropertyTransactionDTO {
+  return {
+    id: t.id,
+    propertyId: t.propertyId,
+    date: toDateStr(t.date),
+    year: t.year,
+    month: t.month,
+    type: t.type,
+    category: t.category,
+    amount: t.amount,
+    description: t.description,
+  };
+}
+
+function serializeProperty(p: {
+  id: string;
+  nickname: string;
+  address: string;
+  purchasePrice: number | null;
+  purchaseDate: Date | null;
+  notes: string | null;
+}): PropertyDTO {
+  return {
+    id: p.id,
+    nickname: p.nickname,
+    address: p.address,
+    purchasePrice: p.purchasePrice,
+    purchaseDate: p.purchaseDate ? toDateStr(p.purchaseDate) : null,
+    notes: p.notes,
+  };
+}
+
+export interface PropertyWithTx extends PropertyDTO {
+  transactions: PropertyTransactionDTO[];
+}
+
+export async function getProperties(): Promise<PropertyWithTx[]> {
+  try {
+    const accountId = await firstAccountId();
+    if (!accountId) return [];
+    const properties = await prisma.property.findMany({
+      where: { accountId },
+      include: { transactions: { orderBy: { date: "desc" } } },
+      orderBy: { createdAt: "asc" },
+    });
+    return properties.map((p) => ({
+      ...serializeProperty(p),
+      transactions: p.transactions.map(serializeTx),
+    }));
+  } catch {
+    // Table may not exist yet (pre-migration) — degrade to empty.
+    return [];
+  }
+}
+
+export async function getPropertyById(id: string): Promise<PropertyWithTx | null> {
+  try {
+    const accountId = await firstAccountId();
+    if (!accountId) return null;
+    const p = await prisma.property.findFirst({
+      where: { id, accountId },
+      include: { transactions: { orderBy: { date: "desc" } } },
+    });
+    if (!p) return null;
+    return { ...serializeProperty(p), transactions: p.transactions.map(serializeTx) };
+  } catch {
+    return null;
+  }
+}
+
+/** Net (income − expenses) per calendar month for the given year, across all properties. */
+export async function getPropertyMonthlyNet(year: number): Promise<number[]> {
+  const net = Array.from({ length: 12 }, () => 0);
+  try {
+    const accountId = await firstAccountId();
+    if (!accountId) return net;
+    const txs = await prisma.propertyTransaction.findMany({
+      where: { year, property: { accountId } },
+      select: { month: true, type: true, amount: true },
+    });
+    for (const t of txs) {
+      net[t.month - 1] += signedAmount({ type: t.type, amount: t.amount });
+    }
+    return net;
+  } catch {
+    return net;
+  }
+}
+
+export async function getPropertyYearNet(year: number): Promise<number> {
+  const monthly = await getPropertyMonthlyNet(year);
+  return monthly.reduce((sum, n) => sum + n, 0);
+}
+
+/** Distinct years that have property transactions, for the year picker. */
+export async function getPropertyYears(): Promise<number[]> {
+  try {
+    const accountId = await firstAccountId();
+    if (!accountId) return [];
+    const rows = await prisma.propertyTransaction.findMany({
+      where: { property: { accountId } },
+      select: { year: true },
+      distinct: ["year"],
+      orderBy: { year: "desc" },
+    });
+    return rows.map((r) => r.year);
+  } catch {
+    return [];
+  }
+}
