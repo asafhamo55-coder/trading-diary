@@ -95,8 +95,19 @@ export default function ThemeToggle({ collapsed }: { collapsed: boolean }) {
     );
   }
 
+  const activeIndex = options.findIndex((o) => o.value === mode);
+
   return (
-    <div className="flex rounded-lg border border-[var(--border)] bg-[var(--muted)] p-0.5 gap-0.5">
+    <div className="relative flex rounded-xl border border-[var(--border)] bg-[var(--muted)] p-1">
+      {/* Sliding indicator */}
+      <span
+        className="absolute top-1 bottom-1 rounded-lg bg-[var(--card)] shadow-sm ring-1 ring-[var(--border)] transition-transform duration-300 ease-out"
+        style={{
+          width: `calc((100% - 0.5rem) / ${options.length})`,
+          transform: `translateX(${activeIndex * 100}%)`,
+        }}
+        aria-hidden
+      />
       {options.map((o) => {
         const active = o.value === mode;
         return (
@@ -104,11 +115,9 @@ export default function ThemeToggle({ collapsed }: { collapsed: boolean }) {
             key={o.value}
             onClick={() => pick(o.value)}
             className={cn(
-              "flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-medium transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--muted)]",
-              active
-                ? "bg-accent-blue/15 text-accent-blue"
-                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              "pressable relative z-10 flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+              active ? "text-accent-blue" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             )}
             title={`Switch to ${o.label.toLowerCase()} mode`}
           >

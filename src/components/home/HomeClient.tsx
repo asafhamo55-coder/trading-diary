@@ -22,6 +22,7 @@ import {
 import { cn, formatCurrency } from "@/lib/utils";
 import YearPicker from "@/components/layout/YearPicker";
 import ImportDialog from "@/components/home/ImportDialog";
+import ExportButton, { toCsv } from "@/components/ui/ExportButton";
 import HomeLedger from "@/components/home/HomeLedger";
 import HomeCategorySelect, { type Selection } from "@/components/home/HomeCategorySelect";
 import {
@@ -63,6 +64,34 @@ export default function HomeClient({
 
   const activeAccounts = accounts.filter((a) => !a.archivedAt);
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
+
+  const catById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const accountById = useMemo(() => new Map(accounts.map((a) => [a.id, a])), [accounts]);
+  const propById = useMemo(() => new Map(properties.map((p) => [p.id, p])), [properties]);
+
+  function buildTransactionsCsv() {
+    const headers = ["Date", "Account", "Description", "Category / Property", "Amount", "Excluded", "Notes", "Original"];
+    const rows = transactions.map((t) => {
+      const bucket = t.propertyId
+        ? propById.get(t.propertyId)?.title ?? "Property"
+        : t.categoryId
+        ? catById.get(t.categoryId)?.name ?? ""
+        : t.needsReview
+        ? "Needs review"
+        : "";
+      return [
+        t.date,
+        accountById.get(t.homeAccountId)?.name ?? "",
+        t.description,
+        bucket,
+        t.amount.toFixed(2),
+        t.isExcluded ? "yes" : "",
+        t.notes ?? "",
+        t.rawDescription,
+      ];
+    });
+    return toCsv(headers, rows);
+  }
 
   const totals = useMemo(() => {
     let income = 0;
@@ -112,6 +141,13 @@ export default function HomeClient({
             <Tag className="w-4 h-4" />
             Categories
           </Link>
+          {transactions.length > 0 && (
+            <ExportButton
+              filename={`hamo-home-${year}.csv`}
+              title={`Hamo Home transactions ${year}`}
+              buildCsv={buildTransactionsCsv}
+            />
+          )}
           <button
             onClick={() => setAddingTx(true)}
             className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:border-[color:var(--border)] transition-colors"

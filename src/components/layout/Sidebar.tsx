@@ -174,18 +174,61 @@ export default function Sidebar() {
     </nav>
   );
 
+  const bottomTabs = [
+    { label: "Home", icon: LayoutDashboard, href: "/trade/dashboard" },
+    { label: "Trades", icon: LineChart, href: "/trade/trades" },
+    { label: "Monthly", icon: Calendar, href: "/trade/monthly" },
+    { label: "Analytics", icon: BarChart3, href: "/trade/analytics" },
+  ];
+
   return (
     <>
-      {/* Mobile hamburger — fixed top-left */}
-      <button
-        type="button"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Open navigation menu"
-        className="md:hidden fixed top-3 left-3 z-40 flex items-center justify-center w-10 h-10 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] shadow-md"
-        style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
+      {/* Native mobile bottom tab bar */}
+      <nav
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 flex items-stretch border-t border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <Menu className="w-5 h-5" />
-      </button>
+        {bottomTabs.map((tab) => {
+          const active =
+            pathname === tab.href || pathname.startsWith(tab.href + "/");
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className="pressable relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 min-h-[3.25rem]"
+            >
+              {active && (
+                <span className="absolute top-0 h-0.5 w-8 rounded-full bg-[#3B82F6]" />
+              )}
+              <tab.icon
+                className={cn(
+                  "w-[22px] h-[22px] transition-colors",
+                  active ? "text-[#3B82F6]" : "text-[var(--muted-foreground)]"
+                )}
+              />
+              <span
+                className={cn(
+                  "text-[10px] font-medium leading-none",
+                  active ? "text-[#3B82F6]" : "text-[var(--muted-foreground)]"
+                )}
+              >
+                {tab.label}
+              </span>
+            </Link>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          aria-label="More"
+          className="pressable relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 min-h-[3.25rem]"
+        >
+          <Menu className="w-[22px] h-[22px] text-[var(--muted-foreground)]" />
+          <span className="text-[10px] font-medium leading-none text-[var(--muted-foreground)]">
+            More
+          </span>
+        </button>
+      </nav>
 
       {/* Mobile drawer */}
       {mobileOpen && (
