@@ -163,6 +163,49 @@ export interface PropertyOption {
   title: string;
 }
 
+// ── Insights ───────────────────────────────────────────────────────
+export interface CategoryBucket {
+  name: string;
+  color: string;
+  total: number;
+  share: number;
+}
+export interface RecurringItem {
+  merchant: string;
+  monthlyAmount: number;
+  months: number;
+  count: number;
+  total: number;
+  category: string | null;
+}
+export interface MerchantTotal {
+  merchant: string;
+  total: number;
+  count: number;
+}
+export interface LargeExpense {
+  date: string;
+  description: string;
+  amount: number;
+}
+export interface HomeInsights {
+  monthly: { name: string; income: number; spend: number; net: number }[];
+  totals: {
+    income: number;
+    spend: number;
+    net: number;
+    savingsRate: number;
+    avgMonthlySpend: number;
+    activeMonths: number;
+  };
+  categories: CategoryBucket[];
+  trend: { months: string[]; series: { name: string; color: string; data: number[] }[] };
+  recurring: RecurringItem[];
+  topMerchants: MerchantTotal[];
+  largest: LargeExpense[];
+  hasData: boolean;
+}
+
 /** A category with its children nested, for tree rendering / selects. */
 export interface HomeCategoryTree extends HomeCategoryDTO {
   children: HomeCategoryDTO[];

@@ -2,11 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts/core";
-import { BarChart, LineChart } from "echarts/charts";
+import { BarChart, LineChart, PieChart } from "echarts/charts";
 import {
   GridComponent,
   TooltipComponent,
   MarkLineComponent,
+  LegendComponent,
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import type { EChartsCoreOption, ECharts } from "echarts/core";
@@ -14,9 +15,11 @@ import type { EChartsCoreOption, ECharts } from "echarts/core";
 echarts.use([
   BarChart,
   LineChart,
+  PieChart,
   GridComponent,
   TooltipComponent,
   MarkLineComponent,
+  LegendComponent,
   CanvasRenderer,
 ]);
 

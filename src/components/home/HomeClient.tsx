@@ -14,6 +14,7 @@ import {
   TrendingDown,
   PiggyBank,
   Tag,
+  BarChart3,
   AlertCircle,
   CreditCard,
   Landmark,
@@ -97,6 +98,13 @@ export default function HomeClient({
           {availableYears.length > 0 && (
             <YearPicker years={availableYears} selected={year} />
           )}
+          <Link
+            href="/home/insights"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:border-[color:var(--border)] transition-colors"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Insights
+          </Link>
           <Link
             href="/home/categories"
             className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:border-[color:var(--border)] transition-colors"

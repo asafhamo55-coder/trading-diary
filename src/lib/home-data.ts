@@ -9,7 +9,13 @@ import {
   type HomeTransactionDTO,
   type HomeAccountType,
   type HomeCategoryKind,
+  type HomeInsights,
 } from "./home";
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const PROPERTY_COLOR = "#FFB547";
+const UNCATEGORIZED_COLOR = "#64748B";
+const OTHER_COLOR = "#475569";
 
 async function firstAccountId(): Promise<string | null> {
   try {
@@ -234,6 +240,165 @@ export async function getHomeMonthlyRevExp(
     }
     return rows;
   }, rows);
+}
+
+function median(nums: number[]): number {
+  if (nums.length === 0) return 0;
+  const s = [...nums].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+/** Full analytics bundle for the Home insights dashboard. */
+export async function getHomeInsights(year: number): Promise<HomeInsights> {
+  const empty: HomeInsights = {
+    monthly: MONTH_NAMES.map((name) => ({ name, income: 0, spend: 0, net: 0 })),
+    totals: { income: 0, spend: 0, net: 0, savingsRate: 0, avgMonthlySpend: 0, activeMonths: 0 },
+    categories: [],
+    trend: { months: MONTH_NAMES, series: [] },
+    recurring: [],
+    topMerchants: [],
+    largest: [],
+    hasData: false,
+  };
+  return withHomeHeal(async () => {
+    const accountId = await firstAccountId();
+    if (!accountId) return empty;
+
+    const [txs, categories, properties] = await Promise.all([
+      prisma.homeTransaction.findMany({
+        where: { accountId, year, isExcluded: false },
+        select: {
+          date: true, month: true, amount: true, description: true,
+          rawDescription: true, categoryId: true, propertyId: true,
+        },
+      }),
+      prisma.homeCategory.findMany({
+        where: { accountId },
+        select: { id: true, name: true, parentId: true, color: true },
+      }),
+      prisma.property.findMany({ where: { accountId }, select: { id: true, nickname: true, street: true, address: true } }),
+    ]);
+
+    if (txs.length === 0) return empty;
+
+    // categoryId → top-level bucket {name, color}
+    const catById = new Map(categories.map((c) => [c.id, c]));
+    function bucketFor(categoryId: string | null, propertyId: string | null): { name: string; color: string } {
+      if (propertyId) {
+        const p = properties.find((x) => x.id === propertyId);
+        const title = (p?.street || p?.nickname || p?.address || "Property").trim();
+        return { name: title, color: PROPERTY_COLOR };
+      }
+      if (categoryId) {
+        const c = catById.get(categoryId);
+        if (c) {
+          const top = c.parentId ? catById.get(c.parentId) ?? c : c;
+          return { name: top.name, color: top.color ?? UNCATEGORIZED_COLOR };
+        }
+      }
+      return { name: "Uncategorized", color: UNCATEGORIZED_COLOR };
+    }
+
+    const monthly = MONTH_NAMES.map((name) => ({ name, income: 0, spend: 0, net: 0 }));
+    const buckets = new Map<string, { color: string; total: number; monthly: number[] }>();
+    const merchantAgg = new Map<
+      string,
+      { display: string; total: number; count: number; months: Set<number>; amounts: number[]; category: string | null }
+    >();
+    const largest: { date: string; description: string; amount: number }[] = [];
+
+    for (const t of txs) {
+      const mi = t.month - 1;
+      if (mi < 0 || mi > 11) continue;
+      if (t.amount > 0) {
+        monthly[mi].income += t.amount;
+        continue;
+      }
+      const spend = -t.amount;
+      monthly[mi].spend += spend;
+
+      const b = bucketFor(t.categoryId, t.propertyId);
+      const existing = buckets.get(b.name) ?? { color: b.color, total: 0, monthly: Array(12).fill(0) };
+      existing.total += spend;
+      existing.monthly[mi] += spend;
+      buckets.set(b.name, existing);
+
+      const key = cleanDescription(t.rawDescription).toLowerCase();
+      const m = merchantAgg.get(key) ?? {
+        display: cleanDescription(t.rawDescription) || t.description,
+        total: 0, count: 0, months: new Set<number>(), amounts: [], category: b.name,
+      };
+      m.total += spend;
+      m.count += 1;
+      m.months.add(t.month);
+      m.amounts.push(spend);
+      merchantAgg.set(key, m);
+
+      largest.push({ date: toDateStr(t.date), description: cleanDescription(t.rawDescription) || t.description, amount: spend });
+    }
+
+    for (const mo of monthly) mo.net = mo.income - mo.spend;
+    const income = monthly.reduce((s, m) => s + m.income, 0);
+    const spend = monthly.reduce((s, m) => s + m.spend, 0);
+    const net = income - spend;
+    const activeMonths = monthly.filter((m) => m.spend > 0 || m.income > 0).length;
+
+    const categories2 = Array.from(buckets.entries())
+      .map(([name, v]) => ({ name, color: v.color, total: v.total, share: spend > 0 ? v.total / spend : 0 }))
+      .sort((a, b) => b.total - a.total);
+
+    // Monthly trend: top 6 buckets + "Other".
+    const top = categories2.slice(0, 6);
+    const topNames = new Set(top.map((c) => c.name));
+    const otherMonthly = Array(12).fill(0);
+    for (const [name, v] of buckets) {
+      if (!topNames.has(name)) v.monthly.forEach((x, i) => (otherMonthly[i] += x));
+    }
+    const series = top.map((c) => ({
+      name: c.name,
+      color: c.color,
+      data: buckets.get(c.name)!.monthly,
+    }));
+    if (otherMonthly.some((x) => x > 0)) series.push({ name: "Other", color: OTHER_COLOR, data: otherMonthly });
+
+    // Recurring: merchants present in ≥3 distinct months.
+    const recurring = Array.from(merchantAgg.values())
+      .filter((m) => m.months.size >= 3)
+      .map((m) => ({
+        merchant: m.display,
+        monthlyAmount: median(m.amounts),
+        months: m.months.size,
+        count: m.count,
+        total: m.total,
+        category: m.category,
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 20);
+
+    const topMerchants = Array.from(merchantAgg.values())
+      .map((m) => ({ merchant: m.display, total: m.total, count: m.count }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8);
+
+    largest.sort((a, b) => b.amount - a.amount);
+
+    return {
+      monthly,
+      totals: {
+        income, spend, net,
+        savingsRate: income > 0 ? net / income : 0,
+        avgMonthlySpend: activeMonths > 0 ? spend / activeMonths : 0,
+        activeMonths,
+      },
+      categories: categories2,
+      trend: { months: MONTH_NAMES, series },
+      recurring,
+      topMerchants,
+      largest: largest.slice(0, 8),
+      hasData: true,
+    };
+  }, empty);
 }
 
 export async function getReviewCount(): Promise<number> {
