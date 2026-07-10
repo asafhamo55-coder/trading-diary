@@ -87,7 +87,7 @@ export default function ThemeToggle({ collapsed }: { collapsed: boolean }) {
     return (
       <button
         onClick={() => pick(next)}
-        className="flex items-center justify-center w-full h-9 rounded-lg border border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--card)]"
+        className="pressable flex items-center justify-center w-9 h-9 rounded-lg border border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--card)]"
         title={`Theme: ${current.label} — click to switch`}
       >
         {current.icon}

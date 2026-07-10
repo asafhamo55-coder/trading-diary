@@ -1,7 +1,5 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import Logo from "@/components/layout/Logo";
-import ThemeToggle from "@/components/layout/ThemeToggle";
+import { Home as HomeIcon } from "lucide-react";
+import AppBar from "@/components/layout/AppBar";
 import HomeTabBar from "@/components/home/HomeTabBar";
 
 export default function HomeLayout({
@@ -11,23 +9,7 @@ export default function HomeLayout({
 }>) {
   return (
     <div className="flex flex-col min-h-screen">
-      <header
-        className="flex items-center justify-between h-16 px-4 md:px-6 border-b border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl sticky top-0 z-30"
-        style={{ paddingTop: "env(safe-area-inset-top)" }}
-      >
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Home Equity</span>
-          </Link>
-          <span className="text-[var(--border)]">/</span>
-          <Logo accentWord="Home" />
-        </div>
-        <ThemeToggle collapsed />
-      </header>
+      <AppBar title="Home" icon={HomeIcon} accent="#00D68F" />
       <main className="flex-1 pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:pb-0">
         {children}
       </main>
