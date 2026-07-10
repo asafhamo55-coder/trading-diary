@@ -39,6 +39,7 @@ export type HomeCategoryRuleMinAggregateOutputType = {
   accountId: string | null
   matcher: string | null
   categoryId: string | null
+  propertyId: string | null
   priority: number | null
   createdAt: Date | null
 }
@@ -48,6 +49,7 @@ export type HomeCategoryRuleMaxAggregateOutputType = {
   accountId: string | null
   matcher: string | null
   categoryId: string | null
+  propertyId: string | null
   priority: number | null
   createdAt: Date | null
 }
@@ -57,6 +59,7 @@ export type HomeCategoryRuleCountAggregateOutputType = {
   accountId: number
   matcher: number
   categoryId: number
+  propertyId: number
   priority: number
   createdAt: number
   _all: number
@@ -76,6 +79,7 @@ export type HomeCategoryRuleMinAggregateInputType = {
   accountId?: true
   matcher?: true
   categoryId?: true
+  propertyId?: true
   priority?: true
   createdAt?: true
 }
@@ -85,6 +89,7 @@ export type HomeCategoryRuleMaxAggregateInputType = {
   accountId?: true
   matcher?: true
   categoryId?: true
+  propertyId?: true
   priority?: true
   createdAt?: true
 }
@@ -94,6 +99,7 @@ export type HomeCategoryRuleCountAggregateInputType = {
   accountId?: true
   matcher?: true
   categoryId?: true
+  propertyId?: true
   priority?: true
   createdAt?: true
   _all?: true
@@ -189,7 +195,8 @@ export type HomeCategoryRuleGroupByOutputType = {
   id: string
   accountId: string
   matcher: string
-  categoryId: string
+  categoryId: string | null
+  propertyId: string | null
   priority: number
   createdAt: Date
   _count: HomeCategoryRuleCountAggregateOutputType | null
@@ -221,17 +228,19 @@ export type HomeCategoryRuleWhereInput = {
   id?: Prisma.StringFilter<"HomeCategoryRule"> | string
   accountId?: Prisma.StringFilter<"HomeCategoryRule"> | string
   matcher?: Prisma.StringFilter<"HomeCategoryRule"> | string
-  categoryId?: Prisma.StringFilter<"HomeCategoryRule"> | string
+  categoryId?: Prisma.StringNullableFilter<"HomeCategoryRule"> | string | null
+  propertyId?: Prisma.StringNullableFilter<"HomeCategoryRule"> | string | null
   priority?: Prisma.IntFilter<"HomeCategoryRule"> | number
   createdAt?: Prisma.DateTimeFilter<"HomeCategoryRule"> | Date | string
-  category?: Prisma.XOR<Prisma.HomeCategoryScalarRelationFilter, Prisma.HomeCategoryWhereInput>
+  category?: Prisma.XOR<Prisma.HomeCategoryNullableScalarRelationFilter, Prisma.HomeCategoryWhereInput> | null
 }
 
 export type HomeCategoryRuleOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   accountId?: Prisma.SortOrder
   matcher?: Prisma.SortOrder
-  categoryId?: Prisma.SortOrder
+  categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  propertyId?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   category?: Prisma.HomeCategoryOrderByWithRelationInput
@@ -244,17 +253,19 @@ export type HomeCategoryRuleWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.HomeCategoryRuleWhereInput | Prisma.HomeCategoryRuleWhereInput[]
   accountId?: Prisma.StringFilter<"HomeCategoryRule"> | string
   matcher?: Prisma.StringFilter<"HomeCategoryRule"> | string
-  categoryId?: Prisma.StringFilter<"HomeCategoryRule"> | string
+  categoryId?: Prisma.StringNullableFilter<"HomeCategoryRule"> | string | null
+  propertyId?: Prisma.StringNullableFilter<"HomeCategoryRule"> | string | null
   priority?: Prisma.IntFilter<"HomeCategoryRule"> | number
   createdAt?: Prisma.DateTimeFilter<"HomeCategoryRule"> | Date | string
-  category?: Prisma.XOR<Prisma.HomeCategoryScalarRelationFilter, Prisma.HomeCategoryWhereInput>
+  category?: Prisma.XOR<Prisma.HomeCategoryNullableScalarRelationFilter, Prisma.HomeCategoryWhereInput> | null
 }, "id">
 
 export type HomeCategoryRuleOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   accountId?: Prisma.SortOrder
   matcher?: Prisma.SortOrder
-  categoryId?: Prisma.SortOrder
+  categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  propertyId?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.HomeCategoryRuleCountOrderByAggregateInput
@@ -271,7 +282,8 @@ export type HomeCategoryRuleScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"HomeCategoryRule"> | string
   accountId?: Prisma.StringWithAggregatesFilter<"HomeCategoryRule"> | string
   matcher?: Prisma.StringWithAggregatesFilter<"HomeCategoryRule"> | string
-  categoryId?: Prisma.StringWithAggregatesFilter<"HomeCategoryRule"> | string
+  categoryId?: Prisma.StringNullableWithAggregatesFilter<"HomeCategoryRule"> | string | null
+  propertyId?: Prisma.StringNullableWithAggregatesFilter<"HomeCategoryRule"> | string | null
   priority?: Prisma.IntWithAggregatesFilter<"HomeCategoryRule"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"HomeCategoryRule"> | Date | string
 }
@@ -280,16 +292,18 @@ export type HomeCategoryRuleCreateInput = {
   id?: string
   accountId: string
   matcher: string
+  propertyId?: string | null
   priority?: number
   createdAt?: Date | string
-  category: Prisma.HomeCategoryCreateNestedOneWithoutRulesInput
+  category?: Prisma.HomeCategoryCreateNestedOneWithoutRulesInput
 }
 
 export type HomeCategoryRuleUncheckedCreateInput = {
   id?: string
   accountId: string
   matcher: string
-  categoryId: string
+  categoryId?: string | null
+  propertyId?: string | null
   priority?: number
   createdAt?: Date | string
 }
@@ -298,16 +312,18 @@ export type HomeCategoryRuleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   matcher?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  category?: Prisma.HomeCategoryUpdateOneRequiredWithoutRulesNestedInput
+  category?: Prisma.HomeCategoryUpdateOneWithoutRulesNestedInput
 }
 
 export type HomeCategoryRuleUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   matcher?: Prisma.StringFieldUpdateOperationsInput | string
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -316,7 +332,8 @@ export type HomeCategoryRuleCreateManyInput = {
   id?: string
   accountId: string
   matcher: string
-  categoryId: string
+  categoryId?: string | null
+  propertyId?: string | null
   priority?: number
   createdAt?: Date | string
 }
@@ -325,6 +342,7 @@ export type HomeCategoryRuleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   matcher?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -333,7 +351,8 @@ export type HomeCategoryRuleUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   matcher?: Prisma.StringFieldUpdateOperationsInput | string
-  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -353,6 +372,7 @@ export type HomeCategoryRuleCountOrderByAggregateInput = {
   accountId?: Prisma.SortOrder
   matcher?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
+  propertyId?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -366,6 +386,7 @@ export type HomeCategoryRuleMaxOrderByAggregateInput = {
   accountId?: Prisma.SortOrder
   matcher?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
+  propertyId?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -375,6 +396,7 @@ export type HomeCategoryRuleMinOrderByAggregateInput = {
   accountId?: Prisma.SortOrder
   matcher?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
+  propertyId?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -429,6 +451,7 @@ export type HomeCategoryRuleCreateWithoutCategoryInput = {
   id?: string
   accountId: string
   matcher: string
+  propertyId?: string | null
   priority?: number
   createdAt?: Date | string
 }
@@ -437,6 +460,7 @@ export type HomeCategoryRuleUncheckedCreateWithoutCategoryInput = {
   id?: string
   accountId: string
   matcher: string
+  propertyId?: string | null
   priority?: number
   createdAt?: Date | string
 }
@@ -474,7 +498,8 @@ export type HomeCategoryRuleScalarWhereInput = {
   id?: Prisma.StringFilter<"HomeCategoryRule"> | string
   accountId?: Prisma.StringFilter<"HomeCategoryRule"> | string
   matcher?: Prisma.StringFilter<"HomeCategoryRule"> | string
-  categoryId?: Prisma.StringFilter<"HomeCategoryRule"> | string
+  categoryId?: Prisma.StringNullableFilter<"HomeCategoryRule"> | string | null
+  propertyId?: Prisma.StringNullableFilter<"HomeCategoryRule"> | string | null
   priority?: Prisma.IntFilter<"HomeCategoryRule"> | number
   createdAt?: Prisma.DateTimeFilter<"HomeCategoryRule"> | Date | string
 }
@@ -483,6 +508,7 @@ export type HomeCategoryRuleCreateManyCategoryInput = {
   id?: string
   accountId: string
   matcher: string
+  propertyId?: string | null
   priority?: number
   createdAt?: Date | string
 }
@@ -491,6 +517,7 @@ export type HomeCategoryRuleUpdateWithoutCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   matcher?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -499,6 +526,7 @@ export type HomeCategoryRuleUncheckedUpdateWithoutCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   matcher?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -507,6 +535,7 @@ export type HomeCategoryRuleUncheckedUpdateManyWithoutCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
   matcher?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -518,9 +547,10 @@ export type HomeCategoryRuleSelect<ExtArgs extends runtime.Types.Extensions.Inte
   accountId?: boolean
   matcher?: boolean
   categoryId?: boolean
+  propertyId?: boolean
   priority?: boolean
   createdAt?: boolean
-  category?: boolean | Prisma.HomeCategoryDefaultArgs<ExtArgs>
+  category?: boolean | Prisma.HomeCategoryRule$categoryArgs<ExtArgs>
 }, ExtArgs["result"]["homeCategoryRule"]>
 
 export type HomeCategoryRuleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -528,9 +558,10 @@ export type HomeCategoryRuleSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   accountId?: boolean
   matcher?: boolean
   categoryId?: boolean
+  propertyId?: boolean
   priority?: boolean
   createdAt?: boolean
-  category?: boolean | Prisma.HomeCategoryDefaultArgs<ExtArgs>
+  category?: boolean | Prisma.HomeCategoryRule$categoryArgs<ExtArgs>
 }, ExtArgs["result"]["homeCategoryRule"]>
 
 export type HomeCategoryRuleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -538,9 +569,10 @@ export type HomeCategoryRuleSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   accountId?: boolean
   matcher?: boolean
   categoryId?: boolean
+  propertyId?: boolean
   priority?: boolean
   createdAt?: boolean
-  category?: boolean | Prisma.HomeCategoryDefaultArgs<ExtArgs>
+  category?: boolean | Prisma.HomeCategoryRule$categoryArgs<ExtArgs>
 }, ExtArgs["result"]["homeCategoryRule"]>
 
 export type HomeCategoryRuleSelectScalar = {
@@ -548,31 +580,33 @@ export type HomeCategoryRuleSelectScalar = {
   accountId?: boolean
   matcher?: boolean
   categoryId?: boolean
+  propertyId?: boolean
   priority?: boolean
   createdAt?: boolean
 }
 
-export type HomeCategoryRuleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "matcher" | "categoryId" | "priority" | "createdAt", ExtArgs["result"]["homeCategoryRule"]>
+export type HomeCategoryRuleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "matcher" | "categoryId" | "propertyId" | "priority" | "createdAt", ExtArgs["result"]["homeCategoryRule"]>
 export type HomeCategoryRuleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  category?: boolean | Prisma.HomeCategoryDefaultArgs<ExtArgs>
+  category?: boolean | Prisma.HomeCategoryRule$categoryArgs<ExtArgs>
 }
 export type HomeCategoryRuleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  category?: boolean | Prisma.HomeCategoryDefaultArgs<ExtArgs>
+  category?: boolean | Prisma.HomeCategoryRule$categoryArgs<ExtArgs>
 }
 export type HomeCategoryRuleIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  category?: boolean | Prisma.HomeCategoryDefaultArgs<ExtArgs>
+  category?: boolean | Prisma.HomeCategoryRule$categoryArgs<ExtArgs>
 }
 
 export type $HomeCategoryRulePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "HomeCategoryRule"
   objects: {
-    category: Prisma.$HomeCategoryPayload<ExtArgs>
+    category: Prisma.$HomeCategoryPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     accountId: string
     matcher: string
-    categoryId: string
+    categoryId: string | null
+    propertyId: string | null
     priority: number
     createdAt: Date
   }, ExtArgs["result"]["homeCategoryRule"]>
@@ -969,7 +1003,7 @@ readonly fields: HomeCategoryRuleFieldRefs;
  */
 export interface Prisma__HomeCategoryRuleClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  category<T extends Prisma.HomeCategoryDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.HomeCategoryDefaultArgs<ExtArgs>>): Prisma.Prisma__HomeCategoryClient<runtime.Types.Result.GetResult<Prisma.$HomeCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  category<T extends Prisma.HomeCategoryRule$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.HomeCategoryRule$categoryArgs<ExtArgs>>): Prisma.Prisma__HomeCategoryClient<runtime.Types.Result.GetResult<Prisma.$HomeCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1003,6 +1037,7 @@ export interface HomeCategoryRuleFieldRefs {
   readonly accountId: Prisma.FieldRef<"HomeCategoryRule", 'String'>
   readonly matcher: Prisma.FieldRef<"HomeCategoryRule", 'String'>
   readonly categoryId: Prisma.FieldRef<"HomeCategoryRule", 'String'>
+  readonly propertyId: Prisma.FieldRef<"HomeCategoryRule", 'String'>
   readonly priority: Prisma.FieldRef<"HomeCategoryRule", 'Int'>
   readonly createdAt: Prisma.FieldRef<"HomeCategoryRule", 'DateTime'>
 }
@@ -1403,6 +1438,25 @@ export type HomeCategoryRuleDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many HomeCategoryRules to delete.
    */
   limit?: number
+}
+
+/**
+ * HomeCategoryRule.category
+ */
+export type HomeCategoryRule$categoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the HomeCategory
+   */
+  select?: Prisma.HomeCategorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the HomeCategory
+   */
+  omit?: Prisma.HomeCategoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.HomeCategoryInclude<ExtArgs> | null
+  where?: Prisma.HomeCategoryWhereInput
 }
 
 /**

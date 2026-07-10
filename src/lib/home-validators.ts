@@ -32,6 +32,7 @@ export const createHomeTransactionSchema = z.object({
   amount: z.number().refine((n) => n !== 0, "Amount can't be zero"),
   description: z.string().min(1, "Description is required").max(200),
   categoryId: z.string().optional().nullable(),
+  propertyId: z.string().optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   isExcluded: z.boolean().optional(),
   excludeReason: z.string().max(120).optional().nullable(),
@@ -42,10 +43,28 @@ export const updateHomeTransactionSchema = z.object({
   amount: z.number().optional(),
   description: z.string().max(200).optional(),
   categoryId: z.string().optional().nullable(),
+  propertyId: z.string().optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   isExcluded: z.boolean().optional(),
   excludeReason: z.string().max(120).optional().nullable(),
   needsReview: z.boolean().optional(),
+});
+
+// Batch save from the ledger: a list of per-row patches applied together.
+export const bulkHomeTransactionSchema = z.object({
+  updates: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        categoryId: z.string().optional().nullable(),
+        propertyId: z.string().optional().nullable(),
+        isExcluded: z.boolean().optional(),
+        excludeReason: z.string().max(120).optional().nullable(),
+        notes: z.string().max(500).optional().nullable(),
+      })
+    )
+    .min(1)
+    .max(500),
 });
 
 export type CreateHomeAccountInput = z.infer<typeof createHomeAccountSchema>;

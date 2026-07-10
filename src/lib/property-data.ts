@@ -6,7 +6,7 @@ import type {
   PropertyTxType,
   TenantDTO,
 } from "./property";
-import { signedAmount } from "./property";
+import { signedAmount, propertyTitle } from "./property";
 import { ensurePropertySchema } from "./property-schema";
 
 // Run a Prisma read; if it fails because the schema isn't present yet (fresh
@@ -145,6 +145,19 @@ async function tenantsByProperty(
   return byProp;
 }
 
+/** Lightweight list of active properties for attribution dropdowns. */
+export async function getPropertyOptions(): Promise<{ id: string; title: string }[]> {
+  return withSchemaHeal(async () => {
+    const accountId = await firstAccountId();
+    if (!accountId) return [];
+    const rows = await prisma.property.findMany({
+      where: { accountId, archivedAt: null },
+      orderBy: { createdAt: "asc" },
+    });
+    return rows.map((p) => ({ id: p.id, title: propertyTitle(p) }));
+  }, []);
+}
+
 export async function getProperties(): Promise<PropertyWithTx[]> {
   return withSchemaHeal(async () => {
     const accountId = await firstAccountId();
@@ -188,7 +201,9 @@ export async function getPropertyMonthlyNet(year: number): Promise<number[]> {
     const accountId = await firstAccountId();
     if (!accountId) return net;
     const txs = await prisma.propertyTransaction.findMany({
-      where: { year, property: { accountId } },
+      // Exclude archived properties so the hub total matches the /properties
+      // page, which sums active properties only.
+      where: { year, property: { accountId, archivedAt: null } },
       select: { month: true, type: true, amount: true },
     });
     for (const t of txs) {
@@ -209,7 +224,9 @@ export async function getPropertyMonthlyRevExp(
     const accountId = await firstAccountId();
     if (!accountId) return rows;
     const txs = await prisma.propertyTransaction.findMany({
-      where: { year, property: { accountId } },
+      // Exclude archived properties so the hub total matches the /properties
+      // page, which sums active properties only.
+      where: { year, property: { accountId, archivedAt: null } },
       select: { month: true, type: true, amount: true },
     });
     for (const t of txs) {

@@ -3,20 +3,28 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, EyeOff, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, CheckCircle2, EyeOff, Loader2 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
-import { buildCategoryTree, type HomeAccountDTO, type HomeCategoryDTO } from "@/lib/home";
+import HomeCategorySelect, { type Selection } from "@/components/home/HomeCategorySelect";
+import {
+  buildCategoryTree,
+  type HomeAccountDTO,
+  type HomeCategoryDTO,
+  type PropertyOption,
+} from "@/lib/home";
 import type { MerchantGroup } from "@/app/home/review/page";
 
 export default function HomeReviewClient({
   categories,
   groups,
   totalRows,
+  properties,
 }: {
   accounts: HomeAccountDTO[];
   categories: HomeCategoryDTO[];
   groups: MerchantGroup[];
   totalRows: number;
+  properties: PropertyOption[];
 }) {
   const router = useRouter();
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
@@ -55,7 +63,13 @@ export default function HomeReviewClient({
       ) : (
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[var(--border)]">
           {groups.map((g) => (
-            <MerchantRow key={g.matcher} group={g} tree={tree} onDone={() => router.refresh()} />
+            <MerchantRow
+              key={g.matcher}
+              group={g}
+              tree={tree}
+              properties={properties}
+              onDone={() => router.refresh()}
+            />
           ))}
         </div>
       )}
@@ -66,10 +80,12 @@ export default function HomeReviewClient({
 function MerchantRow({
   group,
   tree,
+  properties,
   onDone,
 }: {
   group: MerchantGroup;
   tree: ReturnType<typeof buildCategoryTree>;
+  properties: PropertyOption[];
   onDone: () => void;
 }) {
   const [busy, setBusy] = useState(false);
@@ -116,26 +132,18 @@ function MerchantRow({
       {busy ? (
         <Loader2 className="w-4 h-4 animate-spin text-[var(--muted-foreground)]" />
       ) : (
-        <select
-          defaultValue=""
-          onChange={(e) => e.target.value && apply({ categoryId: e.target.value })}
-          className="max-w-[190px] rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs text-[var(--foreground)] focus:outline-none"
-          title="Categorize this merchant (remembered for next time)"
-        >
-          <option value="" disabled>
-            Categorize…
-          </option>
-          {tree.map((parent) => (
-            <optgroup key={parent.id} label={parent.name}>
-              <option value={parent.id}>{parent.name} (general)</option>
-              {parent.children.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {parent.name} › {c.name}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
+        <HomeCategorySelect
+          tree={tree}
+          properties={properties}
+          categoryId={null}
+          propertyId={null}
+          placeholder="Categorize…"
+          onSelect={(sel: Selection) => {
+            if (sel.propertyId) apply({ propertyId: sel.propertyId });
+            else if (sel.categoryId) apply({ categoryId: sel.categoryId });
+          }}
+          className="max-w-[200px] rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs text-[var(--foreground)] focus:outline-none"
+        />
       )}
       <button
         onClick={() => apply({ exclude: true })}

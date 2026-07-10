@@ -5,6 +5,7 @@ import {
   getHomeYears,
   getReviewCount,
 } from "@/lib/home-data";
+import { getPropertyOptions } from "@/lib/property-data";
 import { parseYear, resolveSelectedYear } from "@/lib/year";
 import HomeClient from "@/components/home/HomeClient";
 
@@ -17,11 +18,12 @@ export default async function HomePage({
 }) {
   const sp = await searchParams;
 
-  const [accounts, categories, years, reviewCount] = await Promise.all([
+  const [accounts, categories, years, reviewCount, properties] = await Promise.all([
     getHomeAccounts(),
     getHomeCategories(),
     getHomeYears(),
     getReviewCount(),
+    getPropertyOptions(),
   ]);
 
   const currentYear = new Date().getFullYear();
@@ -38,6 +40,7 @@ export default async function HomePage({
       year={year}
       availableYears={availableYears}
       reviewCount={reviewCount}
+      properties={properties}
     />
   );
 }

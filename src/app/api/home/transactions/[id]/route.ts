@@ -32,8 +32,19 @@ export async function PATCH(
         if (!cat) return errorResponse("Category not found");
       }
       patch.categoryId = data.categoryId || null;
-      // Categorizing a row resolves it out of the review queue.
-      if (data.categoryId) patch.needsReview = false;
+      // Categorizing a row resolves it out of the review queue, and a category
+      // and a property are mutually exclusive assignments from the dropdown.
+      if (data.categoryId) {
+        patch.needsReview = false;
+        patch.propertyId = null;
+      }
+    }
+    if (data.propertyId !== undefined) {
+      patch.propertyId = data.propertyId || null;
+      if (data.propertyId) {
+        patch.needsReview = false;
+        patch.categoryId = null;
+      }
     }
     if (data.notes !== undefined) patch.notes = data.notes;
     if (data.isExcluded !== undefined) patch.isExcluded = data.isExcluded;

@@ -118,6 +118,7 @@ function serializeTx(t: {
   description: string;
   rawDescription: string;
   categoryId: string | null;
+  propertyId: string | null;
   notes: string | null;
   isExcluded: boolean;
   excludeReason: string | null;
@@ -134,6 +135,7 @@ function serializeTx(t: {
     description: t.description,
     rawDescription: t.rawDescription,
     categoryId: t.categoryId,
+    propertyId: t.propertyId,
     notes: t.notes,
     isExcluded: t.isExcluded,
     excludeReason: t.excludeReason,

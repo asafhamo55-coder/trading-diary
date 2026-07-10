@@ -148,11 +148,18 @@ export interface HomeTransactionDTO {
   description: string;
   rawDescription: string;
   categoryId: string | null;
+  propertyId: string | null;
   notes: string | null;
   isExcluded: boolean;
   excludeReason: string | null;
   needsReview: boolean;
   isManual: boolean;
+}
+
+/** A property the user can attribute Home expenses to. */
+export interface PropertyOption {
+  id: string;
+  title: string;
 }
 
 /** A category with its children nested, for tree rendering / selects. */

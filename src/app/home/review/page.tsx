@@ -3,6 +3,7 @@ import {
   getHomeCategories,
   getHomeTransactions,
 } from "@/lib/home-data";
+import { getPropertyOptions } from "@/lib/property-data";
 import { cleanDescription } from "@/lib/home-import";
 import HomeReviewClient from "@/components/home/HomeReviewClient";
 
@@ -18,10 +19,11 @@ export interface MerchantGroup {
 }
 
 export default async function HomeReviewPage() {
-  const [accounts, categories, transactions] = await Promise.all([
+  const [accounts, categories, transactions, properties] = await Promise.all([
     getHomeAccounts(),
     getHomeCategories(),
     getHomeTransactions({ needsReview: true }),
+    getPropertyOptions(),
   ]);
 
   // Group by cleaned merchant so each unique place is decided once.
@@ -53,6 +55,7 @@ export default async function HomeReviewPage() {
       categories={categories}
       groups={groups}
       totalRows={transactions.length}
+      properties={properties}
     />
   );
 }

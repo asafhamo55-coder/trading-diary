@@ -310,6 +310,7 @@ export const HomeTransactionScalarFieldEnum = {
   description: 'description',
   rawDescription: 'rawDescription',
   categoryId: 'categoryId',
+  propertyId: 'propertyId',
   notes: 'notes',
   isExcluded: 'isExcluded',
   excludeReason: 'excludeReason',
@@ -347,6 +348,7 @@ export const HomeCategoryRuleScalarFieldEnum = {
   accountId: 'accountId',
   matcher: 'matcher',
   categoryId: 'categoryId',
+  propertyId: 'propertyId',
   priority: 'priority',
   createdAt: 'createdAt'
 } as const

@@ -313,6 +313,7 @@ model HomeTransaction {
 
   categoryId     String?
   category       HomeCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  propertyId     String? // attributes this expense to a Hamo Properties property
 
   notes          String?
   isExcluded     Boolean      @default(false) // transfers / card payments removed from spend
@@ -354,13 +355,14 @@ model HomeImport {
 }
 
 model HomeCategoryRule {
-  id         String       @id @default(cuid())
+  id         String        @id @default(cuid())
   accountId  String
   matcher    String // lowercased substring matched against rawDescription
-  categoryId String
-  category   HomeCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  priority   Int          @default(0)
-  createdAt  DateTime     @default(now())
+  categoryId String?
+  category   HomeCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  propertyId String? // learned merchant → property attribution
+  priority   Int           @default(0)
+  createdAt  DateTime      @default(now())
 
   @@index([accountId])
 }

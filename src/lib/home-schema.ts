@@ -108,6 +108,9 @@ export async function ensureHomeSchema(): Promise<void> {
   await prisma.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS "HomeTransaction_externalKey_idx" ON "HomeTransaction"("externalKey")`
   );
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "HomeTransaction" ADD COLUMN IF NOT EXISTS "propertyId" TEXT`
+  );
 
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "HomeCategoryRule" (
@@ -122,6 +125,12 @@ export async function ensureHomeSchema(): Promise<void> {
   `);
   await prisma.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS "HomeCategoryRule_accountId_idx" ON "HomeCategoryRule"("accountId")`
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "HomeCategoryRule" ADD COLUMN IF NOT EXISTS "propertyId" TEXT`
+  );
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "HomeCategoryRule" ALTER COLUMN "categoryId" DROP NOT NULL`
   );
 
   // Foreign keys (guarded — ADD CONSTRAINT has no IF NOT EXISTS).

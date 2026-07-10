@@ -49,6 +49,7 @@ export type HomeTransactionMinAggregateOutputType = {
   description: string | null
   rawDescription: string | null
   categoryId: string | null
+  propertyId: string | null
   notes: string | null
   isExcluded: boolean | null
   excludeReason: string | null
@@ -72,6 +73,7 @@ export type HomeTransactionMaxAggregateOutputType = {
   description: string | null
   rawDescription: string | null
   categoryId: string | null
+  propertyId: string | null
   notes: string | null
   isExcluded: boolean | null
   excludeReason: string | null
@@ -95,6 +97,7 @@ export type HomeTransactionCountAggregateOutputType = {
   description: number
   rawDescription: number
   categoryId: number
+  propertyId: number
   notes: number
   isExcluded: number
   excludeReason: number
@@ -132,6 +135,7 @@ export type HomeTransactionMinAggregateInputType = {
   description?: true
   rawDescription?: true
   categoryId?: true
+  propertyId?: true
   notes?: true
   isExcluded?: true
   excludeReason?: true
@@ -155,6 +159,7 @@ export type HomeTransactionMaxAggregateInputType = {
   description?: true
   rawDescription?: true
   categoryId?: true
+  propertyId?: true
   notes?: true
   isExcluded?: true
   excludeReason?: true
@@ -178,6 +183,7 @@ export type HomeTransactionCountAggregateInputType = {
   description?: true
   rawDescription?: true
   categoryId?: true
+  propertyId?: true
   notes?: true
   isExcluded?: true
   excludeReason?: true
@@ -288,6 +294,7 @@ export type HomeTransactionGroupByOutputType = {
   description: string
   rawDescription: string
   categoryId: string | null
+  propertyId: string | null
   notes: string | null
   isExcluded: boolean
   excludeReason: string | null
@@ -334,6 +341,7 @@ export type HomeTransactionWhereInput = {
   description?: Prisma.StringFilter<"HomeTransaction"> | string
   rawDescription?: Prisma.StringFilter<"HomeTransaction"> | string
   categoryId?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
+  propertyId?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
   notes?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
   isExcluded?: Prisma.BoolFilter<"HomeTransaction"> | boolean
   excludeReason?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
@@ -360,6 +368,7 @@ export type HomeTransactionOrderByWithRelationInput = {
   description?: Prisma.SortOrder
   rawDescription?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  propertyId?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   isExcluded?: Prisma.SortOrder
   excludeReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -389,6 +398,7 @@ export type HomeTransactionWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringFilter<"HomeTransaction"> | string
   rawDescription?: Prisma.StringFilter<"HomeTransaction"> | string
   categoryId?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
+  propertyId?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
   notes?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
   isExcluded?: Prisma.BoolFilter<"HomeTransaction"> | boolean
   excludeReason?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
@@ -415,6 +425,7 @@ export type HomeTransactionOrderByWithAggregationInput = {
   description?: Prisma.SortOrder
   rawDescription?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  propertyId?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   isExcluded?: Prisma.SortOrder
   excludeReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -446,6 +457,7 @@ export type HomeTransactionScalarWhereWithAggregatesInput = {
   description?: Prisma.StringWithAggregatesFilter<"HomeTransaction"> | string
   rawDescription?: Prisma.StringWithAggregatesFilter<"HomeTransaction"> | string
   categoryId?: Prisma.StringNullableWithAggregatesFilter<"HomeTransaction"> | string | null
+  propertyId?: Prisma.StringNullableWithAggregatesFilter<"HomeTransaction"> | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"HomeTransaction"> | string | null
   isExcluded?: Prisma.BoolWithAggregatesFilter<"HomeTransaction"> | boolean
   excludeReason?: Prisma.StringNullableWithAggregatesFilter<"HomeTransaction"> | string | null
@@ -467,6 +479,7 @@ export type HomeTransactionCreateInput = {
   amount: number
   description: string
   rawDescription: string
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -492,6 +505,7 @@ export type HomeTransactionUncheckedCreateInput = {
   description: string
   rawDescription: string
   categoryId?: string | null
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -513,6 +527,7 @@ export type HomeTransactionUpdateInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -538,6 +553,7 @@ export type HomeTransactionUncheckedUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -561,6 +577,7 @@ export type HomeTransactionCreateManyInput = {
   description: string
   rawDescription: string
   categoryId?: string | null
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -582,6 +599,7 @@ export type HomeTransactionUpdateManyMutationInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -604,6 +622,7 @@ export type HomeTransactionUncheckedUpdateManyInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -637,6 +656,7 @@ export type HomeTransactionCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   rawDescription?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
+  propertyId?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   isExcluded?: Prisma.SortOrder
   excludeReason?: Prisma.SortOrder
@@ -666,6 +686,7 @@ export type HomeTransactionMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   rawDescription?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
+  propertyId?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   isExcluded?: Prisma.SortOrder
   excludeReason?: Prisma.SortOrder
@@ -689,6 +710,7 @@ export type HomeTransactionMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   rawDescription?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
+  propertyId?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   isExcluded?: Prisma.SortOrder
   excludeReason?: Prisma.SortOrder
@@ -842,6 +864,7 @@ export type HomeTransactionCreateWithoutHomeAccountInput = {
   amount: number
   description: string
   rawDescription: string
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -865,6 +888,7 @@ export type HomeTransactionUncheckedCreateWithoutHomeAccountInput = {
   description: string
   rawDescription: string
   categoryId?: string | null
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -917,6 +941,7 @@ export type HomeTransactionScalarWhereInput = {
   description?: Prisma.StringFilter<"HomeTransaction"> | string
   rawDescription?: Prisma.StringFilter<"HomeTransaction"> | string
   categoryId?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
+  propertyId?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
   notes?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
   isExcluded?: Prisma.BoolFilter<"HomeTransaction"> | boolean
   excludeReason?: Prisma.StringNullableFilter<"HomeTransaction"> | string | null
@@ -938,6 +963,7 @@ export type HomeTransactionCreateWithoutCategoryInput = {
   amount: number
   description: string
   rawDescription: string
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -961,6 +987,7 @@ export type HomeTransactionUncheckedCreateWithoutCategoryInput = {
   amount: number
   description: string
   rawDescription: string
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -1008,6 +1035,7 @@ export type HomeTransactionCreateWithoutImportInput = {
   amount: number
   description: string
   rawDescription: string
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -1032,6 +1060,7 @@ export type HomeTransactionUncheckedCreateWithoutImportInput = {
   description: string
   rawDescription: string
   categoryId?: string | null
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -1079,6 +1108,7 @@ export type HomeTransactionCreateManyHomeAccountInput = {
   description: string
   rawDescription: string
   categoryId?: string | null
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -1100,6 +1130,7 @@ export type HomeTransactionUpdateWithoutHomeAccountInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1123,6 +1154,7 @@ export type HomeTransactionUncheckedUpdateWithoutHomeAccountInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1145,6 +1177,7 @@ export type HomeTransactionUncheckedUpdateManyWithoutHomeAccountInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1167,6 +1200,7 @@ export type HomeTransactionCreateManyCategoryInput = {
   amount: number
   description: string
   rawDescription: string
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -1188,6 +1222,7 @@ export type HomeTransactionUpdateWithoutCategoryInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1211,6 +1246,7 @@ export type HomeTransactionUncheckedUpdateWithoutCategoryInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1233,6 +1269,7 @@ export type HomeTransactionUncheckedUpdateManyWithoutCategoryInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1256,6 +1293,7 @@ export type HomeTransactionCreateManyImportInput = {
   description: string
   rawDescription: string
   categoryId?: string | null
+  propertyId?: string | null
   notes?: string | null
   isExcluded?: boolean
   excludeReason?: string | null
@@ -1276,6 +1314,7 @@ export type HomeTransactionUpdateWithoutImportInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1300,6 +1339,7 @@ export type HomeTransactionUncheckedUpdateWithoutImportInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1322,6 +1362,7 @@ export type HomeTransactionUncheckedUpdateManyWithoutImportInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   rawDescription?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isExcluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   excludeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1346,6 +1387,7 @@ export type HomeTransactionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   description?: boolean
   rawDescription?: boolean
   categoryId?: boolean
+  propertyId?: boolean
   notes?: boolean
   isExcluded?: boolean
   excludeReason?: boolean
@@ -1372,6 +1414,7 @@ export type HomeTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   description?: boolean
   rawDescription?: boolean
   categoryId?: boolean
+  propertyId?: boolean
   notes?: boolean
   isExcluded?: boolean
   excludeReason?: boolean
@@ -1398,6 +1441,7 @@ export type HomeTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   description?: boolean
   rawDescription?: boolean
   categoryId?: boolean
+  propertyId?: boolean
   notes?: boolean
   isExcluded?: boolean
   excludeReason?: boolean
@@ -1424,6 +1468,7 @@ export type HomeTransactionSelectScalar = {
   description?: boolean
   rawDescription?: boolean
   categoryId?: boolean
+  propertyId?: boolean
   notes?: boolean
   isExcluded?: boolean
   excludeReason?: boolean
@@ -1436,7 +1481,7 @@ export type HomeTransactionSelectScalar = {
   updatedAt?: boolean
 }
 
-export type HomeTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "homeAccountId" | "date" | "year" | "month" | "amount" | "description" | "rawDescription" | "categoryId" | "notes" | "isExcluded" | "excludeReason" | "dedupeGroupId" | "needsReview" | "isManual" | "importId" | "externalKey" | "createdAt" | "updatedAt", ExtArgs["result"]["homeTransaction"]>
+export type HomeTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "homeAccountId" | "date" | "year" | "month" | "amount" | "description" | "rawDescription" | "categoryId" | "propertyId" | "notes" | "isExcluded" | "excludeReason" | "dedupeGroupId" | "needsReview" | "isManual" | "importId" | "externalKey" | "createdAt" | "updatedAt", ExtArgs["result"]["homeTransaction"]>
 export type HomeTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   homeAccount?: boolean | Prisma.HomeAccountDefaultArgs<ExtArgs>
   category?: boolean | Prisma.HomeTransaction$categoryArgs<ExtArgs>
@@ -1471,6 +1516,7 @@ export type $HomeTransactionPayload<ExtArgs extends runtime.Types.Extensions.Int
     description: string
     rawDescription: string
     categoryId: string | null
+    propertyId: string | null
     notes: string | null
     isExcluded: boolean
     excludeReason: string | null
@@ -1917,6 +1963,7 @@ export interface HomeTransactionFieldRefs {
   readonly description: Prisma.FieldRef<"HomeTransaction", 'String'>
   readonly rawDescription: Prisma.FieldRef<"HomeTransaction", 'String'>
   readonly categoryId: Prisma.FieldRef<"HomeTransaction", 'String'>
+  readonly propertyId: Prisma.FieldRef<"HomeTransaction", 'String'>
   readonly notes: Prisma.FieldRef<"HomeTransaction", 'String'>
   readonly isExcluded: Prisma.FieldRef<"HomeTransaction", 'Boolean'>
   readonly excludeReason: Prisma.FieldRef<"HomeTransaction", 'String'>

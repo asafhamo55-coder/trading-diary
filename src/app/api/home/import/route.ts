@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const learned = await prisma.homeCategoryRule.findMany({
       where: { accountId: account.id },
       orderBy: { priority: "desc" },
-      select: { matcher: true, categoryId: true },
+      select: { matcher: true, categoryId: true, propertyId: true },
     });
 
     // Dedup against rows already imported into this account. Occurrence-aware:
@@ -86,6 +86,7 @@ export async function POST(req: NextRequest) {
       description: string;
       rawDescription: string;
       categoryId: string | null;
+      propertyId: string | null;
       isExcluded: boolean;
       excludeReason: string | null;
       needsReview: boolean;
@@ -107,12 +108,14 @@ export async function POST(req: NextRequest) {
 
       // Learned rules win over built-in classification.
       let categoryId: string | null = null;
+      let propertyId: string | null = null;
       let excluded = false;
       let excludeReason: string | null = null;
       const rawLower = r.raw.toLowerCase();
       const learnedHit = learned.find((l) => l.matcher && rawLower.includes(l.matcher));
       if (learnedHit) {
-        categoryId = learnedHit.categoryId;
+        categoryId = learnedHit.categoryId ?? null;
+        propertyId = learnedHit.propertyId ?? null;
       } else {
         const c = classify(r.raw);
         if (c.categoryName) categoryId = catIdByName.get(c.categoryName.toLowerCase()) ?? null;
@@ -121,7 +124,7 @@ export async function POST(req: NextRequest) {
           excludeReason = "Auto: card payment / transfer";
         }
       }
-      const needsReview = !excluded && categoryId === null;
+      const needsReview = !excluded && categoryId === null && propertyId === null;
       if (needsReview) needsReviewCount++;
 
       if (!minDate || r.date < minDate) minDate = r.date;
@@ -137,6 +140,7 @@ export async function POST(req: NextRequest) {
         description: r.description,
         rawDescription: r.raw,
         categoryId,
+        propertyId,
         isExcluded: excluded,
         excludeReason,
         needsReview,

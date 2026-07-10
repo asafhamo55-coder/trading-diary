@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
         description: data.description,
         rawDescription: data.description,
         categoryId: data.categoryId ?? null,
+        propertyId: data.propertyId ?? null,
         notes: data.notes ?? null,
         isExcluded: data.isExcluded ?? false,
         excludeReason: data.excludeReason ?? null,
