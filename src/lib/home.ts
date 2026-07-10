@@ -154,6 +154,7 @@ export interface HomeTransactionDTO {
   excludeReason: string | null;
   needsReview: boolean;
   isManual: boolean;
+  merchantKey: string; // normalized merchant, for grouping similar rows
 }
 
 /** A property the user can attribute Home expenses to. */

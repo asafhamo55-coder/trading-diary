@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Loader2, EyeOff, Eye, Pencil, Save, X, Building2 } from "lucide-react";
+import { Trash2, Loader2, EyeOff, Eye, Pencil, Save, X, Building2, Search, Layers } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import HomeCategorySelect, { type Selection } from "@/components/home/HomeCategorySelect";
 import {
@@ -42,12 +42,74 @@ export default function HomeLedger({
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<HomeTransactionDTO | null>(null);
 
+  // Filters.
+  const [filter, setFilter] = useState<"all" | "review" | "excluded">("all");
+  const [accountFilter, setAccountFilter] = useState("");
+  const [query, setQuery] = useState("");
+
+  // "Apply to similar" prompt state.
+  const [similar, setSimilar] = useState<{
+    sel: Selection;
+    merchant: string;
+    ids: string[];
+  } | null>(null);
+
+  const reviewCount = useMemo(
+    () => transactions.filter((t) => t.needsReview).length,
+    [transactions]
+  );
+  const excludedCount = useMemo(
+    () => transactions.filter((t) => t.isExcluded).length,
+    [transactions]
+  );
+
+  const q = query.trim().toLowerCase();
+  const filtered = transactions.filter((t) => {
+    if (filter === "review" && !t.needsReview) return false;
+    if (filter === "excluded" && !t.isExcluded) return false;
+    if (accountFilter && t.homeAccountId !== accountFilter) return false;
+    if (
+      q &&
+      !t.description.toLowerCase().includes(q) &&
+      !t.rawDescription.toLowerCase().includes(q)
+    )
+      return false;
+    return true;
+  });
+
   function stage(id: string, patch: Pending) {
     setPending((prev) => {
       const next = new Map(prev);
       next.set(id, { ...next.get(id), ...patch });
       return next;
     });
+  }
+
+  // Stage a category/property on a row; if it's under review and other review
+  // rows share the same merchant, offer to apply to all of them.
+  function handleSelect(tx: HomeTransactionDTO, sel: Selection) {
+    stage(tx.id, { categoryId: sel.categoryId, propertyId: sel.propertyId });
+    const isAssign = !!(sel.categoryId || sel.propertyId);
+    if (isAssign && tx.needsReview && tx.merchantKey.length >= 3) {
+      const others = transactions.filter(
+        (t) =>
+          t.id !== tx.id &&
+          t.needsReview &&
+          t.merchantKey === tx.merchantKey &&
+          !pending.has(t.id)
+      );
+      if (others.length > 0) {
+        setSimilar({ sel, merchant: tx.description, ids: others.map((t) => t.id) });
+      }
+    }
+  }
+
+  function applySimilar() {
+    if (!similar) return;
+    for (const id of similar.ids) {
+      stage(id, { categoryId: similar.sel.categoryId, propertyId: similar.sel.propertyId });
+    }
+    setSimilar(null);
   }
 
   function effective(t: HomeTransactionDTO) {
@@ -92,7 +154,7 @@ export default function HomeLedger({
 
   return (
     <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-[var(--foreground)]">
           Transactions · {year}
         </h3>
@@ -103,13 +165,55 @@ export default function HomeLedger({
         )}
       </div>
 
+      {/* Filters */}
+      {transactions.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap mb-4">
+          <div className="inline-flex rounded-lg border border-[var(--border)] p-0.5">
+            <FilterTab active={filter === "all"} onClick={() => setFilter("all")}>
+              All
+            </FilterTab>
+            <FilterTab active={filter === "review"} onClick={() => setFilter("review")}>
+              Needs review{reviewCount > 0 ? ` (${reviewCount})` : ""}
+            </FilterTab>
+            <FilterTab active={filter === "excluded"} onClick={() => setFilter("excluded")}>
+              Excluded{excludedCount > 0 ? ` (${excludedCount})` : ""}
+            </FilterTab>
+          </div>
+          {accounts.length > 1 && (
+            <select
+              value={accountFilter}
+              onChange={(e) => setAccountFilter(e.target.value)}
+              className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs text-[var(--foreground)] focus:outline-none"
+            >
+              <option value="">All accounts</option>
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>{a.name}</option>
+              ))}
+            </select>
+          )}
+          <div className="relative flex-1 min-w-[140px]">
+            <Search className="w-3.5 h-3.5 text-[var(--muted-foreground)] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search…"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] pl-8 pr-2 py-1.5 text-xs text-[var(--foreground)] focus:outline-none"
+            />
+          </div>
+        </div>
+      )}
+
       {transactions.length === 0 ? (
         <p className="text-sm text-[var(--muted-foreground)] py-2">
           No transactions yet. Import a statement or add a row to get started.
         </p>
+      ) : filtered.length === 0 ? (
+        <p className="text-sm text-[var(--muted-foreground)] py-2">
+          No transactions match this filter.
+        </p>
       ) : (
         <div className="space-y-1">
-          {transactions.map((t) => {
+          {filtered.map((t) => {
             const eff = effective(t);
             const dirty = pending.has(t.id);
             return (
@@ -122,15 +226,49 @@ export default function HomeLedger({
                 propertyTitle={eff.propertyId ? propById.get(eff.propertyId)?.title : undefined}
                 tree={tree}
                 properties={properties}
-                onSelect={(sel: Selection) =>
-                  stage(t.id, { categoryId: sel.categoryId, propertyId: sel.propertyId })
-                }
+                onSelect={(sel: Selection) => handleSelect(t, sel)}
                 onToggleExclude={() => stage(t.id, { isExcluded: !eff.isExcluded })}
                 onEdit={() => setEditing(t)}
                 onDelete={() => remove(t.id)}
               />
             );
           })}
+        </div>
+      )}
+
+      {/* Apply-to-similar prompt */}
+      {similar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSimilar(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div
+            className="relative w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <Layers className="w-5 h-5 text-[#00D68F]" />
+              <h3 className="text-sm font-semibold text-[var(--foreground)]">Apply to similar?</h3>
+            </div>
+            <p className="text-sm text-[var(--muted-foreground)]">
+              {similar.ids.length} other transaction{similar.ids.length !== 1 ? "s" : ""} from{" "}
+              <span className="font-medium text-[var(--foreground)]">{similar.merchant}</span> {similar.ids.length !== 1 ? "are" : "is"} also
+              under review. Apply the same to {similar.ids.length !== 1 ? "them" : "it"} too?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setSimilar(null)}
+                className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2"
+              >
+                Just this one
+              </button>
+              <button
+                onClick={applySimilar}
+                className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-[#0C0F14]"
+                style={{ background: "#00D68F" }}
+              >
+                Apply to all {similar.ids.length}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -174,6 +312,30 @@ export default function HomeLedger({
         />
       )}
     </div>
+  );
+}
+
+function FilterTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap",
+        active
+          ? "bg-[#00D68F]/15 text-[#00D68F]"
+          : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+      )}
+    >
+      {children}
+    </button>
   );
 }
 

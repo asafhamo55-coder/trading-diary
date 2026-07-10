@@ -1,6 +1,7 @@
 // Server-side data access for Hamo Home.
 import { prisma } from "./db";
 import { ensureHomeSchema } from "./home-schema";
+import { cleanDescription } from "./home-import";
 import {
   DEFAULT_CATEGORIES,
   type HomeAccountDTO,
@@ -141,6 +142,7 @@ function serializeTx(t: {
     excludeReason: t.excludeReason,
     needsReview: t.needsReview,
     isManual: t.isManual,
+    merchantKey: cleanDescription(t.rawDescription).toLowerCase(),
   };
 }
 
