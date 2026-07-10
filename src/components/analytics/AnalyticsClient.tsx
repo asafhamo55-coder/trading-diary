@@ -190,19 +190,24 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
   }, [monthlyTrend]);
 
   return (
-    <div className="flex-1 p-6 lg:p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
-          Advanced Analytics
-        </h1>
-        <p className="text-[var(--muted-foreground)] text-sm mt-1">
+    <div className="flex-1 p-5 sm:p-6 lg:p-8">
+      <div className="mb-7">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#3B82F6]/12 ring-1 ring-inset ring-[#3B82F6]/20">
+            <BarChart3 className="w-[18px] h-[18px] text-[#3B82F6]" />
+          </span>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
+            Advanced Analytics
+          </h1>
+        </div>
+        <p className="text-[var(--muted-foreground)] text-sm mt-2">
           Comprehensive performance analysis across all trades
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
         {/* Overall Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5 sm:gap-4">
           {[
             {
               label: "Total Trades",
@@ -243,15 +248,15 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-4"
+              className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-4 shadow-sm transition-colors hover:border-[#3B82F6]/30"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <stat.icon className={cn("w-4 h-4", stat.iconColor)} />
-                <p className="text-xs text-[var(--muted-foreground)]">{stat.label}</p>
+              <div className="flex items-center gap-2 mb-2.5">
+                <stat.icon className={cn("w-4 h-4 shrink-0", stat.iconColor)} />
+                <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted-foreground)]">{stat.label}</p>
               </div>
               <p
                 className={cn(
-                  "text-xl font-bold",
+                  "font-data text-2xl font-bold tracking-tight tabular-nums",
                   stat.color ?? "text-[var(--foreground)]"
                 )}
               >
@@ -262,24 +267,31 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
         </div>
 
         {/* Symbol Performance */}
-        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
-          <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+        <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-5 shadow-sm">
+          <h2 className="text-base font-semibold text-[var(--foreground)] mb-4">
             Symbol Performance
           </h2>
-          <div className="overflow-x-auto">
+          {symbolStats.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-1 py-10 text-center">
+              <BarChart3 className="w-7 h-7 text-[var(--muted-foreground)] opacity-50 mb-1" />
+              <p className="text-sm font-medium text-[var(--foreground)]">No symbol data yet</p>
+              <p className="text-xs text-[var(--muted-foreground)]">Close a trade to see per-symbol performance.</p>
+            </div>
+          ) : (
+          <div className="overflow-x-auto -mx-5 px-5">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--border)]">
-                  <th className="text-left py-2 text-[var(--muted-foreground)] font-medium">
+                  <th className="text-left py-2.5 text-xs uppercase tracking-wide text-[var(--muted-foreground)] font-medium">
                     Symbol
                   </th>
-                  <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
+                  <th className="text-right py-2.5 text-xs uppercase tracking-wide text-[var(--muted-foreground)] font-medium">
                     Trades
                   </th>
-                  <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
+                  <th className="text-right py-2.5 text-xs uppercase tracking-wide text-[var(--muted-foreground)] font-medium">
                     Total P&L
                   </th>
-                  <th className="text-right py-2 text-[var(--muted-foreground)] font-medium">
+                  <th className="text-right py-2.5 text-xs uppercase tracking-wide text-[var(--muted-foreground)] font-medium">
                     Win Rate
                   </th>
                 </tr>
@@ -288,24 +300,24 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
                 {symbolStats.map((s) => (
                   <tr
                     key={s.symbol}
-                    className="border-b border-[#2A3040]/50"
+                    className="border-b border-[var(--border)] last:border-0 transition-colors hover:bg-[var(--muted)]/50"
                   >
-                    <td className="py-2 font-medium text-[var(--foreground)]">
+                    <td className="py-2.5 font-semibold text-[var(--foreground)]">
                       {s.symbol}
                     </td>
-                    <td className="py-2 text-right text-[var(--foreground)]">
+                    <td className="py-2.5 text-right font-data tabular-nums text-[var(--muted-foreground)]">
                       {s.count}
                     </td>
                     <td
                       className={cn(
-                        "py-2 text-right font-medium",
+                        "py-2.5 text-right font-data font-semibold tabular-nums",
                         s.totalPnL >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
                       )}
                     >
                       {s.totalPnL >= 0 ? "+" : ""}
                       {formatCurrency(s.totalPnL)}
                     </td>
-                    <td className="py-2 text-right text-[var(--foreground)]">
+                    <td className="py-2.5 text-right font-data tabular-nums text-[var(--foreground)]">
                       {formatPercent(s.winRate)}
                     </td>
                   </tr>
@@ -313,102 +325,108 @@ export default function AnalyticsClient({ trades }: { trades: Trade[] }) {
               </tbody>
             </table>
           </div>
+          )}
         </div>
 
         {/* Direction Performance */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <ArrowUpRight className="w-5 h-5 text-[#00D68F]" />
-              <h3 className="font-semibold text-[var(--foreground)]">Long Trades</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-[var(--muted-foreground)]">Count</span>
-                <span className="text-sm font-medium text-[var(--foreground)]">
-                  {directionStats.long.count}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-[var(--muted-foreground)]">Total P&L</span>
-                <span
-                  className={cn(
-                    "text-sm font-medium",
-                    directionStats.long.totalPnL >= 0
-                      ? "text-[#00D68F]"
-                      : "text-[#FF4D6A]"
-                  )}
-                >
-                  {formatCurrency(directionStats.long.totalPnL)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-[var(--muted-foreground)]">Win Rate</span>
-                <span className="text-sm font-medium text-[var(--foreground)]">
-                  {formatPercent(directionStats.long.winRate)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-[var(--muted-foreground)]">Avg R/R</span>
-                <span className="text-sm font-medium text-[var(--foreground)]">
-                  {formatNumber(directionStats.long.avgRR)}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <ArrowDownRight className="w-5 h-5 text-[#FF4D6A]" />
-              <h3 className="font-semibold text-[var(--foreground)]">Short Trades</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-[var(--muted-foreground)]">Count</span>
-                <span className="text-sm font-medium text-[var(--foreground)]">
-                  {directionStats.short.count}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-[var(--muted-foreground)]">Total P&L</span>
-                <span
-                  className={cn(
-                    "text-sm font-medium",
-                    directionStats.short.totalPnL >= 0
-                      ? "text-[#00D68F]"
-                      : "text-[#FF4D6A]"
-                  )}
-                >
-                  {formatCurrency(directionStats.short.totalPnL)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-[var(--muted-foreground)]">Win Rate</span>
-                <span className="text-sm font-medium text-[var(--foreground)]">
-                  {formatPercent(directionStats.short.winRate)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-[var(--muted-foreground)]">Avg R/R</span>
-                <span className="text-sm font-medium text-[var(--foreground)]">
-                  {formatNumber(directionStats.short.avgRR)}
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+          <DirectionCard
+            direction="long"
+            count={directionStats.long.count}
+            totalPnL={directionStats.long.totalPnL}
+            winRate={directionStats.long.winRate}
+            avgRR={directionStats.long.avgRR}
+          />
+          <DirectionCard
+            direction="short"
+            count={directionStats.short.count}
+            totalPnL={directionStats.short.totalPnL}
+            winRate={directionStats.short.winRate}
+            avgRR={directionStats.short.avgRR}
+          />
         </div>
 
         {/* Monthly Trend */}
-        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-5">
-          <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+        <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-5 shadow-sm">
+          <h2 className="text-base font-semibold text-[var(--foreground)] mb-4">
             Monthly Trend
           </h2>
           {monthlyTrend.length === 0 ? (
-            <p className="text-sm text-[var(--muted-foreground)]">No trading data yet.</p>
+            <div className="flex flex-col items-center justify-center gap-1 py-10 text-center">
+              <TrendingUp className="w-7 h-7 text-[var(--muted-foreground)] opacity-50 mb-1" />
+              <p className="text-sm font-medium text-[var(--foreground)]">No trading data yet</p>
+              <p className="text-xs text-[var(--muted-foreground)]">Your monthly P&amp;L will chart here once trades close.</p>
+            </div>
           ) : (
             <div style={{ height: Math.max(monthlyTrend.length * 32 + 32, 160) }}>
               <EChart option={monthlyTrendOption} />
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DirectionCard({
+  direction,
+  count,
+  totalPnL,
+  winRate,
+  avgRR,
+}: {
+  direction: "long" | "short";
+  count: number;
+  totalPnL: number;
+  winRate: number;
+  avgRR: number;
+}) {
+  const isLong = direction === "long";
+  const accent = isLong ? "#00D68F" : "#FF4D6A";
+  const Icon = isLong ? ArrowUpRight : ArrowDownRight;
+  const positive = totalPnL >= 0;
+
+  return (
+    <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-5 shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
+          <span
+            className="flex h-8 w-8 items-center justify-center rounded-xl"
+            style={{ backgroundColor: `${accent}1A` }}
+          >
+            <Icon className="w-[18px] h-[18px]" style={{ color: accent }} />
+          </span>
+          <h3 className="font-semibold text-[var(--foreground)]">
+            {isLong ? "Long" : "Short"} Trades
+          </h3>
+        </div>
+        <span className="font-data text-xs text-[var(--muted-foreground)] tabular-nums">
+          {count} {count === 1 ? "trade" : "trades"}
+        </span>
+      </div>
+
+      <div
+        className={cn(
+          "font-data text-2xl font-bold tracking-tight tabular-nums mb-4",
+          positive ? "text-[#00D68F]" : "text-[#FF4D6A]"
+        )}
+      >
+        {positive ? "+" : ""}
+        {formatCurrency(totalPnL)}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 border-t border-[var(--border)] pt-4">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">Win Rate</p>
+          <p className="font-data text-sm font-semibold text-[var(--foreground)] tabular-nums mt-0.5">
+            {formatPercent(winRate)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">Avg R/R</p>
+          <p className="font-data text-sm font-semibold text-[var(--foreground)] tabular-nums mt-0.5">
+            {formatNumber(avgRR)}
+          </p>
         </div>
       </div>
     </div>

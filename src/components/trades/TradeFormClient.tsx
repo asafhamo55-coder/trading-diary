@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { cn, formatCurrency, todayInEastern } from "@/lib/utils";
 import { TRADE_TYPES, type Direction } from "@/lib/types";
@@ -277,16 +278,17 @@ export default function TradeFormClient({
   );
 
   const inputClass =
-    "w-full rounded-lg bg-[var(--muted)] border border-[var(--border)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]";
-  const labelClass = "block text-sm font-medium text-[var(--muted-foreground)] mb-1";
+    "w-full rounded-lg bg-[var(--muted)] border border-[var(--border)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/60 focus:border-[#3B82F6]/60 transition-shadow";
+  const labelClass = "block text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)] mb-1.5";
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl">
+        <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6 lg:px-8">
           <Link
             href={isEdit && tradeId ? `/trade/trades/${tradeId}` : "/trade/trades"}
-            className="inline-flex items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors mb-4"
+            className="pressable inline-flex items-center gap-1.5 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors mb-2"
           >
             <ArrowLeft className="h-4 w-4" />
             {isEdit ? "Back to Trade" : "Back to Trades"}
@@ -295,10 +297,14 @@ export default function TradeFormClient({
             {isEdit ? "Edit Trade" : "New Trade"}
           </h1>
         </div>
+      </div>
+
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Info */}
-          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6 space-y-5">
+          <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-6 space-y-5 shadow-sm">
+            <h2 className="text-base font-semibold">Trade Details</h2>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label className={labelClass}>Trade Date</label>
@@ -358,9 +364,9 @@ export default function TradeFormClient({
                   type="button"
                   onClick={() => setValue("direction", "LONG")}
                   className={cn(
-                    "flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors",
+                    "pressable flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors",
                     direction === "LONG"
-                      ? "bg-[#00D68F]/15 text-[#00D68F] border border-[#00D68F]/30"
+                      ? "bg-[#00D68F]/15 text-[#00D68F] border border-[#00D68F]/30 ring-1 ring-[#00D68F]/20"
                       : "bg-[var(--muted)] text-[var(--muted-foreground)] border border-[var(--border)] hover:text-[var(--foreground)]"
                   )}
                 >
@@ -370,9 +376,9 @@ export default function TradeFormClient({
                   type="button"
                   onClick={() => setValue("direction", "SHORT")}
                   className={cn(
-                    "flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors",
+                    "pressable flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors",
                     direction === "SHORT"
-                      ? "bg-[#FF4D6A]/15 text-[#FF4D6A] border border-[#FF4D6A]/30"
+                      ? "bg-[#FF4D6A]/15 text-[#FF4D6A] border border-[#FF4D6A]/30 ring-1 ring-[#FF4D6A]/20"
                       : "bg-[var(--muted)] text-[var(--muted-foreground)] border border-[var(--border)] hover:text-[var(--foreground)]"
                   )}
                 >
@@ -433,8 +439,11 @@ export default function TradeFormClient({
 
           {/* Computed Preview */}
           {computed && (
-            <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6">
-              <h2 className="text-base font-semibold mb-4">Computed Preview</h2>
+            <div className="rounded-2xl border border-[#3B82F6]/30 bg-[#3B82F6]/5 p-6 shadow-sm">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#3B82F6]" />
+                <h2 className="text-base font-semibold">Computed Preview</h2>
+              </div>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                 <Mini label="Total Shares" value={String(computed.totalShares)} />
                 <Mini
@@ -473,11 +482,11 @@ export default function TradeFormClient({
           )}
 
           {/* Post-Trade Analysis */}
-          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] overflow-hidden">
+          <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] overflow-hidden shadow-sm">
             <button
               type="button"
               onClick={() => setAnalysisOpen(!analysisOpen)}
-              className="flex items-center justify-between w-full px-6 py-4 text-left hover:bg-[var(--muted)] transition-colors"
+              className="flex items-center justify-between w-full px-6 py-4 text-left hover:bg-[var(--muted)]/60 transition-colors"
             >
               <h2 className="text-base font-semibold">Post-Trade Analysis</h2>
               {analysisOpen ? (
@@ -539,13 +548,13 @@ export default function TradeFormClient({
 
           {/* Error Tags */}
           {errorDefinitions.length > 0 && (
-            <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6">
+            <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-6 shadow-sm">
               <h2 className="text-base font-semibold mb-4">Error Tags</h2>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5">
                 {errorDefinitions.map((err) => (
                   <label
                     key={err.id}
-                    className="flex items-center gap-2 cursor-pointer"
+                    className="pressable flex items-center gap-2 cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--muted)]/40 px-3 py-2 hover:border-[#3B82F6]/40 transition-colors"
                   >
                     <input
                       type="checkbox"
@@ -562,7 +571,7 @@ export default function TradeFormClient({
 
           {/* Money Left on Table (LONG only) */}
           {direction === "LONG" && (
-            <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6">
+            <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-6 shadow-sm">
               <h2 className="text-base font-semibold mb-4">
                 Money Left on Table
               </h2>
@@ -592,22 +601,23 @@ export default function TradeFormClient({
           )}
 
           {submitError && (
-            <div className="rounded-lg bg-[#FF4D6A]/10 border border-[#FF4D6A]/30 text-[#FF4D6A] text-sm px-4 py-3">
-              {submitError}
+            <div className="flex items-start gap-2.5 rounded-lg bg-[#FF4D6A]/10 border border-[#FF4D6A]/30 text-[#FF4D6A] text-sm px-4 py-3">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>{submitError}</span>
             </div>
           )}
 
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
             <Link
               href={isEdit && tradeId ? `/trade/trades/${tradeId}` : "/trade/trades"}
-              className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-5 py-2.5 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+              className="pressable inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card)] px-5 py-2.5 text-sm font-medium text-[var(--muted-foreground)] shadow-sm hover:text-[var(--foreground)] transition-colors"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#3B82F6] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#3B82F6]/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="pressable inline-flex items-center justify-center gap-2 rounded-lg bg-[#3B82F6] px-5 py-2.5 text-sm font-medium text-white shadow-sm shadow-[#3B82F6]/20 hover:bg-[#3B82F6]/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {isEdit ? "Save Changes" : "Save Trade"}
@@ -630,8 +640,10 @@ function Mini({
 }) {
   return (
     <div>
-      <div className="text-xs text-[var(--muted-foreground)] mb-1">{label}</div>
-      <div className={cn("text-sm font-mono font-semibold", color)}>
+      <div className="text-[11px] uppercase tracking-wide text-[var(--muted-foreground)] mb-1">
+        {label}
+      </div>
+      <div className={cn("text-sm font-data font-semibold", color)}>
         {value}
       </div>
     </div>
@@ -664,7 +676,7 @@ function LegsSection({
   labelClass,
 }: LegsSectionProps) {
   return (
-    <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6">
+    <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-6 shadow-sm">
       <h2 className="text-base font-semibold mb-4">{title}</h2>
       <div className="space-y-3">
         {fields.map((field, index) => {
@@ -677,9 +689,12 @@ function LegsSection({
           return (
             <div
               key={field.id}
-              className="flex items-end gap-3 flex-wrap"
+              className="flex items-end gap-3 flex-wrap rounded-lg border border-[var(--border)]/60 bg-[var(--muted)]/20 p-3"
             >
-              <div className="flex-1 min-w-[140px]">
+              <div className="flex h-9 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--muted)] text-xs font-data font-semibold text-[var(--muted-foreground)]">
+                {index + 1}
+              </div>
+              <div className="flex-1 min-w-[120px]">
                 <label className={labelClass}>Price</label>
                 <input
                   type="number"
@@ -689,7 +704,7 @@ function LegsSection({
                   className={cn(inputClass, "font-mono")}
                 />
               </div>
-              <div className="flex-1 min-w-[140px]">
+              <div className="flex-1 min-w-[120px]">
                 <label className={labelClass}>Quantity</label>
                 <input
                   type="number"
@@ -709,7 +724,9 @@ function LegsSection({
                 type="button"
                 onClick={() => remove(index)}
                 disabled={fields.length <= 1}
-                className="rounded-lg p-2 text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[#FF4D6A]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="pressable rounded-lg p-2 text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[#FF4D6A]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Remove leg"
+                aria-label="Remove leg"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -721,7 +738,7 @@ function LegsSection({
         <button
           type="button"
           onClick={append}
-          className="mt-3 inline-flex items-center gap-1.5 text-sm text-[#3B82F6] hover:text-[#3B82F6]/80 transition-colors"
+          className="pressable mt-3 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[var(--border)] px-3 py-2 text-sm font-medium text-[#3B82F6] hover:border-[#3B82F6]/50 hover:bg-[#3B82F6]/5 transition-colors"
         >
           <Plus className="h-4 w-4" />
           Add Leg

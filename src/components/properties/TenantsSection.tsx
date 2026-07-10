@@ -169,7 +169,7 @@ export default function TenantsSection({
           className="mb-5 rounded-xl border border-[var(--border)] border-t-2 border-t-accent-amber/40 bg-[var(--card)] p-4 shadow-sm space-y-4"
         >
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-[var(--foreground)]">
+            <h4 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">
               {editingId ? "Edit tenant" : "New tenant"}
             </h4>
             <Button
@@ -277,10 +277,22 @@ export default function TenantsSection({
       )}
 
       {sorted.length === 0 && !showForm ? (
-        <p className="text-sm text-[var(--muted-foreground)] py-2">
-          No tenants recorded. Add the current tenant, or backfill past ones to
-          keep a leasing history.
-        </p>
+        <div className="flex flex-col items-center justify-center text-center py-8">
+          <div className="mb-3 flex items-center justify-center w-12 h-12 rounded-xl bg-accent-amber/10 ring-1 ring-inset ring-accent-amber/20">
+            <Users className="w-6 h-6 text-accent-amber" />
+          </div>
+          <h4 className="text-sm font-semibold tracking-tight text-[var(--foreground)] mb-1">
+            No tenants yet
+          </h4>
+          <p className="text-sm text-[var(--muted-foreground)] max-w-xs mb-4">
+            Add the current tenant, or backfill past ones to keep a leasing
+            history.
+          </p>
+          <Button variant="outline" size="sm" onClick={openAdd}>
+            <Plus className="w-4 h-4" />
+            Add tenant
+          </Button>
+        </div>
       ) : (
         <div className="space-y-5">
           {current.length > 0 && (
@@ -337,12 +349,12 @@ function TenantGroup({
           return (
             <div
               key={t.id}
-              className="rounded-lg border border-[var(--border)] p-4 group hover:bg-[var(--muted)]/30 transition-colors"
+              className="rounded-xl border border-[var(--border)] p-4 group hover:border-[var(--muted-foreground)]/30 hover:bg-[var(--muted)]/30 transition-colors"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-[var(--foreground)]">
+                    <span className="text-sm font-semibold tracking-tight text-[var(--foreground)]">
                       {t.name}
                     </span>
                     <span
@@ -356,7 +368,7 @@ function TenantGroup({
                       {active ? "Current" : "Past"}
                     </span>
                   </div>
-                  <p className="text-xs text-[var(--muted-foreground)] mt-1 font-data">
+                  <p className="text-xs text-[var(--muted-foreground)] mt-1 font-data tabular-nums">
                     {t.leaseStart} → {t.leaseEnd ?? "ongoing"}
                     {t.monthlyRent != null && (
                       <span className="ml-2">· {formatCurrency(t.monthlyRent)}/mo</span>

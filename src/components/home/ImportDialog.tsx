@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Upload, Loader2, FileText, CheckCircle2 } from "lucide-react";
+import { X, Upload, Loader2, FileText, CheckCircle2, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { accountTypeShort, type HomeAccountDTO } from "@/lib/home";
 
 const ACCENT = "#00D68F";
@@ -63,31 +64,33 @@ export default function ImportDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-4 shadow-2xl"
+        className="relative w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-4 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-[var(--foreground)] flex items-center gap-2">
-            <Upload className="w-4 h-4" style={{ color: ACCENT }} />
+          <h3 className="text-base font-semibold text-[var(--foreground)] flex items-center gap-2.5">
+            <span className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: `${ACCENT}1A` }}>
+              <Upload className="w-4 h-4" style={{ color: ACCENT }} />
+            </span>
             Import statement
           </h3>
-          <button onClick={onClose} className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+          <button onClick={onClose} className="pressable p-1 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {result ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-[#00D68F]">
-              <CheckCircle2 className="w-5 h-5" />
-              <span className="font-semibold">Imported</span>
+            <div className="flex items-center gap-2.5 rounded-xl bg-[#00D68F]/10 px-4 py-3">
+              <CheckCircle2 className="w-5 h-5 text-[#00D68F]" />
+              <span className="font-semibold text-[#00D68F]">Imported successfully</span>
             </div>
             <div className="grid grid-cols-3 gap-3 text-center">
-              <ResultTile label="Added" value={result.added} />
+              <ResultTile label="Added" value={result.added} accent="#00D68F" />
               <ResultTile label="Duplicates skipped" value={result.duplicates} />
-              <ResultTile label="Need review" value={result.needsReview} />
+              <ResultTile label="Need review" value={result.needsReview} accent={result.needsReview > 0 ? "#FFB547" : undefined} />
             </div>
             {result.needsReview > 0 && (
               <p className="text-xs text-[var(--muted-foreground)]">
@@ -102,13 +105,13 @@ export default function ImportDialog({
                   setCsv("");
                   setFilename("");
                 }}
-                className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2"
+                className="pressable text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2 transition-colors"
               >
                 Import another
               </button>
               <button
                 onClick={onClose}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-[#0C0F14]"
+                className="pressable rounded-lg px-4 py-2 text-sm font-semibold text-[#0C0F14] shadow-sm transition-[filter] hover:brightness-105"
                 style={{ background: ACCENT }}
               >
                 Done
@@ -138,10 +141,15 @@ export default function ImportDialog({
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-full flex items-center gap-2 rounded-lg border border-dashed border-[var(--border)] px-3 py-3 text-sm text-[var(--muted-foreground)] hover:border-[color:var(--border)] transition-colors"
+                className={cn(
+                  "pressable w-full flex items-center gap-2 rounded-lg border border-dashed px-3 py-3 text-sm transition-colors",
+                  filename
+                    ? "border-[#00D68F]/50 bg-[#00D68F]/5 text-[var(--foreground)]"
+                    : "border-[var(--border)] text-[var(--muted-foreground)] hover:border-[#00D68F]/40 hover:text-[var(--foreground)]"
+                )}
               >
-                <FileText className="w-4 h-4" />
-                {filename || "Choose a .csv statement export…"}
+                <FileText className={cn("w-4 h-4 shrink-0", filename && "text-[#00D68F]")} />
+                <span className="truncate">{filename || "Choose a .csv statement export…"}</span>
               </button>
               <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={onFile} className="hidden" />
             </div>
@@ -163,15 +171,20 @@ export default function ImportDialog({
               same month is safe (duplicates are skipped).
             </p>
 
-            {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
+            {error && (
+              <p className="flex items-center gap-1.5 text-sm text-[#FF4D6A]">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {error}
+              </p>
+            )}
             <div className="flex justify-end gap-2">
-              <button onClick={onClose} className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2">
+              <button onClick={onClose} className="pressable text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2 transition-colors">
                 Cancel
               </button>
               <button
                 onClick={submit}
                 disabled={importing}
-                className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-[#0C0F14] disabled:opacity-60"
+                className="pressable inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-[#0C0F14] shadow-sm transition-[filter] hover:brightness-105 disabled:opacity-60"
                 style={{ background: ACCENT }}
               >
                 {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
@@ -185,14 +198,19 @@ export default function ImportDialog({
   );
 }
 
-function ResultTile({ label, value }: { label: string; value: number }) {
+function ResultTile({ label, value, accent }: { label: string; value: number; accent?: string }) {
   return (
-    <div className="rounded-lg border border-[var(--border)] p-3">
-      <p className="text-xl font-bold font-data text-[var(--foreground)]">{value}</p>
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3">
+      <p
+        className="text-xl font-bold font-data tracking-tight"
+        style={{ color: accent ?? "var(--foreground)" }}
+      >
+        {value}
+      </p>
       <p className="text-[10px] text-[var(--muted-foreground)] mt-0.5">{label}</p>
     </div>
   );
 }
 
 const inputCls =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:border-[#00D68F]";
+  "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] transition-colors focus:outline-none focus:border-[#00D68F] focus:ring-2 focus:ring-[#00D68F]/20";

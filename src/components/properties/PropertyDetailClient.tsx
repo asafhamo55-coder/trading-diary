@@ -255,12 +255,12 @@ export default function PropertyDetailClient({
         <div className="min-w-0">
           <Link
             href="/properties"
-            className="inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-2"
+            className="pressable inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors mb-2"
           >
             <ArrowLeft className="w-4 h-4" />
             All properties
           </Link>
-          <h1 className="text-2xl font-bold text-[var(--foreground)] truncate">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)] truncate">
             {property.title}
           </h1>
           <p className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] mt-0.5">
@@ -400,9 +400,12 @@ export default function PropertyDetailClient({
           meta="net per month"
         />
         {transactions.length === 0 ? (
-          <p className="text-sm text-[var(--muted-foreground)] py-4">
-            No entries for {year} yet.
-          </p>
+          <div className="flex flex-col items-center justify-center text-center py-8">
+            <BarChart3 className="w-8 h-8 text-[var(--border)] mb-3" />
+            <p className="text-sm text-[var(--muted-foreground)]">
+              No entries for {year} yet.
+            </p>
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-12 gap-1.5 h-24 items-end">
@@ -607,9 +610,12 @@ export default function PropertyDetailClient({
         />
 
         {summary.byCategory.length === 0 ? (
-          <p className="text-sm text-[var(--muted-foreground)] py-4">
-            No entries for {year} yet. Add rental income and expenses below.
-          </p>
+          <div className="flex flex-col items-center justify-center text-center py-8">
+            <FileText className="w-8 h-8 text-[var(--border)] mb-3" />
+            <p className="text-sm text-[var(--muted-foreground)]">
+              No entries for {year} yet. Add rental income and expenses below.
+            </p>
+          </div>
         ) : (
           <div className="space-y-4">
             <SummaryGroup
@@ -625,11 +631,11 @@ export default function PropertyDetailClient({
               tone="neg"
               percentOf={summary.expenses}
             />
-            <div className="flex items-center justify-between pt-3 border-t border-[var(--border)]">
+            <div className="flex items-center justify-between rounded-lg bg-[var(--muted)]/40 px-3 py-2.5 mt-1">
               <span className="text-sm font-semibold text-[var(--foreground)]">
                 Net operating income
               </span>
-              <span className={cn("text-lg font-bold font-data", signedClass(summary.net))}>
+              <span className={cn("text-lg font-bold font-data tracking-tight tabular-nums", signedClass(summary.net))}>
                 {summary.net >= 0 ? "+" : ""}
                 {formatCurrency(summary.net)}
               </span>
@@ -643,7 +649,7 @@ export default function PropertyDetailClient({
         onSubmit={handleAdd}
         className="bg-[var(--card)] border border-[var(--border)] border-t-2 border-t-accent-amber/40 rounded-xl p-5 shadow-sm space-y-4"
       >
-        <h3 className="text-sm font-semibold text-[var(--foreground)]">Add entry</h3>
+        <h3 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Add entry</h3>
         <SegmentedControl
           value={form.type}
           onChange={setType}
@@ -716,9 +722,12 @@ export default function PropertyDetailClient({
           title={`Entries · ${year}`}
         />
         {transactions.length === 0 ? (
-          <p className="text-sm text-[var(--muted-foreground)] py-2">
-            No entries recorded for {year}.
-          </p>
+          <div className="flex flex-col items-center justify-center text-center py-8">
+            <Receipt className="w-8 h-8 text-[var(--border)] mb-3" />
+            <p className="text-sm text-[var(--muted-foreground)]">
+              No entries recorded for {year}.
+            </p>
+          </div>
         ) : (
           <>
             {/* Desktop table */}
@@ -753,7 +762,7 @@ export default function PropertyDetailClient({
                       </td>
                       <td
                         className={cn(
-                          "py-3 text-right font-data font-semibold whitespace-nowrap",
+                          "py-3 text-right font-data font-semibold tabular-nums whitespace-nowrap",
                           t.type === "INCOME" ? "text-profit" : "text-loss"
                         )}
                       >
@@ -793,7 +802,7 @@ export default function PropertyDetailClient({
                   <div className="flex items-center gap-1 shrink-0">
                     <span
                       className={cn(
-                        "font-data font-semibold text-sm whitespace-nowrap",
+                        "font-data font-semibold tabular-nums text-sm whitespace-nowrap",
                         t.type === "INCOME" ? "text-profit" : "text-loss"
                       )}
                     >

@@ -170,11 +170,14 @@ export default function HubClient({
   }, [monthly, cumulative]);
 
   return (
-    <div className="flex-1 p-4 md:p-8 space-y-8 overflow-y-auto max-w-6xl mx-auto w-full">
+    <div className="flex-1 p-4 md:p-8 space-y-8 md:space-y-10 overflow-y-auto max-w-6xl mx-auto w-full">
       {/* Hero */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex flex-col gap-1">
           <Logo size="lg" />
+          <p className="text-xs md:text-sm text-[var(--muted-foreground)] pl-0.5">
+            Your unified financial overview
+          </p>
         </div>
         {availableYears.length > 0 && (
           <YearPicker years={availableYears} selected={year} />
@@ -182,25 +185,59 @@ export default function HubClient({
       </div>
 
       {/* Consolidated equity summary */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8">
-        <div className="flex items-center gap-2 mb-1">
-          <TrendingUp className="w-4 h-4 text-[#3B82F6]" />
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Consolidated equity · {year}
+      <div className="relative overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8 shadow-sm">
+        <div
+          className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full blur-3xl opacity-[0.12]"
+          style={{ background: grandTotal >= 0 ? "#00D68F" : "#FF4D6A" }}
+        />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+              <TrendingUp className="w-3.5 h-3.5" />
+            </span>
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+              Consolidated equity · {year}
+            </p>
+          </div>
+          <h1
+            className={cn(
+              "text-4xl md:text-6xl font-bold font-data tracking-tight leading-none",
+              grandTotal >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
+            )}
+          >
+            {grandTotal >= 0 ? "+" : ""}
+            {formatCurrency(grandTotal)}
+          </h1>
+          <p className="text-xs text-[var(--muted-foreground)] mt-3">
+            Aggregated across Hamo Trade, Properties &amp; Home
           </p>
+          {/* Module contribution chips */}
+          <div className="flex flex-wrap gap-x-5 gap-y-2 mt-5 pt-5 border-t border-[var(--border)]">
+            {sources.map((s) => (
+              <div key={s.key} className="flex items-center gap-2">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: SOURCE_COLORS[s.key] }}
+                />
+                <span className="text-xs text-[var(--muted-foreground)]">
+                  {s.label}
+                </span>
+                <span
+                  className={cn(
+                    "text-xs font-semibold font-data",
+                    !s.ready
+                      ? "text-[var(--muted-foreground)]"
+                      : s.total >= 0
+                        ? "text-[#00D68F]"
+                        : "text-[#FF4D6A]"
+                  )}
+                >
+                  {s.ready ? `${s.total >= 0 ? "+" : ""}${formatCurrency(s.total)}` : "—"}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-        <h1
-          className={cn(
-            "text-4xl md:text-5xl font-bold font-data",
-            grandTotal >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
-          )}
-        >
-          {grandTotal >= 0 ? "+" : ""}
-          {formatCurrency(grandTotal)}
-        </h1>
-        <p className="text-xs text-[var(--muted-foreground)] mt-2">
-          Aggregated across Hamo Trade, Properties & Home
-        </p>
       </div>
 
       {/* App cards */}
@@ -210,25 +247,36 @@ export default function HubClient({
           const card = (
             <div
               className={cn(
-                "h-full bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 transition-colors",
+                "group relative h-full overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 transition-all duration-200",
                 s.ready
-                  ? "hover:border-[color:var(--border)] cursor-pointer"
-                  : "opacity-80"
+                  ? "shadow-sm hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
+                  : "opacity-75"
               )}
-              style={s.ready ? { borderColor: undefined } : undefined}
             >
+              {/* Accent top hairline on hover */}
+              {s.ready && (
+                <span
+                  className="pointer-events-none absolute inset-x-0 top-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ background: color }}
+                />
+              )}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ background: color }}
-                  />
+                    className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-bold"
+                    style={{ background: `${color}1F`, color }}
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ background: color }}
+                    />
+                  </span>
                   <h3 className="text-sm font-semibold text-[var(--foreground)]">
                     {s.label}
                   </h3>
                 </div>
                 {s.ready ? (
-                  <ArrowUpRight className="w-4 h-4 text-[var(--muted-foreground)]" />
+                  <ArrowUpRight className="w-4 h-4 text-[var(--muted-foreground)] transition-all group-hover:text-[var(--foreground)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 ) : (
                   <Lock className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />
                 )}
@@ -236,7 +284,7 @@ export default function HubClient({
               {s.ready ? (
                 <p
                   className={cn(
-                    "text-2xl font-bold font-data mb-2",
+                    "text-2xl font-bold font-data mb-2 tracking-tight",
                     s.total >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
                   )}
                 >
@@ -259,7 +307,7 @@ export default function HubClient({
             </div>
           );
           return s.ready ? (
-            <Link key={s.key} href={s.href} className="block">
+            <Link key={s.key} href={s.href} className="block pressable">
               {card}
             </Link>
           ) : (
@@ -271,12 +319,14 @@ export default function HubClient({
       {/* Annual breakdown — one square per month, revenue & expense per module */}
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <CalendarDays className="w-4 h-4 text-[#3B82F6]" />
+          <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+            <CalendarDays className="w-4 h-4" />
+          </span>
           <h3 className="text-sm font-semibold text-[var(--foreground)]">
             Monthly Breakdown · {year}
           </h3>
-          <span className="text-xs text-[var(--muted-foreground)]">
-            · revenue & expense per module
+          <span className="text-xs text-[var(--muted-foreground)] hidden sm:inline">
+            · revenue &amp; expense per module
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -293,8 +343,10 @@ export default function HubClient({
               <div
                 key={m.month}
                 className={cn(
-                  "bg-[var(--card)] border border-[var(--border)] rounded-xl p-4",
-                  !active && "opacity-60"
+                  "bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 transition-colors",
+                  active
+                    ? "shadow-sm hover:border-[var(--muted-foreground)]/30"
+                    : "opacity-55"
                 )}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -357,13 +409,15 @@ export default function HubClient({
       </div>
 
       {/* Monthly equity chart */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="w-4 h-4 text-[#3B82F6]" />
+          <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+            <BarChart3 className="w-4 h-4" />
+          </span>
           <h3 className="text-sm font-semibold text-[var(--foreground)]">
             Monthly Equity Analysis
           </h3>
-          <span className="text-xs text-[var(--muted-foreground)]">
+          <span className="text-xs text-[var(--muted-foreground)] hidden sm:inline">
             · net by source, cumulative line
           </span>
         </div>
@@ -372,8 +426,19 @@ export default function HubClient({
             <EChart option={option} />
           </div>
         ) : (
-          <div className="h-40 flex items-center justify-center text-sm text-[var(--muted-foreground)]">
-            No equity activity recorded for {year} yet.
+          <div className="h-56 flex flex-col items-center justify-center text-center gap-3 px-6">
+            <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--muted)] text-[var(--muted-foreground)]">
+              <BarChart3 className="w-6 h-6" />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-[var(--foreground)]">
+                No equity activity yet
+              </p>
+              <p className="text-xs text-[var(--muted-foreground)] mt-1 max-w-xs">
+                Once you log trades and entries for {year}, your monthly net by
+                source will appear here.
+              </p>
+            </div>
           </div>
         )}
       </div>

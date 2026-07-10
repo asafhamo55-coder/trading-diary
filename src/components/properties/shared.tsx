@@ -9,6 +9,7 @@ export { MONTH_ABBR } from "@/lib/property";
 export const inputCls =
   "w-full rounded-lg border border-[var(--border)] bg-[var(--input)] px-3 py-2 text-sm " +
   "text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 transition-colors " +
+  "hover:border-[var(--muted-foreground)]/40 " +
   "focus-visible:outline-none focus:outline-none focus:border-accent-amber " +
   "focus:ring-2 focus:ring-accent-amber/25";
 
@@ -24,7 +25,7 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-xs font-medium text-[var(--muted-foreground)] mb-1 block">
+      <span className="text-xs font-medium text-[var(--muted-foreground)] mb-1.5 block">
         {label}
         {required && <span className="text-loss ml-0.5">*</span>}
       </span>
@@ -44,11 +45,11 @@ export function SectionHeader({
   meta?: string;
 }) {
   return (
-    <div className="flex items-center gap-2 mb-4">
-      <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-accent-amber/10">
+    <div className="flex items-center gap-2.5 mb-4">
+      <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-accent-amber/10 ring-1 ring-inset ring-accent-amber/15">
         {icon}
       </div>
-      <h3 className="text-sm font-semibold text-[var(--foreground)]">{title}</h3>
+      <h3 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">{title}</h3>
       {meta && (
         <span className="text-xs text-[var(--muted-foreground)]">· {meta}</span>
       )}
@@ -89,13 +90,15 @@ export function SummaryTile({
       : String(value);
 
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm">
-      <p className="text-xs text-[var(--muted-foreground)] mb-1 truncate">{label}</p>
-      <p className={cn("text-base sm:text-lg md:text-xl font-bold font-data", valueClass)}>
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm transition-colors hover:border-[var(--muted-foreground)]/30">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--muted-foreground)] mb-1.5 truncate">
+        {label}
+      </p>
+      <p className={cn("text-base sm:text-lg md:text-xl font-bold font-data tracking-tight tabular-nums", valueClass)}>
         {display}
       </p>
       {caption && (
-        <p className={cn("text-[11px] mt-0.5 text-[var(--muted-foreground)]", captionTone)}>
+        <p className={cn("text-[11px] mt-1 text-[var(--muted-foreground)]", captionTone)}>
           {caption}
         </p>
       )}

@@ -34,12 +34,12 @@ export default function HomeReviewClient({
       <div>
         <Link
           href="/home"
-          className="inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-2"
+          className="pressable inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-2 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Home
         </Link>
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">Review queue</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Review queue</h1>
         <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
           Grouped by merchant. Categorize each place <span className="font-medium text-[var(--foreground)]">once</span> —
           it applies to all its transactions and is remembered for future imports.
@@ -53,15 +53,17 @@ export default function HomeReviewClient({
       </div>
 
       {groups.length === 0 ? (
-        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-12 text-center">
-          <CheckCircle2 className="w-12 h-12 text-[#00D68F] mx-auto mb-4" />
+        <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-12 text-center shadow-sm">
+          <span className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[#00D68F]/12 mx-auto mb-4">
+            <CheckCircle2 className="w-8 h-8 text-[#00D68F]" />
+          </span>
           <h2 className="text-base font-semibold text-[var(--foreground)] mb-1">All caught up</h2>
-          <p className="text-sm text-[var(--muted-foreground)]">
+          <p className="text-sm text-[var(--muted-foreground)] max-w-sm mx-auto">
             Every merchant is categorized. New imports only land here when a new place appears.
           </p>
         </div>
       ) : (
-        <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[var(--border)]">
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[var(--border)] shadow-sm overflow-hidden">
           {groups.map((g) => (
             <MerchantRow
               key={g.matcher}
@@ -106,14 +108,14 @@ function MerchantRow({
   }
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3">
+    <div className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[var(--muted)]/40">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-[var(--foreground)] truncate">
             {group.merchant}
           </span>
           {group.count > 1 && (
-            <span className="text-[10px] font-medium rounded px-1.5 py-0.5 bg-[var(--muted)] text-[var(--muted-foreground)] shrink-0">
+            <span className="text-[10px] font-medium font-data rounded px-1.5 py-0.5 bg-[var(--muted)] text-[var(--muted-foreground)] shrink-0">
               ×{group.count}
             </span>
           )}
@@ -149,7 +151,7 @@ function MerchantRow({
         onClick={() => apply({ exclude: true })}
         disabled={busy}
         title="Exclude this merchant (transfer / not spending)"
-        className="p-1.5 rounded text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+        className="pressable p-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--card)] transition-colors disabled:opacity-50"
       >
         <EyeOff className="w-4 h-4" />
       </button>

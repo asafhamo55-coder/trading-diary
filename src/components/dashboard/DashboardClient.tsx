@@ -241,37 +241,53 @@ export default function DashboardClient({
         </div>
 
         {/* Hero section */}
-        <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
-          <p className="text-[var(--muted-foreground)] text-sm mb-1">Current Portfolio Value</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-[var(--foreground)] font-data">
-            {formatCurrency(stats.currentPortfolio)}
-          </h2>
-          <div className="flex items-center gap-4 mt-3">
-            <span
-              className={cn(
-                "flex items-center gap-1 text-sm font-semibold font-data",
-                stats.totalPnL >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
-              )}
-            >
-              {stats.totalPnL >= 0 ? (
-                <TrendingUp className="w-4 h-4" />
-              ) : (
-                <TrendingDown className="w-4 h-4" />
-              )}
-              {stats.totalPnL >= 0 ? "+" : ""}
-              {formatCurrency(stats.totalPnL)}
-            </span>
-            <span
-              className={cn(
-                "text-sm font-semibold font-data px-2 py-0.5 rounded",
-                stats.totalPnL >= 0
-                  ? "text-[#00D68F] bg-[#00D68F]/10"
-                  : "text-[#FF4D6A] bg-[#FF4D6A]/10"
-              )}
-            >
-              {totalReturn >= 0 ? "+" : ""}
-              {formatPercent(totalReturn)}
-            </span>
+        <div className="relative overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-7 shadow-sm">
+          <div
+            className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full blur-3xl opacity-[0.12]"
+            style={{ background: stats.totalPnL >= 0 ? "#00D68F" : "#FF4D6A" }}
+          />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+                <Wallet className="w-3.5 h-3.5" />
+              </span>
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+                Current Portfolio Value
+              </p>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-[var(--foreground)] font-data tracking-tight leading-none">
+              {formatCurrency(stats.currentPortfolio)}
+            </h2>
+            <div className="flex items-center gap-3 mt-4">
+              <span
+                className={cn(
+                  "flex items-center gap-1.5 text-sm font-semibold font-data",
+                  stats.totalPnL >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
+                )}
+              >
+                {stats.totalPnL >= 0 ? (
+                  <TrendingUp className="w-4 h-4" />
+                ) : (
+                  <TrendingDown className="w-4 h-4" />
+                )}
+                {stats.totalPnL >= 0 ? "+" : ""}
+                {formatCurrency(stats.totalPnL)}
+              </span>
+              <span
+                className={cn(
+                  "text-sm font-semibold font-data px-2 py-0.5 rounded-md",
+                  stats.totalPnL >= 0
+                    ? "text-[#00D68F] bg-[#00D68F]/10"
+                    : "text-[#FF4D6A] bg-[#FF4D6A]/10"
+                )}
+              >
+                {totalReturn >= 0 ? "+" : ""}
+                {formatPercent(totalReturn)}
+              </span>
+              <span className="text-xs text-[var(--muted-foreground)]">
+                since inception
+              </span>
+            </div>
           </div>
         </div>
 
@@ -280,9 +296,14 @@ export default function DashboardClient({
           {monthlyPnL.map((m) => (
             <div
               key={m.month}
-              className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-2.5 text-center"
+              className={cn(
+                "rounded-lg p-2.5 text-center border transition-colors",
+                m.count > 0
+                  ? "bg-[var(--card)] border-[var(--border)]"
+                  : "bg-transparent border-[var(--border)]/50"
+              )}
             >
-              <p className="text-[10px] text-[var(--muted-foreground)] font-medium mb-1">
+              <p className="text-[10px] text-[var(--muted-foreground)] font-medium mb-1 uppercase tracking-wide">
                 {m.name}
               </p>
               {m.count > 0 ? (
@@ -300,7 +321,7 @@ export default function DashboardClient({
                   {formatCurrency(m.pnl)}
                 </p>
               ) : (
-                <p className="text-xs text-[var(--border)] font-data">—</p>
+                <p className="text-xs text-[var(--muted-foreground)]/40 font-data">—</p>
               )}
             </div>
           ))}
@@ -339,14 +360,16 @@ export default function DashboardClient({
 
         {/* Equity Curve */}
         {insights.equityCurve.length > 0 && (
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <LineChartIcon className="w-4 h-4 text-[#3B82F6]" />
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+                <LineChartIcon className="w-4 h-4" />
+              </span>
               <h3 className="text-sm font-semibold text-[var(--foreground)]">
                 Equity Curve
               </h3>
-              <span className="text-xs text-[var(--muted-foreground)] ml-2">
-                Cumulative P&L across {insights.equityCurve.length} closed trades
+              <span className="text-xs text-[var(--muted-foreground)] ml-1 hidden sm:inline">
+                Cumulative P&amp;L across {insights.equityCurve.length} closed trades
               </span>
             </div>
             <div className="h-64">
@@ -416,9 +439,11 @@ export default function DashboardClient({
 
         {/* Strategy Performance */}
         {insights.byStrategy.length > 0 && (
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <PieChart className="w-4 h-4 text-[#A78BFA]" />
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#A78BFA]/12 text-[#A78BFA]">
+                <PieChart className="w-4 h-4" />
+              </span>
               <h3 className="text-sm font-semibold text-[var(--foreground)]">
                 Strategy Performance
               </h3>
@@ -426,7 +451,7 @@ export default function DashboardClient({
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[var(--muted-foreground)] text-xs border-b border-[var(--border)]">
+                  <tr className="text-[var(--muted-foreground)] text-[11px] uppercase tracking-wider border-b border-[var(--border)]">
                     <th className="text-left pb-3 font-medium">Strategy</th>
                     <th className="text-right pb-3 font-medium">Trades</th>
                     <th className="text-right pb-3 font-medium">Total P&L</th>
@@ -438,7 +463,7 @@ export default function DashboardClient({
                   {insights.byStrategy.map((s) => (
                     <tr
                       key={s.tradeType}
-                      className="border-b border-[#2A3040]/50 last:border-0"
+                      className="border-b border-[var(--border)]/50 last:border-0 transition-colors hover:bg-[var(--muted)]/40"
                     >
                       <td className="py-2.5 font-medium text-[var(--foreground)]">
                         {s.tradeType}
@@ -481,24 +506,49 @@ export default function DashboardClient({
 
         {/* Monthly P&L + Recent Trades */}
         <div className="grid lg:grid-cols-2 gap-4">
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
-            <h3 className="text-sm font-semibold text-[var(--foreground)] mb-4">
-              Monthly P&L
-            </h3>
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+                <BarChart3 className="w-4 h-4" />
+              </span>
+              <h3 className="text-sm font-semibold text-[var(--foreground)]">
+                Monthly P&amp;L
+              </h3>
+            </div>
             <div className="h-56">
               <EChart option={monthlyOption} />
             </div>
           </div>
 
           {/* Recent Trades */}
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
-            <h3 className="text-sm font-semibold text-[var(--foreground)] mb-4">
-              Recent Trades
-            </h3>
-            <div className="overflow-x-auto">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+                <Activity className="w-4 h-4" />
+              </span>
+              <h3 className="text-sm font-semibold text-[var(--foreground)]">
+                Recent Trades
+              </h3>
+            </div>
+            {recentTrades.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center gap-3 py-10 px-6">
+                <span className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-[var(--muted)] text-[var(--muted-foreground)]">
+                  <Activity className="w-5 h-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">
+                    No trades yet
+                  </p>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                    Your most recent trades will show up here.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[var(--muted-foreground)] text-xs border-b border-[var(--border)]">
+                  <tr className="text-[var(--muted-foreground)] text-[11px] uppercase tracking-wider border-b border-[var(--border)]">
                     <th className="text-left pb-3 font-medium">Date</th>
                     <th className="text-left pb-3 font-medium">Symbol</th>
                     <th className="text-left pb-3 font-medium">Side</th>
@@ -510,7 +560,7 @@ export default function DashboardClient({
                   {recentTrades.map((trade) => (
                     <tr
                       key={trade.id}
-                      className="border-b border-[#2A3040]/50 last:border-0"
+                      className="border-b border-[var(--border)]/50 last:border-0 transition-colors hover:bg-[var(--muted)]/40"
                     >
                       <td className="py-2.5 text-[var(--muted-foreground)] font-data text-xs">
                         {trade.tradeDate}
@@ -556,6 +606,7 @@ export default function DashboardClient({
                 </tbody>
               </table>
             </div>
+            )}
           </div>
         </div>
       </div>
@@ -579,12 +630,19 @@ function SegmentPanel({
   return (
     <a
       href={href}
-      className="block rounded-xl bg-[var(--card)] border border-[var(--border)] p-5 hover:border-[#3B82F6]/40 transition-colors"
+      className="group pressable block rounded-xl bg-[var(--card)] border border-[var(--border)] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2" style={{ color: accent }}>
-          {icon}
-          <h3 className="text-sm font-semibold capitalize">{kind}</h3>
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-flex items-center justify-center w-8 h-8 rounded-lg"
+            style={{ background: `${accent}1F`, color: accent }}
+          >
+            {icon}
+          </span>
+          <h3 className="text-sm font-semibold capitalize" style={{ color: accent }}>
+            {kind}
+          </h3>
         </div>
         <span className="text-xs text-[var(--muted-foreground)]">{stats.count} trades</span>
       </div>
@@ -644,14 +702,16 @@ function StatCard({
   valueColor?: string;
 }) {
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm transition-colors hover:border-[var(--muted-foreground)]/30">
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-[var(--muted-foreground)] font-medium">{label}</span>
-        <div className="text-[var(--muted-foreground)]">{icon}</div>
+        <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)]">
+          {icon}
+        </div>
       </div>
       <p
         className={cn(
-          "text-2xl font-bold font-data",
+          "text-2xl font-bold font-data tracking-tight",
           valueColor ?? "text-[var(--foreground)]"
         )}
       >

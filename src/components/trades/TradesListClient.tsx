@@ -12,6 +12,8 @@ import {
   ArrowDownNarrowWide,
   ArrowUpNarrowWide,
   Download,
+  SearchX,
+  X,
 } from "lucide-react";
 import { cn, formatCurrency, formatNumber } from "@/lib/utils";
 import { MONTH_NAMES } from "@/lib/types";
@@ -160,9 +162,9 @@ export default function TradesListClient({
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight">Trades</h1>
             <YearPicker years={availableYears} selected={year} />
@@ -171,21 +173,24 @@ export default function TradesListClient({
             <button
               onClick={exportCsv}
               disabled={filteredTrades.length === 0}
-              className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="pressable inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-sm font-medium text-[var(--muted-foreground)] shadow-sm hover:text-[var(--foreground)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               title="Download the currently filtered trades as a CSV file (opens in Excel)"
             >
               <Download className="h-4 w-4" />
-              Export ({filteredTrades.length})
+              <span className="hidden sm:inline">Export</span> ({filteredTrades.length})
             </button>
             <Link
               href="/trade/trades/new"
-              className="inline-flex items-center gap-2 rounded-lg bg-[#3B82F6] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#3B82F6]/90 transition-colors"
+              className="pressable inline-flex items-center gap-2 rounded-lg bg-[#3B82F6] px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-[#3B82F6]/20 hover:bg-[#3B82F6]/90 transition-colors"
             >
               <Plus className="h-4 w-4" />
               New Trade
             </Link>
           </div>
         </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
         {/* Status Tabs — primary filter */}
         <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-[var(--border)]">
@@ -221,7 +226,7 @@ export default function TradesListClient({
                 key={tab.key}
                 onClick={() => setStatusFilter(tab.key)}
                 className={cn(
-                  "inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px",
+                  "pressable inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px",
                   active
                     ? "border-current"
                     : "border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -232,7 +237,7 @@ export default function TradesListClient({
                 {tab.label}
                 <span
                   className={cn(
-                    "rounded-full text-[11px] font-mono px-2 py-0.5",
+                    "rounded-full text-[11px] font-data px-2 py-0.5",
                     active
                       ? "bg-[var(--muted)]"
                       : "bg-[var(--muted)] text-[var(--muted-foreground)]"
@@ -250,16 +255,16 @@ export default function TradesListClient({
           <button
             onClick={() => setMonthFilter(null)}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors border",
+              "pressable inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors border",
               monthFilter === null
                 ? "border-[#3B82F6] bg-[#3B82F6]/10 text-[#3B82F6]"
-                : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:border-[#3A4050]"
+                : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:border-[#3B82F6]/40"
             )}
           >
             All months
             <span
               className={cn(
-                "rounded-full text-[10px] font-mono px-1.5",
+                "rounded-full text-[10px] font-data px-1.5",
                 monthFilter === null
                   ? "bg-[#3B82F6]/20"
                   : "bg-[var(--muted)]"
@@ -275,16 +280,16 @@ export default function TradesListClient({
                 key={m}
                 onClick={() => setMonthFilter(active ? null : m)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors border",
+                  "pressable inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors border",
                   active
                     ? "border-[#3B82F6] bg-[#3B82F6]/10 text-[#3B82F6]"
-                    : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:border-[#3A4050]"
+                    : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:border-[#3B82F6]/40"
                 )}
               >
                 {MONTH_NAMES[m - 1]}
                 <span
                   className={cn(
-                    "rounded-full text-[10px] font-mono px-1.5",
+                    "rounded-full text-[10px] font-data px-1.5",
                     active ? "bg-[#3B82F6]/20" : "bg-[var(--muted)]"
                   )}
                 >
@@ -304,9 +309,13 @@ export default function TradesListClient({
                 key={dir}
                 onClick={() => setDirectionFilter(dir)}
                 className={cn(
-                  "px-3 py-2 text-sm font-medium transition-colors",
+                  "pressable px-3.5 py-2 text-sm font-medium transition-colors",
                   directionFilter === dir
-                    ? "bg-[var(--muted)] text-[var(--foreground)]"
+                    ? dir === "LONG"
+                      ? "bg-[#00D68F]/10 text-[#00D68F]"
+                      : dir === "SHORT"
+                      ? "bg-[#FF4D6A]/10 text-[#FF4D6A]"
+                      : "bg-[var(--muted)] text-[var(--foreground)]"
                     : "bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                 )}
               >
@@ -318,7 +327,7 @@ export default function TradesListClient({
           {/* Sort toggle */}
           <button
             onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--muted)] px-3 py-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+            className="pressable inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--muted)] px-3 py-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
             title={
               sortDir === "asc"
                 ? "Oldest first — click to flip to newest first"
@@ -335,43 +344,69 @@ export default function TradesListClient({
 
           {/* Symbol Search */}
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
             <input
               type="text"
               placeholder="Search symbol..."
               value={symbolSearch}
               onChange={(e) => setSymbolSearch(e.target.value)}
-              className="w-full rounded-lg bg-[var(--muted)] border border-[var(--border)] py-2 pl-9 pr-3 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]"
+              className="w-full rounded-lg bg-[var(--muted)] border border-[var(--border)] py-2 pl-9 pr-9 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-1 focus:ring-[#3B82F6] transition-shadow"
             />
+            {symbolSearch && (
+              <button
+                onClick={() => setSymbolSearch("")}
+                className="pressable absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                title="Clear search"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-xl bg-[var(--card)] border border-[var(--border)]">
+        <div className="overflow-x-auto rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
-                <th className="px-4 py-3 text-left font-medium">Date</th>
-                <th className="px-4 py-3 text-left font-medium">Symbol</th>
-                <th className="px-4 py-3 text-left font-medium">Direction</th>
-                <th className="px-4 py-3 text-left font-medium">Type</th>
-                <th className="px-4 py-3 text-right font-medium">Shares</th>
-                <th className="px-4 py-3 text-right font-medium">Avg Buy</th>
-                <th className="px-4 py-3 text-right font-medium">Avg Sell</th>
-                <th className="px-4 py-3 text-right font-medium">P&L</th>
-                <th className="px-4 py-3 text-right font-medium">R/R</th>
-                <th className="px-4 py-3 text-center font-medium">Status</th>
-                <th className="px-4 py-3 text-center font-medium">Asset</th>
+              <tr className="border-b border-[var(--border)] bg-[var(--muted)]/40 text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                <th className="px-4 py-3 text-left font-semibold">Date</th>
+                <th className="px-4 py-3 text-left font-semibold">Symbol</th>
+                <th className="px-4 py-3 text-left font-semibold">Direction</th>
+                <th className="px-4 py-3 text-left font-semibold">Type</th>
+                <th className="px-4 py-3 text-right font-semibold">Shares</th>
+                <th className="px-4 py-3 text-right font-semibold">Avg Buy</th>
+                <th className="px-4 py-3 text-right font-semibold">Avg Sell</th>
+                <th className="px-4 py-3 text-right font-semibold">P&L</th>
+                <th className="px-4 py-3 text-right font-semibold">R/R</th>
+                <th className="px-4 py-3 text-center font-semibold">Status</th>
+                <th className="px-4 py-3 text-center font-semibold">Asset</th>
               </tr>
             </thead>
             <tbody>
               {filteredTrades.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={11}
-                    className="px-4 py-12 text-center text-[var(--muted-foreground)]"
-                  >
-                    No trades match your filters.
+                  <td colSpan={11} className="px-4 py-16">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--muted)]">
+                        <SearchX className="h-7 w-7 text-[var(--muted-foreground)]" />
+                      </div>
+                      <h3 className="text-base font-semibold text-[var(--foreground)]">
+                        No trades match your filters
+                      </h3>
+                      <p className="mt-1 max-w-sm text-sm text-[var(--muted-foreground)]">
+                        {trades.length === 0
+                          ? "You haven't logged any trades this year yet. Add your first one to get started."
+                          : "Try clearing a filter or searching for a different symbol."}
+                      </p>
+                      <Link
+                        href="/trade/trades/new"
+                        className="pressable mt-5 inline-flex items-center gap-2 rounded-lg bg-[#3B82F6] px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-[#3B82F6]/20 hover:bg-[#3B82F6]/90 transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
+                        New Trade
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -392,18 +427,18 @@ export default function TradesListClient({
                     <tr
                       key={trade.id}
                       onClick={() => router.push(`/trade/trades/${trade.id}`)}
-                      className="border-b border-[var(--border)] last:border-b-0 cursor-pointer hover:bg-[var(--muted)] transition-colors"
+                      className="group border-b border-[var(--border)] last:border-b-0 cursor-pointer hover:bg-[var(--muted)]/60 transition-colors"
                     >
-                      <td className="px-4 py-3 font-mono text-[var(--muted-foreground)]">
+                      <td className="px-4 py-3 font-data text-[var(--muted-foreground)] whitespace-nowrap">
                         {trade.tradeDate}
                       </td>
-                      <td className="px-4 py-3 font-semibold">
+                      <td className="px-4 py-3 font-semibold tracking-tight group-hover:text-[#3B82F6] transition-colors">
                         {trade.symbol}
                       </td>
                       <td className="px-4 py-3">
                         <span
                           className={cn(
-                            "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium",
+                            "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold",
                             trade.direction === "LONG"
                               ? "bg-[#00D68F]/10 text-[#00D68F]"
                               : "bg-[#FF4D6A]/10 text-[#FF4D6A]"
@@ -412,25 +447,25 @@ export default function TradesListClient({
                           {trade.direction}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-[var(--muted-foreground)]">
+                      <td className="px-4 py-3 text-[var(--muted-foreground)] whitespace-nowrap">
                         {trade.tradeType ?? "\u2014"}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="px-4 py-3 text-right font-data">
                         {trade.totalShares ?? 0}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="px-4 py-3 text-right font-data">
                         {trade.avgBuyPrice
                           ? formatCurrency(trade.avgBuyPrice)
                           : "\u2014"}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="px-4 py-3 text-right font-data">
                         {trade.avgSellPrice && trade.avgSellPrice > 0
                           ? formatCurrency(trade.avgSellPrice)
                           : "\u2014"}
                       </td>
                       <td
                         className={cn(
-                          "px-4 py-3 text-right font-mono font-semibold",
+                          "px-4 py-3 text-right font-data font-semibold",
                           isProfit && "text-[#00D68F]",
                           isLoss && "text-[#FF4D6A]"
                         )}
@@ -439,7 +474,7 @@ export default function TradesListClient({
                       </td>
                       <td
                         className={cn(
-                          "px-4 py-3 text-right font-mono",
+                          "px-4 py-3 text-right font-data",
                           isProfit && "text-[#00D68F]",
                           isLoss && "text-[#FF4D6A]"
                         )}
@@ -451,7 +486,7 @@ export default function TradesListClient({
                       <td className="px-4 py-3 text-center">
                         <span
                           className={cn(
-                            "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium",
+                            "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold",
                             trade.isCompleted
                               ? "bg-[#00D68F]/10 text-[#00D68F]"
                               : isPartial
@@ -474,7 +509,7 @@ export default function TradesListClient({
                       <td className="px-4 py-3 text-center">
                         {trade.isAsset ? (
                           <span
-                            className="inline-flex items-center rounded-md bg-[#A78BFA]/10 px-2 py-0.5 text-xs font-medium text-[#A78BFA]"
+                            className="inline-flex items-center rounded-md bg-[#A78BFA]/10 px-2 py-0.5 text-xs font-semibold text-[#A78BFA]"
                             title="Marked as asset"
                           >
                             Asset
@@ -493,7 +528,8 @@ export default function TradesListClient({
 
         {/* Summary */}
         <div className="mt-4 text-sm text-[var(--muted-foreground)]">
-          Showing {filteredTrades.length} of {trades.length} trades
+          Showing <span className="font-data text-[var(--foreground)]">{filteredTrades.length}</span> of{" "}
+          <span className="font-data text-[var(--foreground)]">{trades.length}</span> trades
         </div>
       </div>
     </div>

@@ -151,11 +151,11 @@ export default function PropertiesClient({
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent-amber/10">
+          <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-accent-amber/10 ring-1 ring-inset ring-accent-amber/20 shadow-sm">
             <Building2 className="w-5 h-5 text-accent-amber" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--foreground)]">Properties</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Properties</h1>
             <p className="text-sm text-[var(--muted-foreground)]">
               Rental income & expenses · tax-ready · {year}
             </p>
@@ -177,7 +177,7 @@ export default function PropertiesClient({
           className="bg-[var(--card)] border border-[var(--border)] border-t-2 border-t-accent-amber/40 rounded-xl p-5 shadow-sm space-y-4"
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-[var(--foreground)]">New property</h3>
+            <h3 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">New property</h3>
             <Button
               type="button"
               variant="ghost"
@@ -305,12 +305,14 @@ export default function PropertiesClient({
       {/* Active property list */}
       {activeRows.length === 0 ? (
         archivedRows.length === 0 && (
-          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-sm p-12 text-center">
-            <Building2 className="w-12 h-12 text-[var(--border)] mx-auto mb-4" />
-            <h2 className="text-base font-semibold text-[var(--foreground)] mb-1">
+          <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-sm px-6 py-14 text-center">
+            <div className="mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-amber/10 ring-1 ring-inset ring-accent-amber/20">
+              <Building2 className="w-8 h-8 text-accent-amber" />
+            </div>
+            <h2 className="text-base font-semibold tracking-tight text-[var(--foreground)] mb-1.5">
               No properties yet
             </h2>
-            <p className="text-sm text-[var(--muted-foreground)] mb-6">
+            <p className="text-sm text-[var(--muted-foreground)] mb-6 max-w-sm mx-auto">
               Add a property, then log its rental income and expenses for the year.
             </p>
             <Button onClick={() => setAdding(true)}>
@@ -397,7 +399,7 @@ function PropertyCard({
     >
       <Link
         href={`/properties/${r.id}`}
-        className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+        className="pressable block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
       >
         {/* Zone A — identity */}
         <div className="mb-3 pr-9">
@@ -442,7 +444,7 @@ function PropertyCard({
         )}
 
         {/* Zone C — net + split */}
-        <p className={cn("text-2xl font-bold font-data mt-2", signedClass(r.net))}>
+        <p className={cn("text-2xl font-bold font-data tracking-tight tabular-nums mt-2", signedClass(r.net))}>
           {r.net >= 0 ? "+" : ""}
           {formatCurrency(r.net)}
         </p>

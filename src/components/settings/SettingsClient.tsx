@@ -13,6 +13,8 @@ import {
   Loader2,
   Trash2,
   AlertCircle,
+  CheckCircle2,
+  Scale,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import BiometricSettings from "@/components/settings/BiometricSettings";
@@ -239,27 +241,37 @@ export default function SettingsClient({
   }
 
   const inputClass =
-    "w-full bg-[var(--muted)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-none focus:border-[#3B82F6] transition-colors";
-  const labelClass = "block text-sm font-medium text-[var(--muted-foreground)] mb-1";
+    "w-full bg-[var(--muted)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all";
+  const labelClass = "block text-xs font-medium text-[var(--muted-foreground)] mb-1.5 uppercase tracking-wide";
 
   return (
-    <div className="flex-1 p-6 lg:p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">Settings</h1>
-        <p className="text-[var(--muted-foreground)] text-sm mt-1">
-          Account configuration, leverages, and fund transactions
-        </p>
+    <div className="flex-1 p-4 sm:p-6 lg:p-8">
+      <div className="flex items-center gap-3 mb-6 lg:mb-8">
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#3B82F6]/10 shrink-0">
+          <Settings className="w-5 h-5 text-[#3B82F6]" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Settings</h1>
+          <p className="text-[var(--muted-foreground)] text-sm mt-0.5">
+            Account configuration, leverages, and fund transactions
+          </p>
+        </div>
       </div>
 
       {message && (
         <div
           className={cn(
-            "mb-6 rounded-lg border px-4 py-2.5 text-sm max-w-3xl",
+            "mb-6 flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm max-w-3xl shadow-sm",
             message.ok
               ? "border-[#00D68F]/30 bg-[#00D68F]/10 text-[#00D68F]"
               : "border-[#FF4D6A]/30 bg-[#FF4D6A]/10 text-[#FF4D6A]"
           )}
         >
+          {message.ok ? (
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 shrink-0" />
+          )}
           {message.text}
         </div>
       )}
@@ -268,8 +280,8 @@ export default function SettingsClient({
         <BiometricSettings />
 
         {/* Account Settings */}
-        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6">
-          <div className="flex items-center gap-2 mb-6">
+        <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-5 sm:p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-6 pb-4 border-b border-[var(--border)]">
             <Settings className="w-5 h-5 text-[#3B82F6]" />
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
               Account Settings
@@ -332,7 +344,7 @@ export default function SettingsClient({
             <button
               onClick={handleSaveAccount}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#3B82F6] text-white text-sm font-medium hover:bg-[#3B82F6]/90 transition-colors disabled:opacity-60"
+              className="pressable inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#3B82F6] text-white text-sm font-semibold shadow-sm shadow-[#3B82F6]/20 hover:bg-[#3B82F6]/90 transition-colors disabled:opacity-60 disabled:pointer-events-none"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -345,8 +357,8 @@ export default function SettingsClient({
         </div>
 
         {/* Funds */}
-        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-5 sm:p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--border)]">
             <div className="flex items-center gap-2">
               <Wallet className="w-5 h-5 text-[#A78BFA]" />
               <h2 className="text-lg font-semibold text-[var(--foreground)]">
@@ -381,7 +393,7 @@ export default function SettingsClient({
                   <button
                     onClick={handleRunFundsMigration}
                     disabled={savingMigration}
-                    className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#FFB547] px-3 py-1.5 text-xs font-medium text-[var(--background)] hover:bg-[#FFB547]/90 disabled:opacity-60"
+                    className="pressable mt-3 inline-flex items-center gap-2 rounded-lg bg-[#FFB547] px-3 py-1.5 text-xs font-semibold text-[var(--background)] hover:bg-[#FFB547]/90 disabled:opacity-60"
                   >
                     {savingMigration && <Loader2 className="w-3 h-3 animate-spin" />}
                     Set up funds table
@@ -449,7 +461,7 @@ export default function SettingsClient({
                   <button
                     onClick={handleAddFund}
                     disabled={savingFund || !fundAmount}
-                    className="w-full inline-flex items-center justify-center gap-2 h-[38px] rounded-lg bg-[#3B82F6] text-white text-sm font-medium hover:bg-[#3B82F6]/90 transition-colors disabled:opacity-60"
+                    className="pressable w-full inline-flex items-center justify-center gap-2 h-[38px] rounded-lg bg-[#3B82F6] text-white text-sm font-semibold shadow-sm shadow-[#3B82F6]/20 hover:bg-[#3B82F6]/90 transition-colors disabled:opacity-60 disabled:pointer-events-none"
                   >
                     {savingFund ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -473,18 +485,24 @@ export default function SettingsClient({
 
               {/* Transaction list */}
               {funds.length === 0 ? (
-                <p className="text-sm text-[var(--muted-foreground)] py-4 text-center">
-                  No deposits or withdrawals yet.
-                </p>
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--muted)] mb-3">
+                    <Wallet className="w-6 h-6 text-[var(--muted-foreground)]" />
+                  </div>
+                  <p className="text-sm font-medium text-[var(--foreground)]">No transactions yet</p>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                    Record a deposit or withdrawal above to track fund changes.
+                  </p>
+                </div>
               ) : (
                 <div className="overflow-x-auto -mx-2">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)] text-xs">
-                        <th className="px-2 py-2 text-left font-medium">Date</th>
-                        <th className="px-2 py-2 text-left font-medium">Type</th>
-                        <th className="px-2 py-2 text-right font-medium">Amount</th>
-                        <th className="px-2 py-2 text-left font-medium">Comment</th>
+                      <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)] text-xs uppercase tracking-wide">
+                        <th className="px-2 py-2 text-left font-semibold">Date</th>
+                        <th className="px-2 py-2 text-left font-semibold">Type</th>
+                        <th className="px-2 py-2 text-right font-semibold">Amount</th>
+                        <th className="px-2 py-2 text-left font-semibold">Comment</th>
                         <th className="px-2 py-2 w-10" />
                       </tr>
                     </thead>
@@ -494,9 +512,9 @@ export default function SettingsClient({
                         return (
                           <tr
                             key={f.id}
-                            className="border-b border-[#2A3040]/50 last:border-0"
+                            className="border-b border-[var(--border)]/60 last:border-0 hover:bg-[var(--muted)]/40 transition-colors"
                           >
-                            <td className="px-2 py-2 font-mono text-[var(--muted-foreground)] text-xs">
+                            <td className="px-2 py-2 font-data text-[var(--muted-foreground)] text-xs">
                               {f.occurredAt}
                             </td>
                             <td className="px-2 py-2">
@@ -518,7 +536,7 @@ export default function SettingsClient({
                             </td>
                             <td
                               className={cn(
-                                "px-2 py-2 text-right font-mono font-semibold",
+                                "px-2 py-2 text-right font-data font-semibold",
                                 isDeposit ? "text-[#00D68F]" : "text-[#FF4D6A]"
                               )}
                             >
@@ -533,7 +551,7 @@ export default function SettingsClient({
                             <td className="px-2 py-2 text-right">
                               <button
                                 onClick={() => handleDeleteFund(f.id)}
-                                className="p-1 rounded text-[var(--muted-foreground)] hover:text-[#FF4D6A] transition-colors"
+                                className="pressable p-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[#FF4D6A]/10 transition-colors"
                                 title="Delete"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -551,14 +569,16 @@ export default function SettingsClient({
         </div>
 
         {/* Asset Leverages */}
-        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-6">
-          <h2 className="text-lg font-semibold text-[var(--foreground)] mb-2">
-            Asset Leverages
-          </h2>
-          <p className="text-sm text-[var(--muted-foreground)] mb-4">
-            Leverage multipliers applied to leveraged instruments (Oil, S&amp;P,
-            EUR-USD, etc.).
-          </p>
+        <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-5 sm:p-6 shadow-sm">
+          <div className="mb-5 pb-4 border-b border-[var(--border)]">
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">
+              Asset Leverages
+            </h2>
+            <p className="text-sm text-[var(--muted-foreground)] mt-1">
+              Leverage multipliers applied to leveraged instruments (Oil, S&amp;P,
+              EUR-USD, etc.).
+            </p>
+          </div>
 
           <div className="flex flex-wrap gap-3 mb-4">
             <input
@@ -578,7 +598,7 @@ export default function SettingsClient({
             />
             <button
               onClick={handleAddLeverage}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3B82F6] text-white text-sm font-medium hover:bg-[#3B82F6]/90 transition-colors"
+              className="pressable inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3B82F6] text-white text-sm font-semibold shadow-sm shadow-[#3B82F6]/20 hover:bg-[#3B82F6]/90 transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add / Update
@@ -586,30 +606,38 @@ export default function SettingsClient({
           </div>
 
           {leverages.length === 0 ? (
-            <p className="text-sm text-[var(--muted-foreground)]">No leverages configured.</p>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--muted)] mb-3">
+                <Scale className="w-6 h-6 text-[var(--muted-foreground)]" />
+              </div>
+              <p className="text-sm font-medium text-[var(--foreground)]">No leverages configured</p>
+              <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                Add a symbol and multiplier above to apply leverage.
+              </p>
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)] text-xs">
-                    <th className="text-left py-2 font-medium">Symbol</th>
-                    <th className="text-right py-2 font-medium">Leverage</th>
+                  <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)] text-xs uppercase tracking-wide">
+                    <th className="text-left py-2 font-semibold">Symbol</th>
+                    <th className="text-right py-2 font-semibold">Leverage</th>
                     <th className="w-12" />
                   </tr>
                 </thead>
                 <tbody>
                   {leverages.map((l) => (
-                    <tr key={l.id} className="border-b border-[#2A3040]/50 last:border-0">
-                      <td className="py-2 font-medium text-[var(--foreground)]">
+                    <tr key={l.id} className="border-b border-[var(--border)]/60 last:border-0 hover:bg-[var(--muted)]/40 transition-colors">
+                      <td className="py-2.5 font-medium text-[var(--foreground)]">
                         {l.symbol}
                       </td>
-                      <td className="py-2 text-right text-[var(--foreground)] font-data">
+                      <td className="py-2.5 text-right text-[var(--foreground)] font-data">
                         {l.leverage}x
                       </td>
-                      <td className="py-2 text-right">
+                      <td className="py-2.5 text-right">
                         <button
                           onClick={() => handleRemoveLeverage(l.symbol)}
-                          className="p-1 rounded text-[var(--muted-foreground)] hover:text-[#FF4D6A] transition-colors"
+                          className="pressable p-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[#FF4D6A]/10 transition-colors"
                         >
                           <X className="w-4 h-4" />
                         </button>

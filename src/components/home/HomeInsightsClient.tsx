@@ -174,12 +174,12 @@ export default function HomeInsightsClient({
         <div>
           <Link
             href="/home"
-            className="inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-2"
+            className="pressable inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-2 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Home
           </Link>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Insights</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Insights</h1>
           <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
             Spending analysis & cash flow · {year}
           </p>
@@ -197,21 +197,23 @@ export default function HomeInsightsClient({
       </div>
 
       {!insights.hasData ? (
-        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-12 text-center">
-          <BarChart3 className="w-12 h-12 text-[var(--border)] mx-auto mb-4" />
+        <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-12 text-center shadow-sm">
+          <span className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--muted)] mx-auto mb-4">
+            <BarChart3 className="w-8 h-8 text-[var(--muted-foreground)]" />
+          </span>
           <h2 className="text-base font-semibold text-[var(--foreground)] mb-1">Nothing to analyze yet</h2>
-          <p className="text-sm text-[var(--muted-foreground)]">
+          <p className="text-sm text-[var(--muted-foreground)] max-w-sm mx-auto">
             Import a statement for {year} and your insights will appear here.
           </p>
         </div>
       ) : (
         <>
           {/* Stat tiles */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Stat label="Income" value={formatCurrency(totals.income)} icon={<TrendingUp className="w-5 h-5" />} color="text-[#00D68F]" />
-            <Stat label="Spending" value={formatCurrency(totals.spend)} icon={<TrendingDown className="w-5 h-5" />} color="text-[#FF4D6A]" />
-            <Stat label="Net" value={`${totals.net >= 0 ? "+" : ""}${formatCurrency(totals.net)}`} icon={<Wallet className="w-5 h-5" />} color={totals.net >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"} />
-            <Stat label="Savings rate" value={`${Math.round(totals.savingsRate * 100)}%`} icon={<PiggyBank className="w-5 h-5" />} color={totals.savingsRate >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"} sub={`${formatCurrency(totals.avgMonthlySpend)}/mo avg spend`} />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <Stat label="Income" value={formatCurrency(totals.income)} icon={<TrendingUp className="w-5 h-5" />} color="text-[#00D68F]" accent="#00D68F" />
+            <Stat label="Spending" value={formatCurrency(totals.spend)} icon={<TrendingDown className="w-5 h-5" />} color="text-[#FF4D6A]" accent="#FF4D6A" />
+            <Stat label="Net" value={`${totals.net >= 0 ? "+" : ""}${formatCurrency(totals.net)}`} icon={<Wallet className="w-5 h-5" />} color={totals.net >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"} accent={totals.net >= 0 ? "#00D68F" : "#FF4D6A"} />
+            <Stat label="Savings rate" value={`${Math.round(totals.savingsRate * 100)}%`} icon={<PiggyBank className="w-5 h-5" />} color={totals.savingsRate >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"} accent={totals.savingsRate >= 0 ? "#00D68F" : "#FF4D6A"} sub={`${formatCurrency(totals.avgMonthlySpend)}/mo avg spend`} />
           </div>
 
           {/* Cash flow */}
@@ -224,9 +226,9 @@ export default function HomeInsightsClient({
             <Card title="Spending by category" icon={<PieIcon className="w-4 h-4 text-[#00D68F]" />}>
               <div className="flex items-center gap-4">
                 <div className="h-52 w-1/2 shrink-0"><EChart option={donutOption} /></div>
-                <div className="flex-1 min-w-0 space-y-1.5 max-h-52 overflow-y-auto">
+                <div className="flex-1 min-w-0 space-y-0.5 max-h-52 overflow-y-auto -mr-1 pr-1">
                   {insights.categories.map((c) => (
-                    <div key={c.name} className="flex items-center gap-2 text-sm">
+                    <div key={c.name} className="flex items-center gap-2 text-sm rounded-md px-1.5 py-1 transition-colors hover:bg-[var(--muted)]/50">
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: c.color }} />
                       <span className="text-[var(--foreground)] truncate flex-1">{c.name}</span>
                       <span className="text-[var(--muted-foreground)] font-data text-xs">{Math.round(c.share * 100)}%</span>
@@ -265,7 +267,7 @@ export default function HomeInsightsClient({
                   </thead>
                   <tbody>
                     {insights.recurring.map((r) => (
-                      <tr key={r.merchant} className="border-b border-[#2A3040]/40 last:border-0">
+                      <tr key={r.merchant} className="border-b border-[var(--border)]/60 last:border-0 transition-colors hover:bg-[var(--muted)]/40">
                         <td className="py-2 text-[var(--foreground)] truncate max-w-[200px]">{r.merchant}</td>
                         <td className="py-2 text-[var(--muted-foreground)] hidden sm:table-cell">{r.category ?? "—"}</td>
                         <td className="py-2 text-right font-data text-[var(--foreground)]">{formatCurrency(r.monthlyAmount)}</td>
@@ -294,14 +296,19 @@ export default function HomeInsightsClient({
   );
 }
 
-function Stat({ label, value, icon, color, sub }: { label: string; value: string; icon: React.ReactNode; color: string; sub?: string }) {
+function Stat({ label, value, icon, color, accent, sub }: { label: string; value: string; icon: React.ReactNode; color: string; accent?: string; sub?: string }) {
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm transition-all hover:border-[var(--muted-foreground)]/25 hover:shadow-md">
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-[var(--muted-foreground)] font-medium">{label}</span>
-        <div className="text-[var(--muted-foreground)]">{icon}</div>
+        <div
+          className="flex items-center justify-center w-8 h-8 rounded-lg"
+          style={accent ? { background: `${accent}1A`, color: accent } : undefined}
+        >
+          {icon}
+        </div>
       </div>
-      <p className={cn("text-2xl font-bold font-data", color)}>{value}</p>
+      <p className={cn("text-2xl font-bold font-data tracking-tight", color)}>{value}</p>
       {sub && <p className="text-xs text-[var(--muted-foreground)] mt-1">{sub}</p>}
     </div>
   );
@@ -309,11 +316,15 @@ function Stat({ label, value, icon, color, sub }: { label: string; value: string
 
 function Card({ title, icon, meta, children }: { title: string; icon: React.ReactNode; meta?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
         {icon}
         <h3 className="text-sm font-semibold text-[var(--foreground)]">{title}</h3>
-        {meta && <span className="text-xs text-[var(--muted-foreground)] ml-auto font-data">{meta}</span>}
+        {meta && (
+          <span className="text-xs text-[var(--muted-foreground)] ml-auto font-data rounded-full bg-[var(--muted)] px-2 py-0.5">
+            {meta}
+          </span>
+        )}
       </div>
       {children}
     </div>
@@ -323,9 +334,9 @@ function Card({ title, icon, meta, children }: { title: string; icon: React.Reac
 function List({ rows }: { rows: { label: string; sub: string; value: number }[] }) {
   if (rows.length === 0) return <p className="text-sm text-[var(--muted-foreground)] py-2">Nothing yet.</p>;
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-0.5">
       {rows.map((r, i) => (
-        <div key={i} className="flex items-center gap-2 text-sm">
+        <div key={i} className="flex items-center gap-2 text-sm rounded-md px-1.5 py-1.5 transition-colors hover:bg-[var(--muted)]/50">
           <span className="text-[var(--foreground)] truncate flex-1">{r.label}</span>
           <span className="text-[var(--muted-foreground)] text-xs font-data">{r.sub}</span>
           <span className="text-[var(--foreground)] font-data font-medium w-20 text-right">{formatCurrency(r.value)}</span>

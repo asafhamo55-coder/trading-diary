@@ -111,13 +111,13 @@ export default function HomeClient({
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <div
-            className="flex items-center justify-center w-10 h-10 rounded-xl"
-            style={{ background: `${ACCENT}1A` }}
+            className="flex items-center justify-center w-11 h-11 rounded-2xl shadow-sm ring-1 ring-inset"
+            style={{ background: `${ACCENT}1A`, borderColor: `${ACCENT}33` }}
           >
             <HomeIcon className="w-5 h-5" style={{ color: ACCENT }} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--foreground)]">Home</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Home</h1>
             <p className="text-sm text-[var(--muted-foreground)]">
               Household spending & cash flow · {year}
             </p>
@@ -127,17 +127,11 @@ export default function HomeClient({
           {availableYears.length > 0 && (
             <YearPicker years={availableYears} selected={year} />
           )}
-          <Link
-            href="/home/insights"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:border-[color:var(--border)] transition-colors"
-          >
+          <Link href="/home/insights" className={secondaryBtn}>
             <BarChart3 className="w-4 h-4" />
             Insights
           </Link>
-          <Link
-            href="/home/categories"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:border-[color:var(--border)] transition-colors"
-          >
+          <Link href="/home/categories" className={secondaryBtn}>
             <Tag className="w-4 h-4" />
             Categories
           </Link>
@@ -148,16 +142,13 @@ export default function HomeClient({
               buildCsv={buildTransactionsCsv}
             />
           )}
-          <button
-            onClick={() => setAddingTx(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:border-[color:var(--border)] transition-colors"
-          >
+          <button onClick={() => setAddingTx(true)} className={secondaryBtn}>
             <Plus className="w-4 h-4" />
             Add row
           </button>
           <button
             onClick={() => setImporting(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-[#0C0F14] transition-colors"
+            className="pressable inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-[#0C0F14] shadow-sm transition-[filter] hover:brightness-105"
             style={{ background: ACCENT }}
           >
             <Upload className="w-4 h-4" />
@@ -170,35 +161,43 @@ export default function HomeClient({
       {reviewCount > 0 && (
         <Link
           href="/home/review"
-          className="flex items-center gap-2 rounded-xl border border-[#FFB547]/40 bg-[#FFB547]/10 px-4 py-3 text-sm hover:bg-[#FFB547]/15 transition-colors"
+          className="pressable group flex items-center gap-3 rounded-xl border border-[#FFB547]/40 bg-[#FFB547]/10 px-4 py-3 text-sm shadow-sm transition-colors hover:bg-[#FFB547]/15"
         >
-          <AlertCircle className="w-4 h-4 text-[#FFB547]" />
-          <span className="text-[var(--foreground)]">
+          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#FFB547]/15 shrink-0">
+            <AlertCircle className="w-4 h-4 text-[#FFB547]" />
+          </span>
+          <span className="text-[var(--foreground)] flex-1">
             <span className="font-semibold">{reviewCount}</span> transaction
             {reviewCount !== 1 ? "s" : ""} need review
+          </span>
+          <span className="text-xs font-medium text-[#FFB547] opacity-0 group-hover:opacity-100 transition-opacity">
+            Resolve →
           </span>
         </Link>
       )}
 
       {/* Summary tiles */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <SummaryTile
           label={`Income · ${year}`}
           value={totals.income}
           icon={<TrendingUp className="w-5 h-5" />}
           valueColor="text-[#00D68F]"
+          accent="#00D68F"
         />
         <SummaryTile
           label={`Spending · ${year}`}
           value={totals.spend}
           icon={<TrendingDown className="w-5 h-5" />}
           valueColor="text-[#FF4D6A]"
+          accent="#FF4D6A"
         />
         <SummaryTile
           label={`Net · ${year}`}
           value={totals.net}
           icon={<Wallet className="w-5 h-5" />}
           valueColor={totals.net >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"}
+          accent={totals.net >= 0 ? "#00D68F" : "#FF4D6A"}
           signed
         />
         <SummaryTile
@@ -206,12 +205,13 @@ export default function HomeClient({
           value={totals.savingsRate}
           icon={<PiggyBank className="w-5 h-5" />}
           valueColor={totals.savingsRate >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"}
+          accent={totals.savingsRate >= 0 ? "#00D68F" : "#FF4D6A"}
           percent
         />
       </div>
 
       {/* Accounts / sources */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-[var(--foreground)]">
             Accounts
@@ -219,7 +219,7 @@ export default function HomeClient({
           {!addingAccount && (
             <button
               onClick={() => setAddingAccount(true)}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              className="pressable inline-flex items-center gap-1.5 text-sm font-medium text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]"
             >
               <Plus className="w-4 h-4" />
               Add account
@@ -236,10 +236,24 @@ export default function HomeClient({
           />
         )}
         {activeAccounts.length === 0 && !addingAccount ? (
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Add your Bank of America and American Express accounts, then import
-            statements or add rows manually.
-          </p>
+          <div className="flex flex-col items-center text-center rounded-lg border border-dashed border-[var(--border)] px-6 py-8">
+            <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-[var(--muted)] mb-3">
+              <Landmark className="w-5 h-5 text-[var(--muted-foreground)]" />
+            </span>
+            <p className="text-sm font-medium text-[var(--foreground)]">No accounts yet</p>
+            <p className="text-sm text-[var(--muted-foreground)] mt-1 max-w-sm">
+              Add your Bank of America and American Express accounts, then import
+              statements or add rows manually.
+            </p>
+            <button
+              onClick={() => setAddingAccount(true)}
+              className="pressable mt-4 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-[#0C0F14] shadow-sm transition-[filter] hover:brightness-105"
+              style={{ background: ACCENT }}
+            >
+              <Plus className="w-4 h-4" />
+              Add account
+            </button>
+          </div>
         ) : (
           <div className="flex flex-wrap gap-2 mt-1">
             {activeAccounts.map((a) => (
@@ -286,6 +300,7 @@ function SummaryTile({
   value,
   icon,
   valueColor,
+  accent,
   signed,
   percent,
 }: {
@@ -293,6 +308,7 @@ function SummaryTile({
   value: number;
   icon: React.ReactNode;
   valueColor: string;
+  accent?: string;
   signed?: boolean;
   percent?: boolean;
 }) {
@@ -300,12 +316,17 @@ function SummaryTile({
     ? `${Math.round(value * 100)}%`
     : `${signed && value >= 0 ? "+" : ""}${formatCurrency(value)}`;
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm transition-all hover:border-[var(--muted-foreground)]/25 hover:shadow-md">
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-[var(--muted-foreground)] font-medium">{label}</span>
-        <div className="text-[var(--muted-foreground)]">{icon}</div>
+        <div
+          className="flex items-center justify-center w-8 h-8 rounded-lg"
+          style={accent ? { background: `${accent}1A`, color: accent } : undefined}
+        >
+          {icon}
+        </div>
       </div>
-      <p className={cn("text-2xl font-bold font-data", valueColor)}>{text}</p>
+      <p className={cn("text-2xl font-bold font-data tracking-tight", valueColor)}>{text}</p>
     </div>
   );
 }
@@ -330,10 +351,12 @@ function AccountChip({
     }
   }
   return (
-    <div className="group inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--background)] pl-3 pr-2 py-1.5">
-      <Icon className="w-4 h-4 text-[var(--muted-foreground)]" />
-      <span className="text-sm text-[var(--foreground)]">{account.name}</span>
-      <span className="text-xs text-[var(--muted-foreground)]">
+    <div className="group inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--background)] pl-2.5 pr-2 py-1.5 shadow-sm transition-colors hover:border-[var(--muted-foreground)]/30">
+      <span className="flex items-center justify-center w-6 h-6 rounded-md bg-[var(--muted)]">
+        <Icon className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />
+      </span>
+      <span className="text-sm font-medium text-[var(--foreground)]">{account.name}</span>
+      <span className="text-xs text-[var(--muted-foreground)] font-data">
         {accountTypeShort(account.type)}
         {account.last4 ? ` ·${account.last4}` : ""}
       </span>
@@ -341,7 +364,7 @@ function AccountChip({
         onClick={remove}
         disabled={busy}
         title="Remove account (and its transactions)"
-        className="text-[var(--muted-foreground)] hover:text-[#FF4D6A] opacity-0 group-hover:opacity-100 transition-opacity"
+        className="pressable p-0.5 rounded text-[var(--muted-foreground)] hover:text-[#FF4D6A] opacity-0 group-hover:opacity-100 transition-opacity"
       >
         {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
       </button>
@@ -386,7 +409,7 @@ function AddAccountForm({
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-[var(--border)] p-4 mb-3 space-y-3">
+    <form onSubmit={submit} className="rounded-lg border border-[var(--border)] bg-[var(--background)] p-4 mb-3 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <label className="block">
           <span className="text-xs font-medium text-[var(--muted-foreground)] mb-1 block">Type</span>
@@ -421,15 +444,20 @@ function AddAccountForm({
           />
         </label>
       </div>
-      {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
+      {error && (
+        <p className="flex items-center gap-1.5 text-sm text-[#FF4D6A]">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          {error}
+        </p>
+      )}
       <div className="flex justify-end gap-2">
-        <button type="button" onClick={onCancel} className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2">
+        <button type="button" onClick={onCancel} className="pressable text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2 transition-colors">
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-[#0C0F14] disabled:opacity-60"
+          className="pressable inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-[#0C0F14] shadow-sm transition-[filter] hover:brightness-105 disabled:opacity-60"
           style={{ background: ACCENT }}
         >
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -500,14 +528,14 @@ function AddTransactionForm({
   }
 
   return (
-    <form onSubmit={submit} className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+    <form onSubmit={submit} className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[var(--foreground)]">Add transaction</h3>
-        <button type="button" onClick={onCancel} className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+        <button type="button" onClick={onCancel} className="pressable p-1 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className="inline-flex rounded-lg border border-[var(--border)] p-0.5">
+      <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--background)] p-0.5">
         {(["OUT", "IN"] as const).map((d) => (
           <button
             key={d}
@@ -564,9 +592,14 @@ function AddTransactionForm({
           <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any clarity you want to add" className={inputCls} />
         </label>
       </div>
-      {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
+      {error && (
+        <p className="flex items-center gap-1.5 text-sm text-[#FF4D6A]">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          {error}
+        </p>
+      )}
       <div className="flex justify-end">
-        <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-[#0C0F14] disabled:opacity-60" style={{ background: ACCENT }}>
+        <button type="submit" disabled={saving} className="pressable inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-[#0C0F14] shadow-sm transition-[filter] hover:brightness-105 disabled:opacity-60" style={{ background: ACCENT }}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
           Add transaction
         </button>
@@ -576,4 +609,7 @@ function AddTransactionForm({
 }
 
 const inputCls =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:border-[#00D68F]";
+  "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] transition-colors focus:outline-none focus:border-[#00D68F] focus:ring-2 focus:ring-[#00D68F]/20";
+
+const secondaryBtn =
+  "pressable inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm font-medium text-[var(--foreground)] shadow-sm transition-colors hover:bg-[var(--muted)] hover:border-[var(--muted-foreground)]/30";

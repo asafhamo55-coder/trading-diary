@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Loader2, EyeOff, Eye, Pencil, Save, X, Building2, Search, Layers } from "lucide-react";
+import { Trash2, Loader2, EyeOff, Eye, Pencil, Save, X, Building2, Search, Layers, Inbox, SearchX } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import HomeCategorySelect, { type Selection } from "@/components/home/HomeCategorySelect";
 import {
@@ -160,13 +160,14 @@ export default function HomeLedger({
   }
 
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-sm">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-[var(--foreground)]">
           Transactions · {year}
         </h3>
         {pending.size > 0 && (
-          <span className="text-xs text-[var(--muted-foreground)]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00D68F]/12 px-2.5 py-1 text-xs font-medium text-[#00D68F]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00D68F] animate-pulse" />
             {pending.size} unsaved change{pending.size !== 1 ? "s" : ""}
           </span>
         )}
@@ -211,13 +212,25 @@ export default function HomeLedger({
       )}
 
       {transactions.length === 0 ? (
-        <p className="text-sm text-[var(--muted-foreground)] py-2">
-          No transactions yet. Import a statement or add a row to get started.
-        </p>
+        <div className="flex flex-col items-center text-center px-6 py-12">
+          <span className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--muted)] mb-3">
+            <Inbox className="w-6 h-6 text-[var(--muted-foreground)]" />
+          </span>
+          <p className="text-sm font-medium text-[var(--foreground)]">No transactions yet</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1 max-w-xs">
+            Import a statement or add a row to get started.
+          </p>
+        </div>
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-[var(--muted-foreground)] py-2">
-          No transactions match this filter.
-        </p>
+        <div className="flex flex-col items-center text-center px-6 py-12">
+          <span className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--muted)] mb-3">
+            <SearchX className="w-6 h-6 text-[var(--muted-foreground)]" />
+          </span>
+          <p className="text-sm font-medium text-[var(--foreground)]">No matches</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">
+            No transactions match this filter.
+          </p>
+        </div>
       ) : (
         <div className="space-y-1">
           {filtered.map((t) => {
@@ -246,16 +259,18 @@ export default function HomeLedger({
       {/* Apply-to-similar prompt */}
       {similar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSimilar(null)}>
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-4 shadow-2xl"
+            className="relative w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2">
-              <Layers className="w-5 h-5 text-[#00D68F]" />
+            <div className="flex items-center gap-2.5">
+              <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#00D68F]/12 shrink-0">
+                <Layers className="w-[18px] h-[18px] text-[#00D68F]" />
+              </span>
               <h3 className="text-sm font-semibold text-[var(--foreground)]">Apply to similar?</h3>
             </div>
-            <p className="text-sm text-[var(--muted-foreground)]">
+            <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
               {similar.ids.length} other transaction{similar.ids.length !== 1 ? "s" : ""} from{" "}
               <span className="font-medium text-[var(--foreground)]">{similar.merchant}</span> {similar.ids.length !== 1 ? "are" : "is"} also
               under review. Apply the same to {similar.ids.length !== 1 ? "them" : "it"} too?
@@ -263,13 +278,13 @@ export default function HomeLedger({
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setSimilar(null)}
-                className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2"
+                className="pressable text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2 transition-colors"
               >
                 Just this one
               </button>
               <button
                 onClick={applySimilar}
-                className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-[#0C0F14]"
+                className="pressable inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-[#0C0F14] shadow-sm transition-[filter] hover:brightness-105"
                 style={{ background: "#00D68F" }}
               >
                 Apply to all {similar.ids.length}
@@ -281,10 +296,10 @@ export default function HomeLedger({
 
       {/* Sticky save bar */}
       {pending.size > 0 && (
-        <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom))] md:bottom-3 mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#00D68F]/40 bg-[var(--card)] px-4 py-3 shadow-lg">
+        <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom))] md:bottom-3 mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#00D68F]/40 bg-[var(--card)]/95 backdrop-blur-xl px-4 py-3 shadow-lg ring-1 ring-[#00D68F]/10">
           <span className="text-sm text-[var(--foreground)]">
             {saveError ? (
-              <span className="text-[#FF4D6A]">{saveError}</span>
+              <span className="flex items-center gap-1.5 text-[#FF4D6A]">{saveError}</span>
             ) : (
               <>
                 {pending.size} change{pending.size !== 1 ? "s" : ""} not saved yet
@@ -295,14 +310,14 @@ export default function HomeLedger({
             <button
               onClick={() => setPending(new Map())}
               disabled={saving}
-              className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-1.5"
+              className="pressable text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-1.5 transition-colors disabled:opacity-60"
             >
               Discard
             </button>
             <button
               onClick={saveAll}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-medium text-[#0C0F14] disabled:opacity-60"
+              className="pressable inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-semibold text-[#0C0F14] shadow-sm transition-[filter] hover:brightness-105 disabled:opacity-60"
               style={{ background: "#00D68F" }}
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -341,9 +356,9 @@ function FilterTab({
     <button
       onClick={onClick}
       className={cn(
-        "px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap",
+        "pressable px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap",
         active
-          ? "bg-[#00D68F]/15 text-[#00D68F]"
+          ? "bg-[#00D68F]/15 text-[#00D68F] shadow-sm"
           : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
       )}
     >
@@ -439,21 +454,21 @@ function Row({
         <button
           onClick={onToggleExclude}
           title={effective.isExcluded ? "Include in spending" : "Exclude (transfer / payment)"}
-          className="p-1.5 rounded text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--card)] transition-colors opacity-0 group-hover:opacity-100"
+          className="pressable p-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--card)] transition-colors md:opacity-0 md:group-hover:opacity-100"
         >
           {effective.isExcluded ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
         </button>
         <button
           onClick={onEdit}
           title="Edit"
-          className="p-1.5 rounded text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--card)] transition-colors opacity-0 group-hover:opacity-100"
+          className="pressable p-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--card)] transition-colors md:opacity-0 md:group-hover:opacity-100"
         >
           <Pencil className="w-4 h-4" />
         </button>
         <button
           onClick={onDelete}
           title="Delete"
-          className="p-1.5 rounded text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[var(--card)] transition-colors opacity-0 group-hover:opacity-100"
+          className="pressable p-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[var(--card)] transition-colors md:opacity-0 md:group-hover:opacity-100"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -507,19 +522,19 @@ function EditModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-4 shadow-2xl"
+        className="relative w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-4 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-[var(--foreground)]">Edit transaction</h3>
-          <button onClick={onClose} className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+          <button onClick={onClose} className="pressable p-1 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-xs text-[var(--muted-foreground)]">
-          Original: <span className="font-data">{tx.rawDescription}</span>
+        <p className="text-xs text-[var(--muted-foreground)] rounded-lg bg-[var(--muted)] px-3 py-2">
+          Original: <span className="font-data text-[var(--foreground)]">{tx.rawDescription}</span>
         </p>
         <div className="inline-flex rounded-lg border border-[var(--border)] p-0.5">
           {(["OUT", "IN"] as const).map((d) => (
@@ -567,9 +582,9 @@ function EditModal({
           <span className="text-xs font-medium text-[var(--muted-foreground)] mb-1 block">Notes</span>
           <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add clarity to this row" className={inputCls} />
         </label>
-        <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2">Cancel</button>
-          <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-[#0C0F14] disabled:opacity-60" style={{ background: "#00D68F" }}>
+        <div className="flex justify-end gap-2 pt-1">
+          <button onClick={onClose} className="pressable text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-3 py-2 transition-colors">Cancel</button>
+          <button onClick={save} disabled={saving} className="pressable inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-[#0C0F14] shadow-sm transition-[filter] hover:brightness-105 disabled:opacity-60" style={{ background: "#00D68F" }}>
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
             Save
           </button>
@@ -580,4 +595,4 @@ function EditModal({
 }
 
 const inputCls =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:border-[#00D68F]";
+  "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] transition-colors focus:outline-none focus:border-[#00D68F] focus:ring-2 focus:ring-[#00D68F]/20";

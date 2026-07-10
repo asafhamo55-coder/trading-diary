@@ -371,15 +371,20 @@ export default function AssetsClient({
       </div>
 
       {trades.length === 0 ? (
-        <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-12 text-center">
-          <Wallet className="w-12 h-12 text-[var(--border)] mx-auto mb-4" />
-          <h2 className="text-base font-semibold text-[var(--foreground)] mb-1">
+        <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-10 sm:p-12 text-center shadow-sm">
+          <div
+            className="flex items-center justify-center w-16 h-16 rounded-2xl mx-auto mb-5"
+            style={{ background: `${v.accent}1A` }}
+          >
+            <Wallet className="w-8 h-8" style={{ color: v.accent }} />
+          </div>
+          <h2 className="text-lg font-semibold text-[var(--foreground)] mb-1.5">
             {v.emptyTitle}
           </h2>
-          <p className="text-sm text-[var(--muted-foreground)] mb-6">{v.emptyHint}</p>
+          <p className="text-sm text-[var(--muted-foreground)] mb-6 max-w-sm mx-auto leading-relaxed">{v.emptyHint}</p>
           <Link
             href="/trade/trades"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#3B82F6] px-4 py-2 text-sm font-medium text-white hover:bg-[#3B82F6]/90 transition-colors"
+            className="pressable inline-flex items-center gap-2 rounded-lg bg-[#3B82F6] px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#3B82F6]/20 hover:bg-[#3B82F6]/90 transition-colors"
           >
             Go to Trades
           </Link>
@@ -387,11 +392,17 @@ export default function AssetsClient({
       ) : (
         <>
           {/* Summary card */}
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
-            <p className="text-[var(--muted-foreground)] text-sm mb-1">{v.totalLabel}</p>
+          <div
+            className="relative overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm"
+          >
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 w-1"
+              style={{ background: v.accent }}
+            />
+            <p className="text-[var(--muted-foreground)] text-xs font-medium uppercase tracking-wide mb-1.5">{v.totalLabel}</p>
             <h2
               className={cn(
-                "text-3xl md:text-4xl font-bold font-data",
+                "text-3xl md:text-4xl font-bold font-data tracking-tight",
                 totalRealized >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
               )}
             >
@@ -412,9 +423,9 @@ export default function AssetsClient({
               {symbolRows.map((r) => (
                 <div
                   key={r.symbol}
-                  className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex-1 min-w-0"
+                  className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 flex-1 min-w-[140px] shadow-sm hover:border-[var(--muted-foreground)]/30 transition-colors"
                 >
-                  <p className="text-xs text-[var(--muted-foreground)] font-medium mb-2 truncate">
+                  <p className="text-xs text-[var(--muted-foreground)] font-semibold uppercase tracking-wide mb-2 truncate">
                     {r.symbol}
                   </p>
                   <p
@@ -448,7 +459,7 @@ export default function AssetsClient({
 
           {/* Monthly P&L Bar Chart */}
           {monthlyPnL.some((m) => m.pnl !== 0) && (
-            <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <BarChart3
                   className="w-4 h-4"
@@ -466,7 +477,7 @@ export default function AssetsClient({
 
           {/* Daily P&L Bar Chart (1-day resolution) */}
           {dailyPnL.length > 0 && (
-            <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <BarChart3
                   className="w-4 h-4"
@@ -526,7 +537,7 @@ export default function AssetsClient({
 
           {/* Equity Curve */}
           {insights.equityCurve.length > 0 && (
-            <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <LineChartIcon
                   className="w-4 h-4"
@@ -544,7 +555,7 @@ export default function AssetsClient({
 
           {/* Per-symbol breakdown */}
           {symbolRows.length > 0 && (
-            <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <PieChart className="w-4 h-4" style={{ color: v.accent }} />
                 <h3 className="text-sm font-semibold text-[var(--foreground)]">
@@ -554,19 +565,19 @@ export default function AssetsClient({
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-[var(--muted-foreground)] text-xs border-b border-[var(--border)]">
-                      <th className="text-left pb-3 font-medium">Symbol</th>
-                      <th className="text-right pb-3 font-medium">Trades</th>
-                      <th className="text-right pb-3 font-medium">Open</th>
-                      <th className="text-right pb-3 font-medium">Total P&L</th>
-                      <th className="text-right pb-3 font-medium">Win Rate</th>
+                    <tr className="text-[var(--muted-foreground)] text-xs uppercase tracking-wide border-b border-[var(--border)]">
+                      <th className="text-left pb-3 font-semibold">Symbol</th>
+                      <th className="text-right pb-3 font-semibold">Trades</th>
+                      <th className="text-right pb-3 font-semibold">Open</th>
+                      <th className="text-right pb-3 font-semibold">Total P&L</th>
+                      <th className="text-right pb-3 font-semibold">Win Rate</th>
                     </tr>
                   </thead>
                   <tbody>
                     {symbolRows.map((r) => (
                       <tr
                         key={r.symbol}
-                        className="border-b border-[#2A3040]/50 last:border-0"
+                        className="border-b border-[var(--border)]/60 last:border-0 hover:bg-[var(--muted)]/40 transition-colors"
                       >
                         <td className="py-2.5 font-medium text-[var(--foreground)]">
                           {r.symbol}
@@ -625,14 +636,14 @@ function StatCard({
   valueColor?: string;
 }) {
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-[var(--muted-foreground)] font-medium">{label}</span>
-        <div className="text-[var(--muted-foreground)]">{icon}</div>
+        <span className="text-xs text-[var(--muted-foreground)] font-semibold uppercase tracking-wide">{label}</span>
+        <div className="text-[var(--muted-foreground)]/70">{icon}</div>
       </div>
       <p
         className={cn(
-          "text-2xl font-bold font-data",
+          "text-xl sm:text-2xl font-bold font-data tracking-tight",
           valueColor ?? "text-[var(--foreground)]"
         )}
       >
