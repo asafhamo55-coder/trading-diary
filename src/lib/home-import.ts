@@ -160,13 +160,19 @@ function normalizeSign(amount: number, type: HomeAccountType): number {
 /** Tidy a raw statement description into a friendlier merchant label. */
 export function cleanDescription(raw: string): string {
   let s = raw.replace(/\s+/g, " ").trim();
-  // Strip common BofA prefixes/noise.
-  s = s.replace(/^CHECKCARD\s+\d{4}\s*/i, "");
-  s = s.replace(/^(PURCHASE|POS|DEBIT|CREDIT)\s+/i, "");
+  // Digital-wallet / processor prefixes (Amex & card feeds).
+  s = s.replace(/^AplPay\s+/i, "");
+  s = s.replace(/^(TST\*|SQ ?\*|SQU\*|PY ?\*|PAYPAL ?\*|GOOGLE ?\*|AMZN Mktp|SP ?\*)\s*/i, "");
+  // Bank of America prefixes.
+  s = s.replace(/^CHECKCARD\s+\d{2,4}\s*/i, "");
+  s = s.replace(/^(PURCHASE|POS|DEBIT|CREDIT|RECURRING)\s+/i, "");
+  // BofA structured suffixes (DES:/ID:/INDN:/CO ID:/Confirmation#).
   s = s.replace(/\bDES:.*$/i, "");
-  s = s.replace(/\bID:.*$/i, "");
-  s = s.replace(/\s+\d{2}\/\d{2}\b.*$/, "");
-  s = s.replace(/#?\d{5,}/g, "").trim();
+  s = s.replace(/\b(Confirmation#|Conf#|ID:|INDN:).*$/i, "");
+  s = s.replace(/;.*$/, "");
+  // Trailing US state code left over from fixed-width merchant+city fields.
+  s = s.replace(/\s+[A-Z]{2}\s*$/, "");
+  s = s.replace(/#?\d{5,}/g, "");
   s = s.replace(/\s{2,}/g, " ").trim();
   return s || raw.trim();
 }
@@ -188,33 +194,48 @@ interface Rule {
 }
 
 const RULES: Rule[] = [
-  // Card payments / internal transfers → excluded from spend
-  { re: /payment\s*-?\s*thank you|online payment|mobile payment|auto\s*pay|autopay|e-?payment|epayment|bill\s*pay|payment received|pymt|web pymt/i, category: "Credit Card Payment", transfer: true },
-  { re: /\b(amex|american express|bankamericard|bank of america).{0,20}(payment|pymt)/i, category: "Credit Card Payment", transfer: true },
-  { re: /transfer|xfer|online banking transfer|to savings|from checking/i, category: "Account Transfer", transfer: true },
-  { re: /\batm\b|cash withdrawal/i, category: "ATM / Cash", transfer: true },
-  // Income
-  { re: /payroll|direct dep|dir dep|salary|\bach credit\b/i, category: "Salary" },
-  { re: /refund|reversal/i, category: "Refunds" },
-  // Spending
-  { re: /trader joe|whole foods|safeway|kroger|costco|aldi|wegmans|publix|grocery|supermarket|ralphs|vons/i, category: "Groceries" },
-  { re: /starbucks|dunkin|peet|coffee|cafe|philz/i, category: "Coffee" },
-  { re: /doordash|uber eats|ubereats|grubhub|postmates|caviar/i, category: "Delivery" },
-  { re: /mcdonald|chipotle|taco|pizza|restaurant|grill|kitchen|sushi|thai|burger|chick-fil|panera|subway/i, category: "Dining out" },
-  { re: /shell|chevron|exxon|arco|mobil|76 |valero|bp\b|gas|fuel/i, category: "Gas" },
-  { re: /\buber\b|lyft/i, category: "Rideshare & Taxi" },
-  { re: /parking|toll|fastrak|ipass/i, category: "Parking & Tolls" },
-  { re: /netflix|spotify|hulu|disney\+?|hbo|max\b|youtube premium|paramount|peacock|apple tv/i, category: "Streaming" },
-  { re: /amazon|amzn/i, category: "General / Amazon" },
-  { re: /comcast|xfinity|at&t|att\b|verizon|t-mobile|tmobile|spectrum|internet/i, category: "Internet & Phone" },
-  { re: /pg&e|pge |edison|water|electric|utility|gas company|con ed|duke energy/i, category: "Utilities" },
-  { re: /cvs|walgreens|rite aid|pharmacy/i, category: "Pharmacy" },
-  { re: /planet fitness|equinox|\bgym\b|fitness|peloton/i, category: "Fitness" },
-  { re: /apple\.com\/bill|google \*|microsoft|adobe|dropbox|notion|openai|github/i, category: "Software" },
-  { re: /delta|united|american air|southwest|jetblue|alaska air|airline/i, category: "Flights" },
-  { re: /airbnb|marriott|hilton|hyatt|hotel|motel|expedia|booking\.com/i, category: "Hotels" },
-  { re: /insurance|geico|state farm|progressive|allstate/i, category: "Insurance" },
-  { re: /mortgage|loan pmt|home loan/i, category: "Mortgage / Rent" },
+  // ── Transfers / card payments → excluded from spend (the de-dupe) ──
+  // Amex statement side: "MOBILE PAYMENT - THANK YOU".
+  { re: /payment\s*-?\s*thank you|payment received|thank you for your payment/i, category: "Credit Card Payment", transfer: true },
+  // BofA → Amex: "AMERICAN EXPRESS DES:ACH PMT ...".
+  { re: /american express.{0,25}(ach pmt|pmt|payment|epay)/i, category: "Credit Card Payment", transfer: true },
+  // BofA → BofA card: "Mobile Banking payment to CRD 6111".
+  { re: /payment to crd\b|payment to card|to crd \d/i, category: "Credit Card Payment", transfer: true },
+  // Other card issuers.
+  { re: /\b(bankamericard|chase|citi|discover|capital one|barclays|synchrony|wells fargo)\b.{0,25}(card|payment|pmt|epay|autopay)/i, category: "Credit Card Payment", transfer: true },
+  { re: /\b(autopay|auto\s*pay|online payment|bill\s*pay|e-?payment)\b.{0,15}(card|amex|visa|mastercard|discover)/i, category: "Credit Card Payment", transfer: true },
+  // Internal / external account transfers (own accounts, brokerage).
+  { re: /extrnltfr|external transfer|online banking transfer|des:ach transf|\bach transf\b|interactive brok|transfer (to|from) (sav|chk|savings|checking)/i, category: "Account Transfer", transfer: true },
+  { re: /\batm\b|cash withdrawal|withdrawal - atm/i, category: "ATM / Cash", transfer: true },
+
+  // ── Income ──
+  { re: /des:payroll|\bpayroll\b|des:direct-pay|direct dep|dir dep|\bsalary\b/i, category: "Salary" },
+  { re: /\brefund\b|reversal|return credit|statement credit|rideshare credit/i, category: "Refunds" },
+
+  // ── Spending — merchants (tuned to real BofA/Amex descriptions) ──
+  { re: /kroger fuel|\bmarathon\b|quiktrip|racetrac|\bchevron\b|\bshell\b|\bexxon\b|\barco\b|\bmobil\b|valero|\bbp\b|\bfuel\b|gas station/i, category: "Gas" },
+  { re: /trader joe|whole foods|safeway|\bkroger\b|costco|\baldi\b|wegmans|\bpublix\b|sprouts|ralphs|\bvons\b|supermarket|grocery|\bheb\b|food lion/i, category: "Groceries" },
+  { re: /starbucks|dunkin|peet|\bcoffee\b|\bcafe\b|philz|dutch bros/i, category: "Coffee" },
+  { re: /doordash|uber ?eats|grubhub|postmates|caviar/i, category: "Delivery" },
+  // Toast POS (TST*) is overwhelmingly restaurants; plus common dining keywords.
+  { re: /\btst\*|toast|mcdonald|chipotle|\btaco\b|pizza|restaurant|\bgrill\b|kitchen|sushi|\bthai\b|burger|chick-?fil|panera|subway|cool river|marlows|buffalo wild|cheesecake|chili'?s|wingstop|\bbbq\b/i, category: "Dining out" },
+  { re: /\buber\b|\blyft\b/i, category: "Rideshare & Taxi" },
+  { re: /parking|\btoll\b|fastrak|ipass|peachpass/i, category: "Parking & Tolls" },
+  { re: /netflix|spotify|hulu|disney\+?|\bhbo\b|youtube premium|paramount|peacock|apple tv|patreon/i, category: "Streaming" },
+  { re: /amazon|\bamzn\b/i, category: "General / Amazon" },
+  { re: /comcast|xfinity|at&t|\batt\b|verizon|t-?mobile|spectrum|\binternet\b/i, category: "Internet & Phone" },
+  { re: /sawnee|\bemc\b|georgia power|\bpg&e\b|edison|con ed|duke energy|water & sewer|water and sewer|\bsewer\b|\bwater\b|\belectric\b|\butility\b|gas company/i, category: "Utilities" },
+  { re: /cvs|walgreens|rite aid|pharmacy|\bcvs\/|goodrx/i, category: "Pharmacy" },
+  { re: /planet fitness|equinox|\bgym\b|fitness|peloton|life ?time/i, category: "Fitness" },
+  { re: /openai|chatgpt|microsoft|adobe|dropbox|notion|github|google \*|apple\.com|\bicloud\b|anthropic/i, category: "Software" },
+  { re: /\bdelta\b|united air|southwest|jetblue|american air|alaska air|\bairline\b|jetset/i, category: "Flights" },
+  { re: /airbnb|marriott|hilton|hyatt|\bhotel\b|\bmotel\b|expedia|booking\.com|vrbo/i, category: "Hotels" },
+  { re: /geico|state farm|progressive|allstate|\bnationwide\b|\binsurance\b/i, category: "Insurance" },
+  { re: /\bmortgage\b|loan pmt|home loan|\brent\b/i, category: "Mortgage / Rent" },
+  // Zelle "for <reason>" context — common household services.
+  { re: /zelle.*(repair|handyman|contractor|plumb|electr|floor|roof)/i, category: "Repairs & Maintenance" },
+  { re: /zelle.*(clean|maid|housekeep|lawn|landscap|garden|pool)/i, category: "Repairs & Maintenance" },
+  { re: /zelle.*(tutor|nanny|babysit|school|lesson|coach)/i, category: "Childcare" },
 ];
 
 export interface Classification {
