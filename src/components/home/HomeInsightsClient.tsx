@@ -17,6 +17,7 @@ import EChart from "@/components/charts/EChart";
 import type { EChartsCoreOption } from "echarts/core";
 import { cn, formatCurrency } from "@/lib/utils";
 import YearPicker from "@/components/layout/YearPicker";
+import ExportButton, { toCsv } from "@/components/ui/ExportButton";
 import type { HomeInsights } from "@/lib/home";
 
 const TOOLTIP = {
@@ -151,6 +152,22 @@ export default function HomeInsightsClient({
     [insights.recurring]
   );
 
+  function buildInsightsCsv() {
+    const monthly = toCsv(
+      ["Month", "Income", "Spending", "Net"],
+      insights.monthly.map((m) => [m.name, m.income.toFixed(2), m.spend.toFixed(2), m.net.toFixed(2)])
+    );
+    const cats = toCsv(
+      ["Category", "Total", "Share %"],
+      insights.categories.map((c) => [c.name, c.total.toFixed(2), Math.round(c.share * 100)])
+    );
+    const recurring = toCsv(
+      ["Recurring merchant", "~ Monthly", "Months", "Total"],
+      insights.recurring.map((r) => [r.merchant, r.monthlyAmount.toFixed(2), r.months, r.total.toFixed(2)])
+    );
+    return `MONTHLY CASH FLOW\n${monthly}\n\nSPENDING BY CATEGORY\n${cats}\n\nRECURRING & SUBSCRIPTIONS\n${recurring}\n`;
+  }
+
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-6xl mx-auto w-full">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -167,7 +184,16 @@ export default function HomeInsightsClient({
             Spending analysis & cash flow · {year}
           </p>
         </div>
-        <YearPicker years={availableYears} selected={year} />
+        <div className="flex items-center gap-2">
+          {insights.hasData && (
+            <ExportButton
+              filename={`hamo-home-insights-${year}.csv`}
+              title={`Hamo Home insights ${year}`}
+              buildCsv={buildInsightsCsv}
+            />
+          )}
+          <YearPicker years={availableYears} selected={year} />
+        </div>
       </div>
 
       {!insights.hasData ? (

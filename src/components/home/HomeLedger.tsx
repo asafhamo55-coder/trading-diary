@@ -281,7 +281,7 @@ export default function HomeLedger({
 
       {/* Sticky save bar */}
       {pending.size > 0 && (
-        <div className="sticky bottom-3 mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#00D68F]/40 bg-[var(--card)] px-4 py-3 shadow-lg">
+        <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom))] md:bottom-3 mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#00D68F]/40 bg-[var(--card)] px-4 py-3 shadow-lg">
           <span className="text-sm text-[var(--foreground)]">
             {saveError ? (
               <span className="text-[#FF4D6A]">{saveError}</span>
