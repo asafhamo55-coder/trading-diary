@@ -12,8 +12,13 @@ import {
   Archive,
   ArchiveRestore,
   ChevronDown,
+  ArrowUp,
+  ArrowDown,
+  CircleAlert,
 } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, signedClass } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Field, SummaryTile, inputCls } from "@/components/properties/shared";
 import YearPicker from "@/components/layout/YearPicker";
 
 interface Row {
@@ -25,16 +30,27 @@ interface Row {
   income: number;
   expenses: number;
   net: number;
+  monthlyNet: number[];
+  hasTenants: boolean;
+  occupiedMonths: number;
+  occupancyMonths: number;
+  occupancyPct: number | null;
+  currentTenantName: string | null;
+  monthlyRent: number | null;
+  purchasePrice: number | null;
+  yieldPct: number | null;
 }
 
 export default function PropertiesClient({
   rows,
   year,
   availableYears,
+  elapsed,
 }: {
   rows: Row[];
   year: number;
   availableYears: number[];
+  elapsed: number;
 }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
@@ -56,9 +72,25 @@ export default function PropertiesClient({
   const activeRows = rows.filter((r) => !r.archived);
   const archivedRows = rows.filter((r) => r.archived);
 
-  const grandNet = activeRows.reduce((sum, r) => sum + r.net, 0);
   const grandIncome = activeRows.reduce((sum, r) => sum + r.income, 0);
   const grandExpenses = activeRows.reduce((sum, r) => sum + r.expenses, 0);
+  const grandNet = activeRows.reduce((sum, r) => sum + r.net, 0);
+
+  // Portfolio occupancy = Σ occupied months / Σ tracked months across active props.
+  const occupiedSum = activeRows.reduce((s, r) => s + r.occupiedMonths, 0);
+  const monthsSum = activeRows.reduce((s, r) => s + r.occupancyMonths, 0);
+  const occupancyPct = monthsSum > 0 ? Math.round((occupiedSum / monthsSum) * 100) : null;
+
+  // Portfolio avg yield = annualized Σ net (of priced props) / Σ purchase price.
+  const priceSum = activeRows.reduce((s, r) => s + (r.purchasePrice ?? 0), 0);
+  const netWithPrice = activeRows.reduce(
+    (s, r) => s + (r.purchasePrice ? r.net : 0),
+    0
+  );
+  const avgYield =
+    priceSum > 0 && elapsed > 0
+      ? ((netWithPrice / elapsed) * 12 / priceSum) * 100
+      : null;
 
   async function setArchived(id: string, archived: boolean) {
     setBusyId(id);
@@ -119,11 +151,8 @@ export default function PropertiesClient({
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div
-            className="flex items-center justify-center w-10 h-10 rounded-xl"
-            style={{ background: "#FFB5471A" }}
-          >
-            <Building2 className="w-5 h-5" style={{ color: "#FFB547" }} />
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent-amber/10">
+            <Building2 className="w-5 h-5 text-accent-amber" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-[var(--foreground)]">Properties</h1>
@@ -134,13 +163,10 @@ export default function PropertiesClient({
         </div>
         <div className="flex items-center gap-2">
           <YearPicker years={availableYears} selected={year} />
-          <button
-            onClick={() => setAdding((a) => !a)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#FFB547] px-3 py-2 text-sm font-medium text-[#0C0F14] hover:bg-[#FFB547]/90 transition-colors"
-          >
+          <Button onClick={() => setAdding((a) => !a)}>
             <Plus className="w-4 h-4" />
             Add property
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -148,21 +174,23 @@ export default function PropertiesClient({
       {adding && (
         <form
           onSubmit={handleCreate}
-          className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4"
+          className="bg-[var(--card)] border border-[var(--border)] border-t-2 border-t-accent-amber/40 rounded-xl p-5 shadow-sm space-y-4"
         >
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-[var(--foreground)]">New property</h3>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setAdding(false)}
-              className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              aria-label="Close"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
             <div className="sm:col-span-4">
-              <Field label="Street & number">
+              <Field label="Street & number" required>
                 <input
                   required
                   value={form.street}
@@ -236,23 +264,38 @@ export default function PropertiesClient({
               </Field>
             </div>
           </div>
-          {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#FFB547] px-4 py-2 text-sm font-medium text-[#0C0F14] hover:bg-[#FFB547]/90 transition-colors disabled:opacity-60"
-            >
+          {error && (
+            <div className="flex items-center gap-2 rounded-lg border border-loss/30 bg-loss/10 px-3 py-2 text-sm text-loss">
+              <CircleAlert className="w-4 h-4 shrink-0" /> {error}
+            </div>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setAdding(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={saving}>
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               Save property
-            </button>
+            </Button>
           </div>
         </form>
       )}
 
-      {/* Portfolio summary */}
+      {/* Portfolio KPI strip */}
       {activeRows.length > 0 && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <SummaryTile label="Properties" value={activeRows.length} variant="count" />
+          <SummaryTile
+            label="Occupied"
+            value={`${occupiedSum}/${monthsSum}`}
+            variant="count"
+            caption={occupancyPct !== null ? `${occupancyPct}% of months` : "—"}
+          />
+          <SummaryTile
+            label="Avg yield"
+            value={avgYield !== null ? `${avgYield.toFixed(1)}%` : "—"}
+            variant="percent"
+          />
           <SummaryTile label={`Income · ${year}`} value={grandIncome} tone="pos" />
           <SummaryTile label={`Expenses · ${year}`} value={grandExpenses} tone="neg" />
           <SummaryTile label={`Net · ${year}`} value={grandNet} tone="net" />
@@ -262,7 +305,7 @@ export default function PropertiesClient({
       {/* Active property list */}
       {activeRows.length === 0 ? (
         archivedRows.length === 0 && (
-          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-12 text-center">
+          <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-sm p-12 text-center">
             <Building2 className="w-12 h-12 text-[var(--border)] mx-auto mb-4" />
             <h2 className="text-base font-semibold text-[var(--foreground)] mb-1">
               No properties yet
@@ -270,13 +313,10 @@ export default function PropertiesClient({
             <p className="text-sm text-[var(--muted-foreground)] mb-6">
               Add a property, then log its rental income and expenses for the year.
             </p>
-            <button
-              onClick={() => setAdding(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#FFB547] px-4 py-2 text-sm font-medium text-[#0C0F14] hover:bg-[#FFB547]/90 transition-colors"
-            >
+            <Button onClick={() => setAdding(true)}>
               <Plus className="w-4 h-4" />
               Add your first property
-            </button>
+            </Button>
           </div>
         )
       ) : (
@@ -285,6 +325,7 @@ export default function PropertiesClient({
             <PropertyCard
               key={r.id}
               row={r}
+              elapsed={elapsed}
               busy={busyId === r.id}
               onArchive={() => setArchived(r.id, true)}
             />
@@ -313,6 +354,8 @@ export default function PropertiesClient({
                 <PropertyCard
                   key={r.id}
                   row={r}
+                  elapsed={elapsed}
+                  compact
                   busy={busyId === r.id}
                   onUnarchive={() => setArchived(r.id, false)}
                 />
@@ -327,23 +370,36 @@ export default function PropertiesClient({
 
 function PropertyCard({
   row: r,
+  elapsed,
   busy,
+  compact,
   onArchive,
   onUnarchive,
 }: {
   row: Row;
+  elapsed: number;
   busy: boolean;
+  compact?: boolean;
   onArchive?: () => void;
   onUnarchive?: () => void;
 }) {
+  const bars = r.monthlyNet.slice(0, Math.max(1, elapsed));
+  const maxAbs = Math.max(1, ...bars.map((v) => Math.abs(v)));
+
   return (
     <div
       className={cn(
-        "relative bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-colors",
-        r.archived ? "opacity-70" : "hover:border-[#FFB547]/50"
+        "relative bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-sm transition-all duration-200",
+        r.archived
+          ? "opacity-70"
+          : "hover:border-accent-amber/50 hover:shadow-md hover:-translate-y-0.5"
       )}
     >
-      <Link href={`/properties/${r.id}`} className="block">
+      <Link
+        href={`/properties/${r.id}`}
+        className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+      >
+        {/* Zone A — identity */}
         <div className="mb-3 pr-9">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-[var(--foreground)] truncate">
@@ -360,83 +416,97 @@ function PropertyCard({
             {r.address}
           </p>
         </div>
-        <p
-          className={cn(
-            "text-2xl font-bold font-data",
-            r.net >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
-          )}
-        >
+
+        {/* Zone B — occupancy */}
+        {!compact && r.hasTenants && (
+          <div className="flex items-center gap-1.5 text-xs mt-2">
+            {r.currentTenantName ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-profit shrink-0" />
+                <span className="truncate text-[var(--foreground)]">
+                  {r.currentTenantName}
+                </span>
+                {r.monthlyRent != null && (
+                  <span className="font-data text-[var(--muted-foreground)] shrink-0">
+                    · {formatCurrency(r.monthlyRent)}/mo
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-loss shrink-0" />
+                <span className="text-[var(--muted-foreground)]">Vacant</span>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Zone C — net + split */}
+        <p className={cn("text-2xl font-bold font-data mt-2", signedClass(r.net))}>
           {r.net >= 0 ? "+" : ""}
           {formatCurrency(r.net)}
         </p>
-        <div className="flex items-center justify-between text-xs text-[var(--muted-foreground)] mt-2">
-          <span>
-            {formatCurrency(r.income)} in · {formatCurrency(r.expenses)} out
+        <div className="flex items-center gap-3 text-xs mt-2">
+          <span className="inline-flex items-center gap-1 text-profit font-data">
+            <ArrowUp className="w-3 h-3" />
+            {formatCurrency(r.income)}
           </span>
+          <span className="inline-flex items-center gap-1 text-loss font-data">
+            <ArrowDown className="w-3 h-3" />
+            {formatCurrency(r.expenses)}
+          </span>
+        </div>
+
+        {/* Zone D — sparkline */}
+        {!compact && r.txCount > 0 && (
+          <div className="flex items-end gap-0.5 h-5 mt-3">
+            {bars.map((v, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "flex-1 rounded-sm min-h-[2px]",
+                  v >= 0 ? "bg-profit/70" : "bg-loss/70"
+                )}
+                style={{
+                  height: `${Math.max(8, Math.min(100, (Math.abs(v) / maxAbs) * 100))}%`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Zone E — footer */}
+        <div className="flex items-center justify-between text-xs text-[var(--muted-foreground)] mt-2 pt-2 border-t border-[var(--border)]">
           <span>
             {r.txCount} entr{r.txCount !== 1 ? "ies" : "y"}
           </span>
+          {r.yieldPct != null && (
+            <span className="font-data">{r.yieldPct.toFixed(1)}% yield</span>
+          )}
         </div>
       </Link>
+
       {/* Archive / unarchive control (outside the Link so it doesn't navigate) */}
       {(onArchive || onUnarchive) && (
-        <button
-          onClick={onArchive ?? onUnarchive}
-          disabled={busy}
-          title={onArchive ? "Archive property" : "Restore property"}
-          className="absolute top-4 right-4 p-1.5 rounded text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
-        >
-          {busy ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : onArchive ? (
-            <Archive className="w-4 h-4" />
-          ) : (
-            <ArchiveRestore className="w-4 h-4" />
-          )}
-        </button>
+        <div className="absolute top-4 right-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onArchive ?? onUnarchive}
+            disabled={busy}
+            title={onArchive ? "Archive property" : "Restore property"}
+            className="focus-visible:ring-offset-[var(--card)]"
+          >
+            {busy ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : onArchive ? (
+              <Archive className="w-4 h-4" />
+            ) : (
+              <ArchiveRestore className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
       )}
-    </div>
-  );
-}
-
-const inputCls =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:border-[#FFB547]";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-medium text-[var(--muted-foreground)] mb-1 block">
-        {label}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-function SummaryTile({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone: "pos" | "neg" | "net";
-}) {
-  const color =
-    tone === "pos"
-      ? "text-[#00D68F]"
-      : tone === "neg"
-      ? "text-[#FF4D6A]"
-      : value >= 0
-      ? "text-[#00D68F]"
-      : "text-[#FF4D6A]";
-  return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-      <p className="text-xs text-[var(--muted-foreground)] mb-1">{label}</p>
-      <p className={cn("text-lg md:text-xl font-bold font-data", color)}>
-        {tone === "net" && value >= 0 ? "+" : ""}
-        {formatCurrency(value)}
-      </p>
     </div>
   );
 }

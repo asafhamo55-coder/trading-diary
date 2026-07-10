@@ -12,8 +12,11 @@ import {
   Phone,
   Pencil,
   LogOut,
+  CircleAlert,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Field, SectionHeader, inputCls } from "@/components/properties/shared";
 import {
   isCurrentTenant,
   sortTenantsByRecency,
@@ -145,45 +148,42 @@ export default function TenantsSection({
   }
 
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-[#FFB547]" />
-          <h3 className="text-sm font-semibold text-[var(--foreground)]">Tenants</h3>
-          <span className="text-xs text-[var(--muted-foreground)]">
-            · {current.length} current · {past.length} past
-          </span>
-        </div>
+        <SectionHeader
+          icon={<Users className="w-3.5 h-3.5 text-accent-amber" />}
+          title="Tenants"
+          meta={`${current.length} current · ${past.length} past`}
+        />
         {!showForm && (
-          <button
-            onClick={openAdd}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] hover:border-[#FFB547]/50 transition-colors"
-          >
+          <Button variant="outline" size="sm" onClick={openAdd}>
             <Plus className="w-4 h-4" />
             Add tenant
-          </button>
+          </Button>
         )}
       </div>
 
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-5 rounded-lg border border-[var(--border)] p-4 space-y-4"
+          className="mb-5 rounded-xl border border-[var(--border)] border-t-2 border-t-accent-amber/40 bg-[var(--card)] p-4 shadow-sm space-y-4"
         >
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-medium text-[var(--foreground)]">
               {editingId ? "Edit tenant" : "New tenant"}
             </h4>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setShowForm(false)}
-              className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              aria-label="Close"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Name">
+            <Field label="Name" required>
               <input
                 required
                 value={form.name}
@@ -220,7 +220,7 @@ export default function TenantsSection({
                 className={inputCls}
               />
             </Field>
-            <Field label="Lease start">
+            <Field label="Lease start" required>
               <input
                 required
                 type="date"
@@ -259,16 +259,19 @@ export default function TenantsSection({
               />
             </Field>
           </div>
-          {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#FFB547] px-4 py-2 text-sm font-medium text-[#0C0F14] hover:bg-[#FFB547]/90 transition-colors disabled:opacity-60"
-            >
+          {error && (
+            <div className="flex items-center gap-2 rounded-lg border border-loss/30 bg-loss/10 px-3 py-2 text-sm text-loss">
+              <CircleAlert className="w-4 h-4 shrink-0" /> {error}
+            </div>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={saving}>
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               {editingId ? "Save changes" : "Add tenant"}
-            </button>
+            </Button>
           </div>
         </form>
       )}
@@ -291,14 +294,16 @@ export default function TenantsSection({
             />
           )}
           {past.length > 0 && (
-            <TenantGroup
-              title="Past tenants"
-              tenants={past}
-              today={today}
-              onEdit={openEdit}
-              onEndLease={endLease}
-              onDelete={deleteTenant}
-            />
+            <div className={cn(current.length > 0 && "border-t border-[var(--border)] pt-5")}>
+              <TenantGroup
+                title="Past tenants"
+                tenants={past}
+                today={today}
+                onEdit={openEdit}
+                onEndLease={endLease}
+                onDelete={deleteTenant}
+              />
+            </div>
           )}
         </div>
       )}
@@ -332,7 +337,7 @@ function TenantGroup({
           return (
             <div
               key={t.id}
-              className="rounded-lg border border-[var(--border)] p-4 group"
+              className="rounded-lg border border-[var(--border)] p-4 group hover:bg-[var(--muted)]/30 transition-colors"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -344,7 +349,7 @@ function TenantGroup({
                       className={cn(
                         "text-[10px] font-medium uppercase tracking-wider rounded px-1.5 py-0.5",
                         active
-                          ? "bg-[#00D68F]/15 text-[#00D68F]"
+                          ? "bg-profit/15 text-profit"
                           : "bg-[var(--muted)] text-[var(--muted-foreground)]"
                       )}
                     >
@@ -392,28 +397,31 @@ function TenantGroup({
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   {active && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => onEndLease(t)}
                       title="End lease (mark moved out today)"
-                      className="p-1.5 rounded text-[var(--muted-foreground)] hover:text-[#FFB547] hover:bg-[var(--muted)] transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
-                    </button>
+                    </Button>
                   )}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => onEdit(t)}
                     title="Edit tenant"
-                    className="p-1.5 rounded text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
                   >
                     <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="danger-ghost"
+                    size="icon-sm"
                     onClick={() => onDelete(t.id)}
                     title="Delete tenant"
-                    className="p-1.5 rounded text-[var(--muted-foreground)] hover:text-[#FF4D6A] hover:bg-[var(--muted)] transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -421,19 +429,5 @@ function TenantGroup({
         })}
       </div>
     </div>
-  );
-}
-
-const inputCls =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:border-[#FFB547]";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-medium text-[var(--muted-foreground)] mb-1 block">
-        {label}
-      </span>
-      {children}
-    </label>
   );
 }

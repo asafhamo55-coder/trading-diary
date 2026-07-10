@@ -89,20 +89,3 @@ body {
   font-family: var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
 }
-
-/* Profit/Loss coloring utility */
-.text-profit {
-  color: #00D68F;
-}
-
-.text-loss {
-  color: #FF4D6A;
-}
-
-.bg-profit {
-  background-color: rgba(0, 214, 143, 0.1);
-}
-
-.bg-loss {
-  background-color: rgba(255, 77, 106, 0.1);
-}

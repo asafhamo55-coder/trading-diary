@@ -54,7 +54,7 @@ export default function Logo({
       {!collapsed && (
         <span className={cn("font-semibold tracking-tight whitespace-nowrap", word)}>
           <span className="text-[var(--foreground)]">Hamo</span>{" "}
-          <span className="text-[#3B82F6]">{accentWord}</span>
+          <span className="text-accent-blue">{accentWord}</span>
         </span>
       )}
     </div>

@@ -140,6 +140,89 @@ export function signedAmount(t: { type: PropertyTxType; amount: number }): numbe
   return t.type === "INCOME" ? t.amount : -t.amount;
 }
 
+export const MONTH_ABBR = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+] as const;
+
+/**
+ * Months elapsed in `year` as of `today` (YYYY-MM-DD): 12 for past years,
+ * the current month number for the ongoing year, 0 for future years.
+ */
+export function monthsElapsed(year: number, today: string): number {
+  const nowYear = Number(today.slice(0, 4));
+  const nowMonth = Number(today.slice(5, 7));
+  if (year < nowYear) return 12;
+  if (year > nowYear) return 0;
+  return nowMonth;
+}
+
+/** Signed net (income − expense) per calendar month for a set of transactions. */
+export function monthlyNet(
+  transactions: { month: number; type: PropertyTxType; amount: number }[]
+): number[] {
+  const net = Array.from({ length: 12 }, () => 0);
+  for (const t of transactions) {
+    const idx = t.month - 1;
+    if (idx < 0 || idx > 11) continue;
+    net[idx] += signedAmount(t);
+  }
+  return net;
+}
+
+/** The tenant whose lease is current as of `today`, most-recent lease first. */
+export function currentTenantOf(
+  tenants: TenantDTO[],
+  today: string
+): TenantDTO | null {
+  return (
+    sortTenantsByRecency(tenants).find((t) => isCurrentTenant(t, today)) ?? null
+  );
+}
+
+/**
+ * Share of tracked months in `year` that had an active lease. `totalMonths` is
+ * the number of elapsed months (0 if the year hasn't started); `occupiedMonths`
+ * counts elapsed months overlapped by any lease.
+ */
+export function occupancyForYear(
+  tenants: TenantDTO[],
+  year: number,
+  today: string
+): { occupiedMonths: number; totalMonths: number; pct: number } {
+  const totalMonths = monthsElapsed(year, today);
+  if (totalMonths === 0) return { occupiedMonths: 0, totalMonths: 0, pct: 0 };
+  let occupied = 0;
+  for (let m = 1; m <= totalMonths; m++) {
+    // Month m of `year` counts as occupied if any lease overlaps it.
+    const monthStart = `${year}-${String(m).padStart(2, "0")}-01`;
+    const monthEnd = `${year}-${String(m).padStart(2, "0")}-28`;
+    const covered = tenants.some(
+      (t) => t.leaseStart <= monthEnd && (t.leaseEnd === null || t.leaseEnd >= monthStart)
+    );
+    if (covered) occupied++;
+  }
+  return {
+    occupiedMonths: occupied,
+    totalMonths,
+    pct: (occupied / totalMonths) * 100,
+  };
+}
+
+/**
+ * Annualized yield: net operating income (extrapolated from `elapsedMonths` to a
+ * full year) as a percentage of purchase price. Null when price/elapsed missing.
+ */
+export function yieldPct(
+  net: number,
+  purchasePrice: number | null,
+  elapsedMonths: number
+): number | null {
+  if (!purchasePrice || purchasePrice <= 0 || elapsedMonths <= 0) return null;
+  const annualized = (net / elapsedMonths) * 12;
+  return (annualized / purchasePrice) * 100;
+}
+
 export interface PropertyYearSummary {
   income: number;
   expenses: number;

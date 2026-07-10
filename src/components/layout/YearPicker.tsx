@@ -22,7 +22,7 @@ export default function YearPicker({
   }
 
   return (
-    <div className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2">
+    <div className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 transition-colors focus-within:border-[var(--ring)]">
       <Calendar className="w-4 h-4 text-[var(--muted-foreground)]" />
       <select
         value={selected}

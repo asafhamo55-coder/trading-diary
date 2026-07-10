@@ -15,8 +15,20 @@ import {
   MoreVertical,
   Pencil,
   Home,
+  BarChart3,
+  Receipt,
+  CircleAlert,
 } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, signedClass } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  SummaryTile,
+  SegmentedControl,
+  SectionHeader,
+  inputCls,
+  MONTH_ABBR,
+} from "@/components/properties/shared";
 import YearPicker from "@/components/layout/YearPicker";
 import TenantsSection from "@/components/properties/TenantsSection";
 import {
@@ -24,6 +36,7 @@ import {
   EXPENSE_CATEGORIES,
   categoryLabel,
   getCategory,
+  monthlyNet,
   type PropertyYearSummary,
   type PropertyTransactionDTO,
   type TenantDTO,
@@ -49,17 +62,25 @@ export default function PropertyDetailClient({
   year,
   availableYears,
   summary,
+  prevSummary,
   transactions,
   tenants,
   today,
+  elapsed,
+  occupancy,
+  yieldPct,
 }: {
   property: PropertyInfo;
   year: number;
   availableYears: number[];
   summary: PropertyYearSummary;
+  prevSummary: PropertyYearSummary;
   transactions: PropertyTransactionDTO[];
   tenants: TenantDTO[];
   today: string;
+  elapsed: number;
+  occupancy: { occupiedMonths: number; totalMonths: number; pct: number };
+  yieldPct: number | null;
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -215,6 +236,18 @@ export default function PropertyDetailClient({
     }
   }
 
+  // Cash-flow: signed net per month for the selected year.
+  const net = monthlyNet(transactions);
+  const cashMaxAbs = Math.max(1, ...net.map((v) => Math.abs(v)));
+
+  // Year-over-year change vs. prior year's net (only when prior year has data).
+  const prevHasData = prevSummary.byCategory.length > 0 && prevSummary.net !== 0;
+  const yoyPct = prevHasData
+    ? ((summary.net - prevSummary.net) / Math.abs(prevSummary.net)) * 100
+    : null;
+
+  const monthsTracked = new Set(transactions.map((t) => t.month)).size;
+
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full">
       {/* Header */}
@@ -239,13 +272,14 @@ export default function PropertyDetailClient({
           <YearPicker years={availableYears} selected={year} />
           {/* Actions menu */}
           <div className="relative">
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => setMenuOpen((o) => !o)}
               aria-label="Property actions"
-              className="flex items-center justify-center w-9 h-9 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
             >
               <MoreVertical className="w-4 h-4" />
-            </button>
+            </Button>
             {menuOpen && (
               <>
                 <div
@@ -278,7 +312,7 @@ export default function PropertyDetailClient({
                       setMenuOpen(false);
                       setConfirmDelete(true);
                     }}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[#FF4D6A] hover:bg-[#FF4D6A]/10 transition-colors"
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-loss hover:bg-loss/10 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete property
@@ -292,25 +326,18 @@ export default function PropertyDetailClient({
 
       {/* Delete confirmation */}
       {confirmDelete && (
-        <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl border border-[#FF4D6A]/40 bg-[#FF4D6A]/10 px-4 py-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl border border-loss/40 bg-loss/10 px-4 py-3">
           <span className="text-sm text-[var(--foreground)]">
             Delete <span className="font-semibold">{property.title}</span> and all its entries & tenants? This can&apos;t be undone.
           </span>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleDeleteProperty}
-              disabled={deletingProperty}
-              className="inline-flex items-center gap-1 rounded-lg bg-[#FF4D6A] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#FF4D6A]/90 disabled:opacity-60"
-            >
+            <Button variant="danger" onClick={handleDeleteProperty} disabled={deletingProperty}>
               {deletingProperty && <Loader2 className="w-4 h-4 animate-spin" />}
               Yes, delete
-            </button>
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-            >
+            </Button>
+            <Button variant="outline" onClick={() => setConfirmDelete(false)}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -321,34 +348,119 @@ export default function PropertyDetailClient({
           <span className="text-sm text-[var(--muted-foreground)]">
             This property is <span className="font-medium text-[var(--foreground)]">archived</span> — hidden from the active list, but all records are preserved.
           </span>
-          <button
-            onClick={handleToggleArchive}
-            disabled={archiving}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#FFB547] px-3 py-1.5 text-sm font-medium text-[#0C0F14] hover:bg-[#FFB547]/90 transition-colors disabled:opacity-60"
-          >
+          <Button onClick={handleToggleArchive} disabled={archiving}>
             {archiving ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArchiveRestore className="w-4 h-4" />}
             Restore
-          </button>
+          </Button>
         </div>
       )}
 
+      {/* Snapshot KPIs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <SummaryTile
+          label={`Net · ${year}`}
+          value={summary.net}
+          tone="net"
+          caption={
+            yoyPct != null
+              ? `${yoyPct >= 0 ? "+" : ""}${yoyPct.toFixed(0)}% YoY`
+              : undefined
+          }
+          captionTone={yoyPct != null ? signedClass(yoyPct) : undefined}
+        />
+        <SummaryTile
+          label="Yield"
+          value={yieldPct != null ? `${yieldPct.toFixed(1)}%` : "—"}
+          variant="percent"
+          caption={yieldPct == null ? "Add purchase price" : undefined}
+        />
+        <SummaryTile
+          label="Occupancy"
+          value={occupancy.totalMonths > 0 ? `${Math.round(occupancy.pct)}%` : "—"}
+          variant="percent"
+          caption={
+            occupancy.totalMonths > 0
+              ? `${occupancy.occupiedMonths}/${occupancy.totalMonths} mo`
+              : undefined
+          }
+        />
+        <SummaryTile
+          label="Entries"
+          value={transactions.length}
+          variant="count"
+          caption={`${monthsTracked} month${monthsTracked !== 1 ? "s" : ""} tracked`}
+        />
+      </div>
+
+      {/* Cash flow */}
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+        <SectionHeader
+          icon={<BarChart3 className="w-3.5 h-3.5 text-accent-amber" />}
+          title={`Cash flow · ${year}`}
+          meta="net per month"
+        />
+        {transactions.length === 0 ? (
+          <p className="text-sm text-[var(--muted-foreground)] py-4">
+            No entries for {year} yet.
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-12 gap-1.5 h-24 items-end">
+              {net.map((v, i) => {
+                const future = i >= elapsed;
+                return (
+                  <div
+                    key={i}
+                    title={future ? undefined : formatCurrency(v)}
+                    className={cn(
+                      "w-full rounded-sm",
+                      future
+                        ? "bg-[var(--muted)] opacity-20 min-h-[4px]"
+                        : cn("min-h-[2px]", v >= 0 ? "bg-profit/70" : "bg-loss/70")
+                    )}
+                    style={
+                      future
+                        ? undefined
+                        : { height: `${Math.max(4, (Math.abs(v) / cashMaxAbs) * 100)}%` }
+                    }
+                  />
+                );
+              })}
+            </div>
+            <div className="grid grid-cols-12 gap-1.5 mt-1">
+              {MONTH_ABBR.map((m) => (
+                <span
+                  key={m}
+                  className="text-center text-[10px] text-[var(--muted-foreground)]"
+                >
+                  {m.slice(0, 1)}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-[var(--muted-foreground)]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-profit" /> Positive month
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-loss" /> Negative month
+              </span>
+            </div>
+          </>
+        )}
+      </div>
+
       {/* Property details — structured address + purchase info */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Home className="w-4 h-4 text-[#FFB547]" />
-            <h3 className="text-sm font-semibold text-[var(--foreground)]">
-              Property details
-            </h3>
-          </div>
+          <SectionHeader
+            icon={<Home className="w-3.5 h-3.5 text-accent-amber" />}
+            title="Property details"
+          />
           {!editingDetails && (
-            <button
-              onClick={() => setEditingDetails(true)}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setEditingDetails(true)}>
               <Pencil className="w-3.5 h-3.5" />
               Edit
-            </button>
+            </Button>
           )}
         </div>
 
@@ -356,7 +468,7 @@ export default function PropertyDetailClient({
           <form onSubmit={handleSaveDetails} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
               <div className="sm:col-span-4">
-                <Field label="Street & number">
+                <Field label="Street & number" required>
                   <input
                     required
                     value={details.street}
@@ -430,42 +542,52 @@ export default function PropertyDetailClient({
                 </Field>
               </div>
             </div>
-            {detailsError && <p className="text-sm text-[#FF4D6A]">{detailsError}</p>}
+            {detailsError && (
+              <div className="flex items-center gap-2 rounded-lg border border-loss/30 bg-loss/10 px-3 py-2 text-sm text-loss">
+                <CircleAlert className="w-4 h-4 shrink-0" /> {detailsError}
+              </div>
+            )}
             <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={cancelEditDetails}
-                className="inline-flex items-center rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-              >
+              <Button type="button" variant="outline" onClick={cancelEditDetails}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={savingDetails}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#FFB547] px-4 py-2 text-sm font-medium text-[#0C0F14] hover:bg-[#FFB547]/90 transition-colors disabled:opacity-60"
-              >
+              </Button>
+              <Button type="submit" disabled={savingDetails}>
                 {savingDetails && <Loader2 className="w-4 h-4 animate-spin" />}
                 Save details
-              </button>
+              </Button>
             </div>
           </form>
         ) : (
-          <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
-            <DetailItem label="Street & number" value={property.street} />
-            <DetailItem label="Unit #" value={property.unit} />
-            <DetailItem label="City" value={property.city} />
-            <DetailItem label="State" value={property.state} />
-            <DetailItem label="ZIP code" value={property.zip} />
-            <DetailItem
-              label="Purchase price"
-              value={
-                property.purchasePrice != null
-                  ? formatCurrency(property.purchasePrice)
-                  : null
-              }
-            />
-            <DetailItem label="Purchase date" value={property.purchaseDate} />
-          </dl>
+          <div className="space-y-4">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)] mb-2">
+                Address
+              </p>
+              <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                <DetailItem label="Street & number" value={property.street} />
+                <DetailItem label="Unit #" value={property.unit} />
+                <DetailItem label="City" value={property.city} />
+                <DetailItem label="State" value={property.state} />
+                <DetailItem label="ZIP code" value={property.zip} />
+              </dl>
+            </div>
+            <div className="border-t border-[var(--border)] pt-4">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)] mb-2">
+                Purchase
+              </p>
+              <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                <DetailItem
+                  label="Purchase price"
+                  value={
+                    property.purchasePrice != null
+                      ? formatCurrency(property.purchasePrice)
+                      : null
+                  }
+                />
+                <DetailItem label="Purchase date" value={property.purchaseDate} />
+              </dl>
+            </div>
+          </div>
         )}
       </div>
 
@@ -477,16 +599,12 @@ export default function PropertyDetailClient({
       />
 
       {/* Tax summary */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <FileText className="w-4 h-4 text-[#FFB547]" />
-          <h3 className="text-sm font-semibold text-[var(--foreground)]">
-            Tax summary · {year}
-          </h3>
-          <span className="text-xs text-[var(--muted-foreground)]">
-            · Schedule E style
-          </span>
-        </div>
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+        <SectionHeader
+          icon={<FileText className="w-3.5 h-3.5 text-accent-amber" />}
+          title={`Tax summary · ${year}`}
+          meta="Schedule E style"
+        />
 
         {summary.byCategory.length === 0 ? (
           <p className="text-sm text-[var(--muted-foreground)] py-4">
@@ -505,17 +623,13 @@ export default function PropertyDetailClient({
               rows={summary.byCategory.filter((c) => c.type === "EXPENSE")}
               total={summary.expenses}
               tone="neg"
+              percentOf={summary.expenses}
             />
             <div className="flex items-center justify-between pt-3 border-t border-[var(--border)]">
               <span className="text-sm font-semibold text-[var(--foreground)]">
                 Net operating income
               </span>
-              <span
-                className={cn(
-                  "text-lg font-bold font-data",
-                  summary.net >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
-                )}
-              >
+              <span className={cn("text-lg font-bold font-data", signedClass(summary.net))}>
                 {summary.net >= 0 ? "+" : ""}
                 {formatCurrency(summary.net)}
               </span>
@@ -527,30 +641,19 @@ export default function PropertyDetailClient({
       {/* Add entry */}
       <form
         onSubmit={handleAdd}
-        className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4"
+        className="bg-[var(--card)] border border-[var(--border)] border-t-2 border-t-accent-amber/40 rounded-xl p-5 shadow-sm space-y-4"
       >
         <h3 className="text-sm font-semibold text-[var(--foreground)]">Add entry</h3>
-        <div className="inline-flex rounded-lg border border-[var(--border)] p-0.5">
-          {(["EXPENSE", "INCOME"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setType(t)}
-              className={cn(
-                "px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
-                form.type === t
-                  ? t === "INCOME"
-                    ? "bg-[#00D68F]/15 text-[#00D68F]"
-                    : "bg-[#FF4D6A]/15 text-[#FF4D6A]"
-                  : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-              )}
-            >
-              {t === "INCOME" ? "Income" : "Expense"}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          value={form.type}
+          onChange={setType}
+          options={[
+            { value: "EXPENSE", label: "Expense", activeClassName: "bg-loss/15 text-loss" },
+            { value: "INCOME", label: "Income", activeClassName: "bg-profit/15 text-profit" },
+          ]}
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Field label="Date">
+          <Field label="Date" required>
             <input
               required
               type="date"
@@ -572,7 +675,7 @@ export default function PropertyDetailClient({
               ))}
             </select>
           </Field>
-          <Field label="Amount">
+          <Field label="Amount" required>
             <input
               required
               type="number"
@@ -593,93 +696,126 @@ export default function PropertyDetailClient({
             />
           </Field>
         </div>
-        {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
+        {error && (
+          <div className="flex items-center gap-2 rounded-lg border border-loss/30 bg-loss/10 px-3 py-2 text-sm text-loss">
+            <CircleAlert className="w-4 h-4 shrink-0" /> {error}
+          </div>
+        )}
         <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#FFB547] px-4 py-2 text-sm font-medium text-[#0C0F14] hover:bg-[#FFB547]/90 transition-colors disabled:opacity-60"
-          >
+          <Button type="submit" disabled={saving}>
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
             Add entry
-          </button>
+          </Button>
         </div>
       </form>
 
       {/* Transactions list */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
-        <h3 className="text-sm font-semibold text-[var(--foreground)] mb-4">
-          Entries · {year}
-        </h3>
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+        <SectionHeader
+          icon={<Receipt className="w-3.5 h-3.5 text-accent-amber" />}
+          title={`Entries · ${year}`}
+        />
         {transactions.length === 0 ? (
           <p className="text-sm text-[var(--muted-foreground)] py-2">
             No entries recorded for {year}.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-[var(--muted-foreground)] text-xs border-b border-[var(--border)]">
-                  <th className="text-left pb-3 font-medium">Date</th>
-                  <th className="text-left pb-3 font-medium">Category</th>
-                  <th className="text-left pb-3 font-medium hidden sm:table-cell">Description</th>
-                  <th className="text-right pb-3 font-medium">Amount</th>
-                  <th className="pb-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((t) => (
-                  <tr key={t.id} className="border-b border-[#2A3040]/40 last:border-0 group">
-                    <td className="py-2.5 text-[var(--muted-foreground)] font-data whitespace-nowrap">
-                      {t.date.slice(5)}
-                    </td>
-                    <td className="py-2.5 text-[var(--foreground)]">
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block max-h-[480px] overflow-auto rounded-lg">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-[var(--card)] z-10">
+                  <tr className="text-[var(--muted-foreground)] text-xs border-b border-[var(--border)]">
+                    <th className="text-left pb-3 font-medium">Date</th>
+                    <th className="text-left pb-3 font-medium">Category</th>
+                    <th className="text-left pb-3 font-medium">Description</th>
+                    <th className="text-right pb-3 font-medium">Amount</th>
+                    <th className="pb-3" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((t) => (
+                    <tr
+                      key={t.id}
+                      className="border-b border-[var(--border)]/60 last:border-0 group hover:bg-[var(--muted)]/40 transition-colors"
+                    >
+                      <td
+                        className="py-3 text-[var(--muted-foreground)] font-data whitespace-nowrap"
+                        title={t.date}
+                      >
+                        {t.date.slice(5)}
+                      </td>
+                      <td className="py-3 text-[var(--foreground)]">
+                        {categoryLabel(t.category)}
+                      </td>
+                      <td className="py-3 text-[var(--muted-foreground)] truncate max-w-[200px]">
+                        {t.description || "—"}
+                      </td>
+                      <td
+                        className={cn(
+                          "py-3 text-right font-data font-semibold whitespace-nowrap",
+                          t.type === "INCOME" ? "text-profit" : "text-loss"
+                        )}
+                      >
+                        {t.type === "INCOME" ? "+" : "−"}
+                        {formatCurrency(t.amount)}
+                      </td>
+                      <td className="py-3 text-right">
+                        <Button
+                          variant="danger-ghost"
+                          size="icon-sm"
+                          onClick={() => handleDeleteTx(t.id)}
+                          aria-label="Delete entry"
+                          className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile stacked list */}
+            <div className="sm:hidden divide-y divide-[var(--border)]">
+              {transactions.map((t) => (
+                <div key={t.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <p className="text-sm text-[var(--foreground)] truncate">
                       {categoryLabel(t.category)}
-                    </td>
-                    <td className="py-2.5 text-[var(--muted-foreground)] hidden sm:table-cell truncate max-w-[200px]">
-                      {t.description || "—"}
-                    </td>
-                    <td
+                    </p>
+                    <p className="text-xs text-[var(--muted-foreground)] truncate">
+                      {t.date.slice(5)}
+                      {t.description ? ` · ${t.description}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span
                       className={cn(
-                        "py-2.5 text-right font-data font-semibold whitespace-nowrap",
-                        t.type === "INCOME" ? "text-[#00D68F]" : "text-[#FF4D6A]"
+                        "font-data font-semibold text-sm whitespace-nowrap",
+                        t.type === "INCOME" ? "text-profit" : "text-loss"
                       )}
                     >
                       {t.type === "INCOME" ? "+" : "−"}
                       {formatCurrency(t.amount)}
-                    </td>
-                    <td className="py-2.5 text-right">
-                      <button
-                        onClick={() => handleDeleteTx(t.id)}
-                        aria-label="Delete entry"
-                        className="text-[var(--muted-foreground)] hover:text-[#FF4D6A] opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </span>
+                    <Button
+                      variant="danger-ghost"
+                      size="icon-sm"
+                      onClick={() => handleDeleteTx(t.id)}
+                      aria-label="Delete entry"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
-
     </div>
-  );
-}
-
-const inputCls =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:border-[#FFB547]";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-medium text-[var(--muted-foreground)] mb-1 block">
-        {label}
-      </span>
-      {children}
-    </label>
   );
 }
 
@@ -704,14 +840,16 @@ function SummaryGroup({
   rows,
   total,
   tone,
+  percentOf,
 }: {
   title: string;
   rows: { key: string; label: string; total: number }[];
   total: number;
   tone: "pos" | "neg";
+  percentOf?: number;
 }) {
   if (rows.length === 0) return null;
-  const color = tone === "pos" ? "text-[#00D68F]" : "text-[#FF4D6A]";
+  const color = tone === "pos" ? "text-profit" : "text-loss";
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
@@ -725,9 +863,11 @@ function SummaryGroup({
       <div className="space-y-1">
         {rows.map((r) => {
           const cat = getCategory(r.key);
+          const pct =
+            percentOf && percentOf > 0 ? Math.round((r.total / percentOf) * 100) : null;
           return (
-            <div key={r.key} className="flex items-center justify-between text-sm">
-              <span className="text-[var(--foreground)]">
+            <div key={r.key} className="flex items-center justify-between text-sm gap-2">
+              <span className="text-[var(--foreground)] min-w-0">
                 {r.label}
                 {cat?.taxLine && (
                   <span className="text-[var(--muted-foreground)] text-xs ml-2">
@@ -735,8 +875,15 @@ function SummaryGroup({
                   </span>
                 )}
               </span>
-              <span className="font-data text-[var(--muted-foreground)]">
-                {formatCurrency(r.total)}
+              <span className="flex items-center gap-2 shrink-0">
+                {pct != null && (
+                  <span className="font-data text-[var(--muted-foreground)] text-xs w-9 text-right">
+                    {pct}%
+                  </span>
+                )}
+                <span className="font-data text-[var(--muted-foreground)]">
+                  {formatCurrency(r.total)}
+                </span>
               </span>
             </div>
           );

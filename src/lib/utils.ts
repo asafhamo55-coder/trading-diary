@@ -14,6 +14,11 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
+/** Tailwind text-color class for a signed money value (green ≥ 0, red < 0). */
+export function signedClass(value: number): string {
+  return value >= 0 ? "text-profit" : "text-loss";
+}
+
 export function formatPercent(value: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "percent",

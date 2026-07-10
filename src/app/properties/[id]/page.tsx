@@ -1,7 +1,14 @@
 import { notFound } from "next/navigation";
 import { getPropertyById } from "@/lib/property-data";
 import { parseYear, resolveSelectedYear } from "@/lib/year";
-import { summarizeYear, propertyTitle } from "@/lib/property";
+import {
+  summarizeYear,
+  propertyTitle,
+  monthsElapsed,
+  occupancyForYear,
+  yieldPct,
+} from "@/lib/property";
+import { todayInEastern } from "@/lib/utils";
 import PropertyDetailClient from "@/components/properties/PropertyDetailClient";
 
 export const dynamic = "force-dynamic";
@@ -26,8 +33,12 @@ export default async function PropertyDetailPage({
   const year = resolveSelectedYear(parseYear(sp.year), availableYears);
 
   const summary = summarizeYear(property.transactions, year);
+  const prevSummary = summarizeYear(property.transactions, year - 1);
   const yearTx = property.transactions.filter((t) => t.year === year);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInEastern();
+  const elapsed = monthsElapsed(year, today);
+  const occ = occupancyForYear(property.tenants, year, today);
+  const yieldValue = yieldPct(summary.net, property.purchasePrice, elapsed);
 
   return (
     <PropertyDetailClient
@@ -48,9 +59,13 @@ export default async function PropertyDetailPage({
       year={year}
       availableYears={availableYears}
       summary={summary}
+      prevSummary={prevSummary}
       transactions={yearTx}
       tenants={property.tenants}
       today={today}
+      elapsed={elapsed}
+      occupancy={occ}
+      yieldPct={yieldValue}
     />
   );
 }

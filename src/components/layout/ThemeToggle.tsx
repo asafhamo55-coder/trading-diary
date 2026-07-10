@@ -66,7 +66,7 @@ export default function ThemeToggle({ collapsed }: { collapsed: boolean }) {
     return (
       <div
         className={cn(
-          "h-9 rounded-lg border border-[#2A3040] bg-[#1C2130]",
+          "h-9 rounded-lg border border-[var(--border)] bg-[var(--muted)]",
           collapsed ? "w-9" : "w-full"
         )}
         aria-hidden
@@ -87,7 +87,7 @@ export default function ThemeToggle({ collapsed }: { collapsed: boolean }) {
     return (
       <button
         onClick={() => pick(next)}
-        className="flex items-center justify-center w-full h-9 rounded-lg border border-[#2A3040] bg-[#1C2130] text-[#8892A6] hover:text-[#E8ECF4] transition-colors"
+        className="flex items-center justify-center w-full h-9 rounded-lg border border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--card)]"
         title={`Theme: ${current.label} — click to switch`}
       >
         {current.icon}
@@ -96,7 +96,7 @@ export default function ThemeToggle({ collapsed }: { collapsed: boolean }) {
   }
 
   return (
-    <div className="flex rounded-lg border border-[#2A3040] bg-[#1C2130] p-0.5 gap-0.5">
+    <div className="flex rounded-lg border border-[var(--border)] bg-[var(--muted)] p-0.5 gap-0.5">
       {options.map((o) => {
         const active = o.value === mode;
         return (
@@ -105,9 +105,10 @@ export default function ThemeToggle({ collapsed }: { collapsed: boolean }) {
             onClick={() => pick(o.value)}
             className={cn(
               "flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-medium transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--muted)]",
               active
-                ? "bg-[#3B82F6]/15 text-[#3B82F6]"
-                : "text-[#8892A6] hover:text-[#E8ECF4]"
+                ? "bg-accent-blue/15 text-accent-blue"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             )}
             title={`Switch to ${o.label.toLowerCase()} mode`}
           >
