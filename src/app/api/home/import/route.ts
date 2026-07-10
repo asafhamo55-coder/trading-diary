@@ -45,12 +45,20 @@ export async function POST(req: NextRequest) {
       select: { matcher: true, categoryId: true },
     });
 
-    // Dedup against rows already imported into this account.
+    // Dedup against rows already imported into this account. Occurrence-aware:
+    // we skip an incoming row only if the DB already holds that exact row
+    // (same account+date+amount+description). Genuine same-day repeats (e.g.
+    // two identical coffees) are preserved because we only skip up to the
+    // number already stored, never collapse repeats within one file.
     const existing = await prisma.homeTransaction.findMany({
       where: { homeAccountId },
       select: { externalKey: true },
     });
-    const seen = new Set(existing.map((e) => e.externalKey).filter(Boolean) as string[]);
+    const existingCount = new Map<string, number>();
+    for (const e of existing) {
+      if (e.externalKey) existingCount.set(e.externalKey, (existingCount.get(e.externalKey) ?? 0) + 1);
+    }
+    const fileSeen = new Map<string, number>();
 
     let added = 0;
     let duplicates = 0;
@@ -87,11 +95,15 @@ export async function POST(req: NextRequest) {
 
     for (const r of rows) {
       const key = externalKey(homeAccountId, r);
-      if (seen.has(key)) {
+      const alreadyInDb = existingCount.get(key) ?? 0;
+      const seenInFile = fileSeen.get(key) ?? 0;
+      fileSeen.set(key, seenInFile + 1);
+      // This occurrence is a duplicate only if the DB already has at least
+      // this many identical rows.
+      if (seenInFile < alreadyInDb) {
         duplicates++;
         continue;
       }
-      seen.add(key);
 
       // Learned rules win over built-in classification.
       let categoryId: string | null = null;
