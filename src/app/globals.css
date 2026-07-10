@@ -23,6 +23,8 @@
   --muted-foreground: #8892A6;
   --input: #1C2130;
   --ring: #3B82F6;
+  /* Themes native controls (date pickers, <select> menus, scrollbars) dark */
+  color-scheme: dark;
 }
 
 :root.light {
@@ -30,11 +32,12 @@
   --foreground: #0C0F14;
   --card: #FFFFFF;
   --card-foreground: #0C0F14;
-  --border: #D6DAE2;
-  --muted: #EBEEF3;
-  --muted-foreground: #5B6573;
+  --border: #D9DEE7;
+  --muted: #EEF1F6;
+  --muted-foreground: #59637A;
   --input: #FFFFFF;
   --ring: #3B82F6;
+  color-scheme: light;
 }
 
 @font-face {
@@ -90,6 +93,35 @@ select,
 }
 .pressable:active {
   transform: scale(0.96);
+}
+
+/* ── Native form controls ─────────────────────────────────────── */
+/* Consistent focus ring across inputs/selects/textareas */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
+}
+
+/* On mobile, form fields must be ≥16px or iOS zooms in on focus */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Date inputs: tidy the native calendar indicator */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 /* Respect reduced-motion */
