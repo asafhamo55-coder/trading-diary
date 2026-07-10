@@ -64,7 +64,7 @@ export const bulkHomeTransactionSchema = z.object({
       })
     )
     .min(1)
-    .max(500),
+    .max(4000),
 });
 
 export type CreateHomeAccountInput = z.infer<typeof createHomeAccountSchema>;

@@ -40,6 +40,7 @@ export default function HomeLedger({
   // Staged (unsaved) edits, keyed by transaction id.
   const [pending, setPending] = useState<Map<string, Pending>>(new Map());
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [editing, setEditing] = useState<HomeTransactionDTO | null>(null);
 
   // Filters.
@@ -124,6 +125,7 @@ export default function HomeLedger({
   async function saveAll() {
     if (pending.size === 0) return;
     setSaving(true);
+    setSaveError(null);
     const updates = Array.from(pending.entries()).map(([id, p]) => ({ id, ...p }));
     try {
       const res = await fetch("/api/home/transactions/bulk", {
@@ -134,7 +136,12 @@ export default function HomeLedger({
       if (res.ok) {
         setPending(new Map());
         router.refresh();
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setSaveError(d?.error || "Save failed — nothing was changed. Please try again.");
       }
+    } catch {
+      setSaveError("Save failed — check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -276,7 +283,13 @@ export default function HomeLedger({
       {pending.size > 0 && (
         <div className="sticky bottom-3 mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#00D68F]/40 bg-[var(--card)] px-4 py-3 shadow-lg">
           <span className="text-sm text-[var(--foreground)]">
-            {pending.size} change{pending.size !== 1 ? "s" : ""} not saved yet
+            {saveError ? (
+              <span className="text-[#FF4D6A]">{saveError}</span>
+            ) : (
+              <>
+                {pending.size} change{pending.size !== 1 ? "s" : ""} not saved yet
+              </>
+            )}
           </span>
           <div className="flex items-center gap-2">
             <button
