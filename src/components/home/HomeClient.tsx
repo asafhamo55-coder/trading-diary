@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import YearPicker from "@/components/layout/YearPicker";
+import ImportDialog from "@/components/home/ImportDialog";
 import {
   ACCOUNT_TYPES,
   accountTypeShort,
@@ -56,6 +57,7 @@ export default function HomeClient({
   const router = useRouter();
   const [addingAccount, setAddingAccount] = useState(false);
   const [addingTx, setAddingTx] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const activeAccounts = accounts.filter((a) => !a.archivedAt);
   const catById = useMemo(
@@ -117,14 +119,9 @@ export default function HomeClient({
             Add row
           </button>
           <button
-            title="CSV statement import — coming next"
+            onClick={() => setImporting(true)}
             className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-[#0C0F14] transition-colors"
             style={{ background: ACCENT }}
-            onClick={() =>
-              alert(
-                "Statement import is coming next — attach a sample BofA/Amex CSV and I'll wire up auto-parsing + de-duplication."
-              )
-            }
           >
             <Upload className="w-4 h-4" />
             Import statement
@@ -226,6 +223,11 @@ export default function HomeClient({
           }}
           onCancel={() => setAddingTx(false)}
         />
+      )}
+
+      {/* Import statement */}
+      {importing && (
+        <ImportDialog accounts={activeAccounts} onClose={() => setImporting(false)} />
       )}
 
       {/* Ledger */}
