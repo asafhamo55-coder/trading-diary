@@ -19,18 +19,30 @@ interface Pending {
   isExcluded?: boolean;
 }
 
+interface EditUpdate {
+  id: string;
+  categoryId?: string | null;
+  propertyId?: string | null;
+  isExcluded?: boolean;
+  notes?: string | null;
+}
+
 export default function HomeLedger({
   transactions,
   accounts,
   categories,
   properties,
   year,
+  onApplyEdits,
+  onRemove,
 }: {
   transactions: HomeTransactionDTO[];
   accounts: HomeAccountDTO[];
   categories: HomeCategoryDTO[];
   properties: PropertyOption[];
   year: number;
+  onApplyEdits: (updates: EditUpdate[]) => void;
+  onRemove: (id: string) => void;
 }) {
   const router = useRouter();
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
@@ -134,8 +146,9 @@ export default function HomeLedger({
         body: JSON.stringify({ updates }),
       });
       if (res.ok) {
+        // Apply optimistically to local state — no full page refresh.
+        onApplyEdits(updates);
         setPending(new Map());
-        router.refresh();
       } else {
         const d = await res.json().catch(() => ({}));
         setSaveError(d?.error || "Save failed — nothing was changed. Please try again.");
@@ -155,7 +168,7 @@ export default function HomeLedger({
         next.delete(id);
         return next;
       });
-      router.refresh();
+      onRemove(id);
     }
   }
 

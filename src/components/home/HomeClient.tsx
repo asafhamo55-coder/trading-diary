@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -62,6 +62,54 @@ export default function HomeClient({
   const [addingTx, setAddingTx] = useState(false);
   const [importing, setImporting] = useState(false);
 
+  // Local mirror of transactions so ledger edits apply instantly (optimistic),
+  // without a full server round-trip / page refresh. Re-syncs whenever the
+  // server sends fresh data (import, add row, edit, year change, etc.).
+  const [txs, setTxs] = useState(transactions);
+  useEffect(() => setTxs(transactions), [transactions]);
+
+  // Apply a batch of saved edits to local state, mirroring the server's rules.
+  function applyEdits(updates: {
+    id: string;
+    categoryId?: string | null;
+    propertyId?: string | null;
+    isExcluded?: boolean;
+    notes?: string | null;
+  }[]) {
+    const byId = new Map(updates.map((u) => [u.id, u]));
+    setTxs((prev) =>
+      prev.map((t) => {
+        const u = byId.get(t.id);
+        if (!u) return t;
+        const next = { ...t };
+        if (u.categoryId !== undefined) {
+          next.categoryId = u.categoryId || null;
+          if (u.categoryId) {
+            next.needsReview = false;
+            next.propertyId = null;
+          }
+        }
+        if (u.propertyId !== undefined) {
+          next.propertyId = u.propertyId || null;
+          if (u.propertyId) {
+            next.needsReview = false;
+            next.categoryId = null;
+          }
+        }
+        if (u.isExcluded !== undefined) {
+          next.isExcluded = u.isExcluded;
+          if (u.isExcluded) next.needsReview = false;
+        }
+        if (u.notes !== undefined) next.notes = u.notes;
+        return next;
+      })
+    );
+  }
+
+  function removeTx(id: string) {
+    setTxs((prev) => prev.filter((t) => t.id !== id));
+  }
+
   const activeAccounts = accounts.filter((a) => !a.archivedAt);
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
 
@@ -71,7 +119,7 @@ export default function HomeClient({
 
   function buildTransactionsCsv() {
     const headers = ["Date", "Account", "Description", "Category / Property", "Amount", "Excluded", "Notes", "Original"];
-    const rows = transactions.map((t) => {
+    const rows = txs.map((t) => {
       const bucket = t.propertyId
         ? propById.get(t.propertyId)?.title ?? "Property"
         : t.categoryId
@@ -96,14 +144,14 @@ export default function HomeClient({
   const totals = useMemo(() => {
     let income = 0;
     let spend = 0;
-    for (const t of transactions) {
+    for (const t of txs) {
       if (isIncome(t)) income += t.amount;
       else if (isSpend(t)) spend += -t.amount;
     }
     const net = income - spend;
     const savingsRate = income > 0 ? net / income : 0;
     return { income, spend, net, savingsRate };
-  }, [transactions]);
+  }, [txs]);
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-6xl mx-auto w-full">
@@ -135,7 +183,7 @@ export default function HomeClient({
             <Tag className="w-4 h-4" />
             Categories
           </Link>
-          {transactions.length > 0 && (
+          {txs.length > 0 && (
             <ExportButton
               filename={`hamo-home-${year}.csv`}
               title={`Hamo Home transactions ${year}`}
@@ -284,11 +332,13 @@ export default function HomeClient({
 
       {/* Ledger with staged "Save changes" */}
       <HomeLedger
-        transactions={transactions}
+        transactions={txs}
         accounts={accounts}
         categories={categories}
         properties={properties}
         year={year}
+        onApplyEdits={applyEdits}
+        onRemove={removeTx}
       />
     </div>
   );

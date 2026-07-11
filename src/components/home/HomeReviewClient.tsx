@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, EyeOff, Loader2 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -26,8 +25,16 @@ export default function HomeReviewClient({
   totalRows: number;
   properties: PropertyOption[];
 }) {
-  const router = useRouter();
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
+
+  // Local list so resolving a merchant removes it instantly — no page refresh.
+  const [groupList, setGroupList] = useState(groups);
+  useEffect(() => setGroupList(groups), [groups]);
+  const remainingRows = groupList.reduce((s, g) => s + g.count, 0);
+
+  function resolve(matcher: string) {
+    setGroupList((prev) => prev.filter((g) => g.matcher !== matcher));
+  }
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-3xl mx-auto w-full">
@@ -44,15 +51,15 @@ export default function HomeReviewClient({
           Grouped by merchant. Categorize each place <span className="font-medium text-[var(--foreground)]">once</span> —
           it applies to all its transactions and is remembered for future imports.
         </p>
-        {totalRows > 0 && (
+        {remainingRows > 0 && (
           <p className="text-xs text-[var(--muted-foreground)] mt-1">
-            {groups.length} merchant{groups.length !== 1 ? "s" : ""} · {totalRows} transaction
-            {totalRows !== 1 ? "s" : ""} to resolve
+            {groupList.length} merchant{groupList.length !== 1 ? "s" : ""} · {remainingRows} transaction
+            {remainingRows !== 1 ? "s" : ""} to resolve
           </p>
         )}
       </div>
 
-      {groups.length === 0 ? (
+      {groupList.length === 0 ? (
         <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] p-12 text-center shadow-sm">
           <span className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[#00D68F]/12 mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8 text-[#00D68F]" />
@@ -64,13 +71,13 @@ export default function HomeReviewClient({
         </div>
       ) : (
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[var(--border)] shadow-sm overflow-hidden">
-          {groups.map((g) => (
+          {groupList.map((g) => (
             <MerchantRow
               key={g.matcher}
               group={g}
               tree={tree}
               properties={properties}
-              onDone={() => router.refresh()}
+              onDone={() => resolve(g.matcher)}
             />
           ))}
         </div>
