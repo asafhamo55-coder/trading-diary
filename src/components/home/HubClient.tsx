@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { ArrowUpRight, TrendingUp, Lock, BarChart3, CalendarDays } from "lucide-react";
+import { ArrowUpRight, TrendingUp, Lock, BarChart3, CalendarDays, CalendarClock } from "lucide-react";
 import EChart from "@/components/charts/EChart";
 import type { EChartsCoreOption } from "echarts/core";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -55,6 +55,15 @@ interface SourceRow {
   blurb: string;
 }
 
+interface MtdData {
+  monthName: string;
+  year: number;
+  asOf: string;
+  trade: RevExp;
+  properties: RevExp;
+  home: RevExp;
+}
+
 const SOURCE_COLORS: Record<SourceRow["key"], string> = {
   trade: "#3B82F6",
   properties: "#FFB547",
@@ -77,6 +86,7 @@ export default function HubClient({
   recommendations,
   aiConfigured,
   hasData,
+  mtd,
 }: {
   monthly: MonthlyRow[];
   sources: SourceRow[];
@@ -86,8 +96,14 @@ export default function HubClient({
   recommendations: Recommendation[];
   aiConfigured: boolean;
   hasData: boolean;
+  mtd: MtdData;
 }) {
   const grandTotal = sources.reduce((sum, s) => sum + s.total, 0);
+
+  const mtdNet = net(mtd.trade) + net(mtd.properties) + net(mtd.home);
+  const mtdIn = mtd.trade.revenue + mtd.properties.revenue + mtd.home.revenue;
+  const mtdOut = mtd.trade.expense + mtd.properties.expense + mtd.home.expense;
+  const mtdActive = mtdIn !== 0 || mtdOut !== 0;
 
   const netByMonth = useMemo(
     () => monthly.map((m) => net(m.trade) + net(m.properties) + net(m.home)),
@@ -261,6 +277,109 @@ export default function HubClient({
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* This month — month-to-date across all modules */}
+      <div className="relative overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8 shadow-sm">
+        <div
+          className="pointer-events-none absolute -top-24 -left-16 w-64 h-64 rounded-full blur-3xl opacity-[0.10]"
+          style={{ background: "#FFB547" }}
+        />
+        <div className="relative">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-[#FFB547]/12 text-[#FFB547]">
+                  <CalendarClock className="w-3.5 h-3.5" />
+                </span>
+                <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+                  This month · {mtd.monthName} {mtd.year} · MTD
+                </p>
+              </div>
+              <h2
+                className={cn(
+                  "text-3xl md:text-5xl font-bold font-data tracking-tight leading-none",
+                  mtdNet >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
+                )}
+              >
+                {mtdNet >= 0 ? "+" : ""}
+                {formatCurrency(mtdNet)}
+              </h2>
+              <p className="text-xs text-[var(--muted-foreground)] mt-3">
+                Net month-to-date · as of {mtd.asOf}
+              </p>
+            </div>
+            <div className="flex items-center gap-6">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)] mb-1">
+                  In
+                </p>
+                <p className="text-lg md:text-xl font-bold font-data text-[#00D68F]">
+                  +{formatCurrency(mtdIn)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)] mb-1">
+                  Out
+                </p>
+                <p className="text-lg md:text-xl font-bold font-data text-[#FF4D6A]">
+                  −{formatCurrency(mtdOut)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Per-module MTD breakdown */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 pt-6 border-t border-[var(--border)]">
+            {MODULES.map((mod) => {
+              const rx = mtd[mod.key];
+              const n = net(rx);
+              const color = SOURCE_COLORS[mod.key];
+              return (
+                <div
+                  key={mod.key}
+                  className="rounded-xl border border-[var(--border)] bg-[var(--muted)]/40 p-4"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ background: color }}
+                    />
+                    <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                      {mod.label}
+                    </span>
+                  </div>
+                  <p
+                    className={cn(
+                      "text-lg font-bold font-data",
+                      n > 0
+                        ? "text-[#00D68F]"
+                        : n < 0
+                          ? "text-[#FF4D6A]"
+                          : "text-[var(--muted-foreground)]"
+                    )}
+                  >
+                    {n === 0 ? "—" : `${n >= 0 ? "+" : ""}${formatCurrency(n)}`}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1 text-[11px] font-data">
+                    <span className="text-[#00D68F]">
+                      {rx.revenue ? `+${formatCurrency(rx.revenue)}` : "—"}
+                    </span>
+                    <span className="text-[#FF4D6A]">
+                      {rx.expense ? `−${formatCurrency(rx.expense)}` : "—"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {!mtdActive && (
+            <p className="text-xs text-[var(--muted-foreground)] mt-4">
+              No activity recorded yet this month.
+            </p>
+          )}
         </div>
       </div>
 

@@ -5,7 +5,14 @@ import { prisma } from "@/lib/db";
 import { getAvailableYears, parseYear, resolveSelectedYear } from "@/lib/year";
 import { agg, equitySummary, buildEquityRecommendations, type EquityData } from "@/lib/equity-coach";
 import { hasLLMKey } from "@/lib/llm";
+import { todayInEastern } from "@/lib/utils";
 import HubClient from "@/components/home/HubClient";
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+const zeroRevExp = { revenue: 0, expense: 0 };
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +70,39 @@ export default async function HomeEquityPage({
   const aiConfigured = hasLLMKey();
   const hasData = summary.totalIncome !== 0 || summary.totalExpense !== 0;
 
+  // Month-to-date widget — always the real current calendar month (Eastern),
+  // independent of the year picker. Reuse the fetched data when the selected
+  // year is the current year; otherwise fetch the current year's figures.
+  const todayET = todayInEastern();
+  const nowYear = Number(todayET.slice(0, 4));
+  const nowMonth = Number(todayET.slice(5, 7)); // 1–12
+  const nowDay = Number(todayET.slice(8, 10));
+
+  let mtdSource = monthly;
+  if (year !== nowYear) {
+    const [t, p, h] = await Promise.all([
+      getMonthlyTradeRevExp(nowYear),
+      getPropertyMonthlyRevExp(nowYear),
+      getHomeMonthlyRevExp(nowYear),
+    ]);
+    mtdSource = t.map((m, i) => ({
+      month: m.month,
+      name: m.name,
+      trade: { revenue: m.revenue, expense: m.expense },
+      properties: p[i] ?? zeroRevExp,
+      home: h[i] ?? zeroRevExp,
+    }));
+  }
+  const mtdRow = mtdSource[nowMonth - 1];
+  const mtd = {
+    monthName: MONTH_NAMES[nowMonth - 1],
+    year: nowYear,
+    asOf: `${mtdRow.name} ${nowDay}`,
+    trade: mtdRow.trade,
+    properties: mtdRow.properties,
+    home: mtdRow.home,
+  };
+
   const sources = [
     {
       key: "trade" as const,
@@ -100,6 +140,7 @@ export default async function HomeEquityPage({
       recommendations={recommendations}
       aiConfigured={aiConfigured}
       hasData={hasData}
+      mtd={mtd}
     />
   );
 }
