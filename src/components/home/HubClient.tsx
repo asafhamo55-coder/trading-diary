@@ -9,6 +9,11 @@ import { cn, formatCurrency } from "@/lib/utils";
 import Logo from "@/components/layout/Logo";
 import YearPicker from "@/components/layout/YearPicker";
 import ThemeToggle from "@/components/layout/ThemeToggle";
+import RecommendationList from "@/components/home/RecommendationList";
+import CoPilotChat from "@/components/home/CoPilotChat";
+import { Sparkles, PiggyBank } from "lucide-react";
+import type { EquitySummary } from "@/lib/equity-coach";
+import type { Recommendation } from "@/lib/home-coach";
 
 interface RevExp {
   revenue: number;
@@ -56,16 +61,31 @@ const SOURCE_COLORS: Record<SourceRow["key"], string> = {
   home: "#00D68F",
 };
 
+const EQUITY_SUGGESTIONS = [
+  "How do I grow my total equity fastest?",
+  "Which module should I focus on?",
+  "Where am I losing the most money?",
+  "How can I generate more cash?",
+];
+
 export default function HubClient({
   monthly,
   sources,
   year,
   availableYears,
+  summary,
+  recommendations,
+  aiConfigured,
+  hasData,
 }: {
   monthly: MonthlyRow[];
   sources: SourceRow[];
   year: number;
   availableYears: number[];
+  summary: EquitySummary;
+  recommendations: Recommendation[];
+  aiConfigured: boolean;
+  hasData: boolean;
 }) {
   const grandTotal = sources.reduce((sum, s) => sum + s.total, 0);
 
@@ -79,7 +99,7 @@ export default function HubClient({
     return netByMonth.map((n) => (running += n));
   }, [netByMonth]);
 
-  const hasData = netByMonth.some((n) => n !== 0);
+  const chartHasData = netByMonth.some((n) => n !== 0);
 
   const option = useMemo<EChartsCoreOption>(() => {
     const series = [
@@ -425,7 +445,7 @@ export default function HubClient({
             · net by source, cumulative line
           </span>
         </div>
-        {hasData ? (
+        {chartHasData ? (
           <div className="h-72">
             <EChart option={option} />
           </div>
@@ -446,6 +466,75 @@ export default function HubClient({
           </div>
         )}
       </div>
+
+      {hasData && (
+        <>
+          {/* Consolidated analysis snapshot */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <EquityTile label={`Total in · ${year}`} value={summary.totalIncome} color="text-[#00D68F]" icon={<TrendingUp className="w-5 h-5" />} />
+            <EquityTile label={`Total out · ${year}`} value={summary.totalExpense} color="text-[#FF4D6A]" icon={<PiggyBank className="w-5 h-5" />} />
+            <EquityTile label={`Net equity · ${year}`} value={summary.net} color={summary.net >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"} icon={<Sparkles className="w-5 h-5" />} signed />
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-[var(--muted-foreground)] font-medium">Retention</span>
+                <PiggyBank className="w-5 h-5 text-[var(--muted-foreground)]" />
+              </div>
+              <p className={cn("text-2xl font-bold font-data", summary.retention >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]")}>
+                {Math.round(summary.retention * 100)}%
+              </p>
+              <p className="text-xs text-[var(--muted-foreground)] mt-1">of income kept</p>
+            </div>
+          </div>
+
+          {/* Recommendations */}
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#00D68F]/12 text-[#00D68F]">
+                <Sparkles className="w-4 h-4" />
+              </span>
+              <h3 className="text-sm font-semibold text-[var(--foreground)]">Recommendations to grow your equity</h3>
+            </div>
+            <RecommendationList items={recommendations} />
+          </div>
+
+          {/* Equity co-pilot */}
+          <CoPilotChat
+            endpoint="/api/equity/copilot"
+            suggestions={EQUITY_SUGGESTIONS}
+            accent="#3B82F6"
+            aiConfigured={aiConfigured}
+            title="Equity co-pilot"
+            subtitle="Ask across all your modules"
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+function EquityTile({
+  label,
+  value,
+  color,
+  icon,
+  signed,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  icon: React.ReactNode;
+  signed?: boolean;
+}) {
+  return (
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs text-[var(--muted-foreground)] font-medium">{label}</span>
+        <div className="text-[var(--muted-foreground)]">{icon}</div>
+      </div>
+      <p className={cn("text-2xl font-bold font-data", color)}>
+        {signed && value >= 0 ? "+" : ""}
+        {formatCurrency(value)}
+      </p>
     </div>
   );
 }

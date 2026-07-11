@@ -3,6 +3,8 @@ import { getPropertyMonthlyRevExp } from "@/lib/property-data";
 import { getHomeMonthlyRevExp } from "@/lib/home-data";
 import { prisma } from "@/lib/db";
 import { getAvailableYears, parseYear, resolveSelectedYear } from "@/lib/year";
+import { agg, equitySummary, buildEquityRecommendations, type EquityData } from "@/lib/equity-coach";
+import { hasLLMKey } from "@/lib/llm";
 import HubClient from "@/components/home/HubClient";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +44,25 @@ export default async function HomeEquityPage({
   const propertyTotal = sumNet(propertyMonthly);
   const homeTotal = sumNet(homeMonthly);
 
+  // Consolidated equity analysis across all three modules.
+  const equityData: EquityData = {
+    trade: agg(tradeMonthly),
+    properties: agg(propertyMonthly),
+    home: agg(homeMonthly),
+    monthly: monthly.map((m) => ({
+      name: m.name,
+      net:
+        m.trade.revenue - m.trade.expense +
+        (m.properties.revenue - m.properties.expense) +
+        (m.home.revenue - m.home.expense),
+    })),
+    year,
+  };
+  const summary = equitySummary(equityData);
+  const recommendations = buildEquityRecommendations(equityData);
+  const aiConfigured = hasLLMKey();
+  const hasData = summary.totalIncome !== 0 || summary.totalExpense !== 0;
+
   const sources = [
     {
       key: "trade" as const,
@@ -75,6 +96,10 @@ export default async function HomeEquityPage({
       sources={sources}
       year={year}
       availableYears={availableYears}
+      summary={summary}
+      recommendations={recommendations}
+      aiConfigured={aiConfigured}
+      hasData={hasData}
     />
   );
 }
