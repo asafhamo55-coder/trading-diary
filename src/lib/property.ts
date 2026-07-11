@@ -68,9 +68,42 @@ export interface PropertyDTO {
   state: string | null;
   zip: string | null;
   purchasePrice: number | null;
+  downPayment: number | null;
   purchaseDate: string | null;
+  currentValue: number | null;
+  valueAsOf: string | null;
   notes: string | null;
   archivedAt: string | null;
+}
+
+export interface AppreciationStats {
+  gain: number;
+  totalPct: number;
+  years: number;
+  annualizedPct: number;
+  returnOnDownPct: number | null;
+}
+
+/** Appreciation from purchase price to the current value/Zestimate. */
+export function computeAppreciation(p: {
+  purchasePrice: number | null;
+  purchaseDate: string | null;
+  currentValue: number | null;
+  valueAsOf: string | null;
+  downPayment: number | null;
+}): AppreciationStats | null {
+  if (!p.purchasePrice || p.purchasePrice <= 0 || p.currentValue == null) return null;
+  const gain = p.currentValue - p.purchasePrice;
+  const totalPct = gain / p.purchasePrice;
+  const start = p.purchaseDate ? new Date(p.purchaseDate).getTime() : NaN;
+  const end = p.valueAsOf ? new Date(p.valueAsOf).getTime() : Date.now();
+  const years = Number.isNaN(start)
+    ? 0
+    : Math.max(0, (end - start) / (365.25 * 24 * 3600 * 1000));
+  const annualizedPct =
+    years > 0 ? Math.pow(p.currentValue / p.purchasePrice, 1 / years) - 1 : totalPct;
+  const returnOnDownPct = p.downPayment && p.downPayment > 0 ? gain / p.downPayment : null;
+  return { gain, totalPct, years, annualizedPct, returnOnDownPct };
 }
 
 /** Structured address parts. */

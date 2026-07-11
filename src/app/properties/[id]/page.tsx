@@ -52,7 +52,10 @@ export default async function PropertyDetailPage({
         state: property.state,
         zip: property.zip,
         purchasePrice: property.purchasePrice,
+        downPayment: property.downPayment,
         purchaseDate: property.purchaseDate,
+        currentValue: property.currentValue,
+        valueAsOf: property.valueAsOf,
         notes: property.notes,
         archivedAt: property.archivedAt,
       }}

@@ -99,7 +99,14 @@ const propertyBaseSchema = z.object({
   zip: z.string().max(20).optional().nullable(),
   address: z.string().max(200).optional().nullable(),
   purchasePrice: z.number().nonnegative().optional().nullable(),
+  downPayment: z.number().nonnegative().optional().nullable(),
   purchaseDate: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((s) => (s ? new Date(s) : null)),
+  currentValue: z.number().nonnegative().optional().nullable(),
+  valueAsOf: z
     .string()
     .optional()
     .nullable()
@@ -125,6 +132,8 @@ export const createPropertyTransactionSchema = z.object({
   amount: z.number().positive("Amount must be positive"),
   description: z.string().max(300).optional().nullable(),
 });
+
+export const updatePropertyTransactionSchema = createPropertyTransactionSchema.partial();
 
 export const createTenantSchema = z.object({
   name: z.string().min(1, "Tenant name is required").max(120),

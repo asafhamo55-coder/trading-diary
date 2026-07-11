@@ -42,7 +42,10 @@ model Property {
   state         String?    // state / province, e.g. "CA"
   zip           String?    // postal / ZIP code
   purchasePrice Float?
+  downPayment   Float?     // cash invested at purchase
   purchaseDate  DateTime?
+  currentValue  Float?     // latest market value / Zestimate
+  valueAsOf     DateTime?  // date of the current value estimate
   notes         String?
   archivedAt    DateTime?  // null = active; set = archived (hidden from active list)
 

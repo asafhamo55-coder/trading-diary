@@ -72,7 +72,10 @@ export async function PATCH(
         ...(data.zip !== undefined ? { zip: data.zip } : {}),
         ...(addressTouched ? { address, nickname } : {}),
         ...(data.purchasePrice !== undefined ? { purchasePrice: data.purchasePrice } : {}),
+        ...(data.downPayment !== undefined ? { downPayment: data.downPayment } : {}),
         ...(data.purchaseDate !== undefined ? { purchaseDate: data.purchaseDate } : {}),
+        ...(data.currentValue !== undefined ? { currentValue: data.currentValue } : {}),
+        ...(data.valueAsOf !== undefined ? { valueAsOf: data.valueAsOf } : {}),
         ...(data.notes !== undefined ? { notes: data.notes } : {}),
         ...(data.archived !== undefined
           ? { archivedAt: data.archived ? new Date() : null }

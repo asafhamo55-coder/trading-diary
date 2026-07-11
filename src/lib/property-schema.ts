@@ -39,6 +39,15 @@ export async function ensurePropertySchema(): Promise<void> {
       `ALTER TABLE "Property" ADD COLUMN IF NOT EXISTS "${col}" TEXT`
     );
   }
+  // Value / appreciation tracking.
+  for (const col of ["downPayment", "currentValue"]) {
+    await prisma.$executeRawUnsafe(
+      `ALTER TABLE "Property" ADD COLUMN IF NOT EXISTS "${col}" DOUBLE PRECISION`
+    );
+  }
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "Property" ADD COLUMN IF NOT EXISTS "valueAsOf" TIMESTAMP(3)`
+  );
 
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "PropertyTransaction" (

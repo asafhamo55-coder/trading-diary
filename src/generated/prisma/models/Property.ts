@@ -28,10 +28,14 @@ export type AggregateProperty = {
 
 export type PropertyAvgAggregateOutputType = {
   purchasePrice: number | null
+  downPayment: number | null
+  currentValue: number | null
 }
 
 export type PropertySumAggregateOutputType = {
   purchasePrice: number | null
+  downPayment: number | null
+  currentValue: number | null
 }
 
 export type PropertyMinAggregateOutputType = {
@@ -45,7 +49,10 @@ export type PropertyMinAggregateOutputType = {
   state: string | null
   zip: string | null
   purchasePrice: number | null
+  downPayment: number | null
   purchaseDate: Date | null
+  currentValue: number | null
+  valueAsOf: Date | null
   notes: string | null
   archivedAt: Date | null
   createdAt: Date | null
@@ -63,7 +70,10 @@ export type PropertyMaxAggregateOutputType = {
   state: string | null
   zip: string | null
   purchasePrice: number | null
+  downPayment: number | null
   purchaseDate: Date | null
+  currentValue: number | null
+  valueAsOf: Date | null
   notes: string | null
   archivedAt: Date | null
   createdAt: Date | null
@@ -81,7 +91,10 @@ export type PropertyCountAggregateOutputType = {
   state: number
   zip: number
   purchasePrice: number
+  downPayment: number
   purchaseDate: number
+  currentValue: number
+  valueAsOf: number
   notes: number
   archivedAt: number
   createdAt: number
@@ -92,10 +105,14 @@ export type PropertyCountAggregateOutputType = {
 
 export type PropertyAvgAggregateInputType = {
   purchasePrice?: true
+  downPayment?: true
+  currentValue?: true
 }
 
 export type PropertySumAggregateInputType = {
   purchasePrice?: true
+  downPayment?: true
+  currentValue?: true
 }
 
 export type PropertyMinAggregateInputType = {
@@ -109,7 +126,10 @@ export type PropertyMinAggregateInputType = {
   state?: true
   zip?: true
   purchasePrice?: true
+  downPayment?: true
   purchaseDate?: true
+  currentValue?: true
+  valueAsOf?: true
   notes?: true
   archivedAt?: true
   createdAt?: true
@@ -127,7 +147,10 @@ export type PropertyMaxAggregateInputType = {
   state?: true
   zip?: true
   purchasePrice?: true
+  downPayment?: true
   purchaseDate?: true
+  currentValue?: true
+  valueAsOf?: true
   notes?: true
   archivedAt?: true
   createdAt?: true
@@ -145,7 +168,10 @@ export type PropertyCountAggregateInputType = {
   state?: true
   zip?: true
   purchasePrice?: true
+  downPayment?: true
   purchaseDate?: true
+  currentValue?: true
+  valueAsOf?: true
   notes?: true
   archivedAt?: true
   createdAt?: true
@@ -250,7 +276,10 @@ export type PropertyGroupByOutputType = {
   state: string | null
   zip: string | null
   purchasePrice: number | null
+  downPayment: number | null
   purchaseDate: Date | null
+  currentValue: number | null
+  valueAsOf: Date | null
   notes: string | null
   archivedAt: Date | null
   createdAt: Date
@@ -291,7 +320,10 @@ export type PropertyWhereInput = {
   state?: Prisma.StringNullableFilter<"Property"> | string | null
   zip?: Prisma.StringNullableFilter<"Property"> | string | null
   purchasePrice?: Prisma.FloatNullableFilter<"Property"> | number | null
+  downPayment?: Prisma.FloatNullableFilter<"Property"> | number | null
   purchaseDate?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+  currentValue?: Prisma.FloatNullableFilter<"Property"> | number | null
+  valueAsOf?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
@@ -312,7 +344,10 @@ export type PropertyOrderByWithRelationInput = {
   state?: Prisma.SortOrderInput | Prisma.SortOrder
   zip?: Prisma.SortOrderInput | Prisma.SortOrder
   purchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  downPayment?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentValue?: Prisma.SortOrderInput | Prisma.SortOrder
+  valueAsOf?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -336,7 +371,10 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   state?: Prisma.StringNullableFilter<"Property"> | string | null
   zip?: Prisma.StringNullableFilter<"Property"> | string | null
   purchasePrice?: Prisma.FloatNullableFilter<"Property"> | number | null
+  downPayment?: Prisma.FloatNullableFilter<"Property"> | number | null
   purchaseDate?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+  currentValue?: Prisma.FloatNullableFilter<"Property"> | number | null
+  valueAsOf?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
@@ -357,7 +395,10 @@ export type PropertyOrderByWithAggregationInput = {
   state?: Prisma.SortOrderInput | Prisma.SortOrder
   zip?: Prisma.SortOrderInput | Prisma.SortOrder
   purchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  downPayment?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentValue?: Prisma.SortOrderInput | Prisma.SortOrder
+  valueAsOf?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -383,7 +424,10 @@ export type PropertyScalarWhereWithAggregatesInput = {
   state?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   zip?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   purchasePrice?: Prisma.FloatNullableWithAggregatesFilter<"Property"> | number | null
+  downPayment?: Prisma.FloatNullableWithAggregatesFilter<"Property"> | number | null
   purchaseDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Property"> | Date | string | null
+  currentValue?: Prisma.FloatNullableWithAggregatesFilter<"Property"> | number | null
+  valueAsOf?: Prisma.DateTimeNullableWithAggregatesFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Property"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Property"> | Date | string
@@ -400,7 +444,10 @@ export type PropertyCreateInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -421,7 +468,10 @@ export type PropertyUncheckedCreateInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -440,7 +490,10 @@ export type PropertyUpdateInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -461,7 +514,10 @@ export type PropertyUncheckedUpdateInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -481,7 +537,10 @@ export type PropertyCreateManyInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -498,7 +557,10 @@ export type PropertyUpdateManyMutationInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -516,7 +578,10 @@ export type PropertyUncheckedUpdateManyInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -544,7 +609,10 @@ export type PropertyCountOrderByAggregateInput = {
   state?: Prisma.SortOrder
   zip?: Prisma.SortOrder
   purchasePrice?: Prisma.SortOrder
+  downPayment?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
+  currentValue?: Prisma.SortOrder
+  valueAsOf?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -553,6 +621,8 @@ export type PropertyCountOrderByAggregateInput = {
 
 export type PropertyAvgOrderByAggregateInput = {
   purchasePrice?: Prisma.SortOrder
+  downPayment?: Prisma.SortOrder
+  currentValue?: Prisma.SortOrder
 }
 
 export type PropertyMaxOrderByAggregateInput = {
@@ -566,7 +636,10 @@ export type PropertyMaxOrderByAggregateInput = {
   state?: Prisma.SortOrder
   zip?: Prisma.SortOrder
   purchasePrice?: Prisma.SortOrder
+  downPayment?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
+  currentValue?: Prisma.SortOrder
+  valueAsOf?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -584,7 +657,10 @@ export type PropertyMinOrderByAggregateInput = {
   state?: Prisma.SortOrder
   zip?: Prisma.SortOrder
   purchasePrice?: Prisma.SortOrder
+  downPayment?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
+  currentValue?: Prisma.SortOrder
+  valueAsOf?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -593,6 +669,8 @@ export type PropertyMinOrderByAggregateInput = {
 
 export type PropertySumOrderByAggregateInput = {
   purchasePrice?: Prisma.SortOrder
+  downPayment?: Prisma.SortOrder
+  currentValue?: Prisma.SortOrder
 }
 
 export type PropertyScalarRelationFilter = {
@@ -696,7 +774,10 @@ export type PropertyCreateWithoutAccountInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -715,7 +796,10 @@ export type PropertyUncheckedCreateWithoutAccountInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -764,7 +848,10 @@ export type PropertyScalarWhereInput = {
   state?: Prisma.StringNullableFilter<"Property"> | string | null
   zip?: Prisma.StringNullableFilter<"Property"> | string | null
   purchasePrice?: Prisma.FloatNullableFilter<"Property"> | number | null
+  downPayment?: Prisma.FloatNullableFilter<"Property"> | number | null
   purchaseDate?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+  currentValue?: Prisma.FloatNullableFilter<"Property"> | number | null
+  valueAsOf?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
@@ -781,7 +868,10 @@ export type PropertyCreateWithoutTenantsInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -801,7 +891,10 @@ export type PropertyUncheckedCreateWithoutTenantsInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -835,7 +928,10 @@ export type PropertyUpdateWithoutTenantsInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -855,7 +951,10 @@ export type PropertyUncheckedUpdateWithoutTenantsInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -873,7 +972,10 @@ export type PropertyCreateWithoutTransactionsInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -893,7 +995,10 @@ export type PropertyUncheckedCreateWithoutTransactionsInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -927,7 +1032,10 @@ export type PropertyUpdateWithoutTransactionsInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -947,7 +1055,10 @@ export type PropertyUncheckedUpdateWithoutTransactionsInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -965,7 +1076,10 @@ export type PropertyCreateManyAccountInput = {
   state?: string | null
   zip?: string | null
   purchasePrice?: number | null
+  downPayment?: number | null
   purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -982,7 +1096,10 @@ export type PropertyUpdateWithoutAccountInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1001,7 +1118,10 @@ export type PropertyUncheckedUpdateWithoutAccountInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1020,7 +1140,10 @@ export type PropertyUncheckedUpdateManyWithoutAccountInput = {
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1078,7 +1201,10 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   state?: boolean
   zip?: boolean
   purchasePrice?: boolean
+  downPayment?: boolean
   purchaseDate?: boolean
+  currentValue?: boolean
+  valueAsOf?: boolean
   notes?: boolean
   archivedAt?: boolean
   createdAt?: boolean
@@ -1100,7 +1226,10 @@ export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   state?: boolean
   zip?: boolean
   purchasePrice?: boolean
+  downPayment?: boolean
   purchaseDate?: boolean
+  currentValue?: boolean
+  valueAsOf?: boolean
   notes?: boolean
   archivedAt?: boolean
   createdAt?: boolean
@@ -1119,7 +1248,10 @@ export type PropertySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   state?: boolean
   zip?: boolean
   purchasePrice?: boolean
+  downPayment?: boolean
   purchaseDate?: boolean
+  currentValue?: boolean
+  valueAsOf?: boolean
   notes?: boolean
   archivedAt?: boolean
   createdAt?: boolean
@@ -1138,14 +1270,17 @@ export type PropertySelectScalar = {
   state?: boolean
   zip?: boolean
   purchasePrice?: boolean
+  downPayment?: boolean
   purchaseDate?: boolean
+  currentValue?: boolean
+  valueAsOf?: boolean
   notes?: boolean
   archivedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "nickname" | "address" | "street" | "unit" | "city" | "state" | "zip" | "purchasePrice" | "purchaseDate" | "notes" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
+export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "nickname" | "address" | "street" | "unit" | "city" | "state" | "zip" | "purchasePrice" | "downPayment" | "purchaseDate" | "currentValue" | "valueAsOf" | "notes" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
 export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   transactions?: boolean | Prisma.Property$transactionsArgs<ExtArgs>
@@ -1177,7 +1312,10 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     state: string | null
     zip: string | null
     purchasePrice: number | null
+    downPayment: number | null
     purchaseDate: Date | null
+    currentValue: number | null
+    valueAsOf: Date | null
     notes: string | null
     archivedAt: Date | null
     createdAt: Date
@@ -1618,7 +1756,10 @@ export interface PropertyFieldRefs {
   readonly state: Prisma.FieldRef<"Property", 'String'>
   readonly zip: Prisma.FieldRef<"Property", 'String'>
   readonly purchasePrice: Prisma.FieldRef<"Property", 'Float'>
+  readonly downPayment: Prisma.FieldRef<"Property", 'Float'>
   readonly purchaseDate: Prisma.FieldRef<"Property", 'DateTime'>
+  readonly currentValue: Prisma.FieldRef<"Property", 'Float'>
+  readonly valueAsOf: Prisma.FieldRef<"Property", 'DateTime'>
   readonly notes: Prisma.FieldRef<"Property", 'String'>
   readonly archivedAt: Prisma.FieldRef<"Property", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Property", 'DateTime'>

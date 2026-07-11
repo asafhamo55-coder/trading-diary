@@ -31,6 +31,8 @@ import {
 } from "@/components/properties/shared";
 import YearPicker from "@/components/layout/YearPicker";
 import TenantsSection from "@/components/properties/TenantsSection";
+import PropertyValueSection from "@/components/properties/PropertyValueSection";
+import EditPropertyEntryModal from "@/components/properties/EditPropertyEntryModal";
 import {
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,
@@ -52,7 +54,10 @@ interface PropertyInfo {
   state: string | null;
   zip: string | null;
   purchasePrice: number | null;
+  downPayment: number | null;
   purchaseDate: string | null;
+  currentValue: number | null;
+  valueAsOf: string | null;
   notes: string | null;
   archivedAt: string | null;
 }
@@ -88,6 +93,7 @@ export default function PropertyDetailClient({
   const [deletingProperty, setDeletingProperty] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [editingTx, setEditingTx] = useState<PropertyTransactionDTO | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const isArchived = property.archivedAt !== null;
 
@@ -594,6 +600,19 @@ export default function PropertyDetailClient({
         )}
       </div>
 
+      {/* Value & appreciation */}
+      <PropertyValueSection
+        propertyId={property.id}
+        property={{
+          purchasePrice: property.purchasePrice,
+          downPayment: property.downPayment,
+          purchaseDate: property.purchaseDate,
+          currentValue: property.currentValue,
+          valueAsOf: property.valueAsOf,
+        }}
+        today={today}
+      />
+
       {/* Tenants */}
       <TenantsSection
         propertyId={property.id}
@@ -770,15 +789,24 @@ export default function PropertyDetailClient({
                         {formatCurrency(t.amount)}
                       </td>
                       <td className="py-3 text-right">
-                        <Button
-                          variant="danger-ghost"
-                          size="icon-sm"
-                          onClick={() => handleDeleteTx(t.id)}
-                          aria-label="Delete entry"
-                          className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setEditingTx(t)}
+                            aria-label="Edit entry"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="danger-ghost"
+                            size="icon-sm"
+                            onClick={() => handleDeleteTx(t.id)}
+                            aria-label="Delete entry"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -810,6 +838,14 @@ export default function PropertyDetailClient({
                       {formatCurrency(t.amount)}
                     </span>
                     <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setEditingTx(t)}
+                      aria-label="Edit entry"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
                       variant="danger-ghost"
                       size="icon-sm"
                       onClick={() => handleDeleteTx(t.id)}
@@ -824,6 +860,15 @@ export default function PropertyDetailClient({
           </>
         )}
       </div>
+
+      {editingTx && (
+        <EditPropertyEntryModal
+          propertyId={property.id}
+          tx={editingTx}
+          onClose={() => setEditingTx(null)}
+          onSaved={() => setEditingTx(null)}
+        />
+      )}
     </div>
   );
 }

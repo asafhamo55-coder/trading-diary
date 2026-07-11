@@ -71,7 +71,10 @@ function serializeProperty(p: {
   state: string | null;
   zip: string | null;
   purchasePrice: number | null;
+  downPayment: number | null;
   purchaseDate: Date | null;
+  currentValue: number | null;
+  valueAsOf: Date | null;
   notes: string | null;
   archivedAt: Date | null;
 }): PropertyDTO {
@@ -85,7 +88,10 @@ function serializeProperty(p: {
     state: p.state,
     zip: p.zip,
     purchasePrice: p.purchasePrice,
+    downPayment: p.downPayment,
     purchaseDate: p.purchaseDate ? toDateStr(p.purchaseDate) : null,
+    currentValue: p.currentValue,
+    valueAsOf: p.valueAsOf ? toDateStr(p.valueAsOf) : null,
     notes: p.notes,
     archivedAt: p.archivedAt ? p.archivedAt.toISOString() : null,
   };
