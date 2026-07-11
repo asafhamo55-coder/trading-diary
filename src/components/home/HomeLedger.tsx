@@ -161,6 +161,33 @@ export default function HomeLedger({
     }
   }
 
+  const [moveMenu, setMoveMenu] = useState<{ txId: string; x: number; y: number } | null>(null);
+  const [movingId, setMovingId] = useState<string | null>(null);
+
+  async function moveToProperty(txId: string, propertyId: string) {
+    setMovingId(txId);
+    setSaveError(null);
+    try {
+      const res = await fetch(`/api/home/transactions/${txId}/move-to-property`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId }),
+      });
+      if (res.ok) {
+        // Row is now excluded from Home spend and linked to the property.
+        onApplyEdits([{ id: txId, isExcluded: true, propertyId }]);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setSaveError(d?.error || "Couldn't move to property. Please try again.");
+      }
+    } catch {
+      setSaveError("Couldn't move to property. Check your connection.");
+    } finally {
+      setMovingId(null);
+      setMoveMenu(null);
+    }
+  }
+
   const [excludingSmall, setExcludingSmall] = useState(false);
   const smallCount = useMemo(
     () =>
@@ -309,6 +336,7 @@ export default function HomeLedger({
                 onToggleExclude={() => stage(t.id, { isExcluded: !eff.isExcluded })}
                 onEdit={() => setEditing(t)}
                 onDelete={() => remove(t.id)}
+                onRequestMove={(x, y) => setMoveMenu({ txId: t.id, x, y })}
               />
             );
           })}
@@ -398,6 +426,44 @@ export default function HomeLedger({
           }}
         />
       )}
+
+      {/* Move-to-property context menu */}
+      {moveMenu && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setMoveMenu(null)} onContextMenu={(e) => { e.preventDefault(); setMoveMenu(null); }} />
+          <div
+            className="fixed z-50 w-56 max-h-72 overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-2xl py-1"
+            style={{
+              left: Math.min(moveMenu.x, (typeof window !== "undefined" ? window.innerWidth : 9999) - 240),
+              top: Math.min(moveMenu.y, (typeof window !== "undefined" ? window.innerHeight : 9999) - 300),
+            }}
+          >
+            <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
+              <Building2 className="w-3 h-3" />
+              Move to property
+            </div>
+            {properties.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-[var(--muted-foreground)]">No properties yet — add one first.</p>
+            ) : (
+              properties.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => moveToProperty(moveMenu.txId, p.id)}
+                  disabled={movingId === moveMenu.txId}
+                  className="pressable flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
+                >
+                  {movingId === moveMenu.txId ? (
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                  ) : (
+                    <Building2 className="w-4 h-4 text-[#FFB547] shrink-0" />
+                  )}
+                  <span className="truncate">{p.title}</span>
+                </button>
+              ))
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -438,6 +504,7 @@ function Row({
   onToggleExclude,
   onEdit,
   onDelete,
+  onRequestMove,
 }: {
   tx: HomeTransactionDTO;
   dirty: boolean;
@@ -450,10 +517,15 @@ function Row({
   onToggleExclude: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onRequestMove: (x: number, y: number) => void;
 }) {
   const out = tx.amount < 0;
   return (
     <div
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onRequestMove(e.clientX, e.clientY);
+      }}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-[var(--muted)] transition-colors group",
         effective.isExcluded && "opacity-55",
@@ -510,6 +582,13 @@ function Row({
         {formatCurrency(Math.abs(tx.amount))}
       </span>
       <div className="flex items-center gap-1 shrink-0">
+        <button
+          onClick={(e) => onRequestMove(e.clientX, e.clientY)}
+          title="Move to a property"
+          className="pressable p-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[#FFB547] hover:bg-[var(--card)] transition-colors md:opacity-0 md:group-hover:opacity-100"
+        >
+          <Building2 className="w-4 h-4" />
+        </button>
         <button
           onClick={onToggleExclude}
           title={effective.isExcluded ? "Include in spending" : "Exclude (transfer / payment)"}
