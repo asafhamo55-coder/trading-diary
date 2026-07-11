@@ -1,4 +1,4 @@
-import { getHomeInsights, getHomeYears } from "@/lib/home-data";
+import { getHomeInsights, getHomeYears, autoExcludeSmall } from "@/lib/home-data";
 import { parseYear, resolveSelectedYear } from "@/lib/year";
 import HomeInsightsClient from "@/components/home/HomeInsightsClient";
 
@@ -10,6 +10,7 @@ export default async function HomeInsightsPage({
   searchParams: Promise<{ year?: string }>;
 }) {
   const sp = await searchParams;
+  await autoExcludeSmall();
   const years = await getHomeYears();
   const currentYear = new Date().getFullYear();
   const availableYears = years.length ? years : [currentYear];

@@ -2,6 +2,7 @@ import {
   getHomeAccounts,
   getHomeCategories,
   getHomeTransactions,
+  autoExcludeSmall,
 } from "@/lib/home-data";
 import { getPropertyOptions } from "@/lib/property-data";
 import { cleanDescription } from "@/lib/home-import";
@@ -19,6 +20,7 @@ export interface MerchantGroup {
 }
 
 export default async function HomeReviewPage() {
+  await autoExcludeSmall();
   const [accounts, categories, transactions, properties] = await Promise.all([
     getHomeAccounts(),
     getHomeCategories(),

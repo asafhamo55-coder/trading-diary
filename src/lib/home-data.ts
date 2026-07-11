@@ -10,6 +10,7 @@ import {
   type HomeAccountType,
   type HomeCategoryKind,
   type HomeInsights,
+  SMALL_EXCLUDE_THRESHOLD,
 } from "./home";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -399,6 +400,25 @@ export async function getHomeInsights(year: number): Promise<HomeInsights> {
       hasData: true,
     };
   }, empty);
+}
+
+/**
+ * Enforce the small-value exclusion rule across all existing data. Idempotent
+ * (only touches not-yet-excluded rows), cheap after the first sweep, and safe
+ * to call on every Home page load so the rule always applies to everything.
+ */
+export async function autoExcludeSmall(): Promise<void> {
+  try {
+    const accountId = await firstAccountId();
+    if (!accountId) return;
+    const t = SMALL_EXCLUDE_THRESHOLD;
+    await prisma.homeTransaction.updateMany({
+      where: { accountId, isExcluded: false, amount: { gt: -t, lt: t } },
+      data: { isExcluded: true, needsReview: false, excludeReason: `Under $${t}` },
+    });
+  } catch {
+    /* never block a page render on this */
+  }
 }
 
 export async function getReviewCount(): Promise<number> {

@@ -4,6 +4,7 @@ import {
   getHomeTransactions,
   getHomeYears,
   getReviewCount,
+  autoExcludeSmall,
 } from "@/lib/home-data";
 import { getPropertyOptions } from "@/lib/property-data";
 import { parseYear, resolveSelectedYear } from "@/lib/year";
@@ -17,6 +18,7 @@ export default async function HomePage({
   searchParams: Promise<{ year?: string }>;
 }) {
   const sp = await searchParams;
+  await autoExcludeSmall();
 
   const [accounts, categories, years, reviewCount, properties] = await Promise.all([
     getHomeAccounts(),
