@@ -106,6 +106,57 @@ export function computeAppreciation(p: {
   return { gain, totalPct, years, annualizedPct, returnOnDownPct };
 }
 
+/** Standard seller selling-cost assumptions (as a fraction of sale price). */
+export const REALTOR_PCT = 0.06;
+export const CLOSING_PCT = 0.02; // title, escrow, transfer/recording, etc.
+
+export interface SaleScenario {
+  realtorPct: number;
+  closingPct: number;
+  realtorCost: number;
+  closingCost: number;
+  sellingCosts: number;
+  netProceeds: number; // after realtor + closing costs
+  netProfit: number; // netProceeds − purchase price
+  netProfitPct: number; // netProfit / purchase price
+  cashOnCash: number | null; // netProfit / down payment
+}
+
+/**
+ * "If sold today" net after standard selling costs (6% realtor + ~2% closing),
+ * and the resulting cash-on-cash return on the down payment.
+ */
+export function computeSaleScenario(
+  p: {
+    purchasePrice: number | null;
+    currentValue: number | null;
+    downPayment: number | null;
+  },
+  realtorPct: number = REALTOR_PCT,
+  closingPct: number = CLOSING_PCT
+): SaleScenario | null {
+  if (!p.currentValue || p.currentValue <= 0) return null;
+  const realtorCost = p.currentValue * realtorPct;
+  const closingCost = p.currentValue * closingPct;
+  const sellingCosts = realtorCost + closingCost;
+  const netProceeds = p.currentValue - sellingCosts;
+  const basis = p.purchasePrice ?? 0;
+  const netProfit = netProceeds - basis;
+  const netProfitPct = basis > 0 ? netProfit / basis : 0;
+  const cashOnCash = p.downPayment && p.downPayment > 0 ? netProfit / p.downPayment : null;
+  return {
+    realtorPct,
+    closingPct,
+    realtorCost,
+    closingCost,
+    sellingCosts,
+    netProceeds,
+    netProfit,
+    netProfitPct,
+    cashOnCash,
+  };
+}
+
 /** Structured address parts. */
 export interface AddressParts {
   street?: string | null;

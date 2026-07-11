@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrendingUp, TrendingDown, Home, Loader2, Pencil, X } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
-import { computeAppreciation } from "@/lib/property";
+import { computeAppreciation, computeSaleScenario } from "@/lib/property";
 
 interface ValueInfo {
   purchasePrice: number | null;
@@ -40,6 +40,7 @@ export default function PropertyValueSection({
   });
 
   const appr = computeAppreciation(property);
+  const sale = computeSaleScenario(property);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -166,6 +167,26 @@ export default function PropertyValueSection({
                   sub="from appreciation"
                 />
               )}
+            </div>
+          )}
+
+          {/* If sold today */}
+          {sale && (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--muted)]/30 p-4">
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-1">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">If sold today</p>
+                <p className="text-[11px] text-[var(--muted-foreground)]">
+                  after {Math.round(sale.realtorPct * 100)}% realtor + {Math.round(sale.closingPct * 100)}% closing
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Metric label="Selling costs" value={`−${formatCurrency(sale.sellingCosts)}`} tone="neg" sub={`${formatCurrency(sale.realtorCost)} + ${formatCurrency(sale.closingCost)}`} />
+                <Metric label="Net proceeds" value={formatCurrency(sale.netProceeds)} tone="pos" />
+                <Metric label="Net profit" value={formatCurrency(sale.netProfit)} tone={sale.netProfit >= 0 ? "pos" : "neg"} sub={pct(sale.netProfitPct)} />
+                {sale.cashOnCash != null && (
+                  <Metric label="Cash-on-cash" value={pct(sale.cashOnCash)} tone={sale.cashOnCash >= 0 ? "pos" : "neg"} sub="on down pmt" highlight />
+                )}
+              </div>
             </div>
           )}
         </div>

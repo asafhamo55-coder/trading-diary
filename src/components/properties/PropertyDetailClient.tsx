@@ -107,8 +107,6 @@ export default function PropertyDetailClient({
     city: property.city ?? "",
     state: property.state ?? "",
     zip: property.zip ?? "",
-    purchasePrice: property.purchasePrice != null ? String(property.purchasePrice) : "",
-    purchaseDate: property.purchaseDate ?? "",
   });
 
   function cancelEditDetails() {
@@ -118,8 +116,6 @@ export default function PropertyDetailClient({
       city: property.city ?? "",
       state: property.state ?? "",
       zip: property.zip ?? "",
-      purchasePrice: property.purchasePrice != null ? String(property.purchasePrice) : "",
-      purchaseDate: property.purchaseDate ?? "",
     });
     setDetailsError(null);
     setEditingDetails(false);
@@ -139,8 +135,6 @@ export default function PropertyDetailClient({
           city: details.city || null,
           state: details.state || null,
           zip: details.zip || null,
-          purchasePrice: details.purchasePrice ? Number(details.purchasePrice) : null,
-          purchaseDate: details.purchaseDate || null,
         }),
       });
       if (!res.ok) {
@@ -527,29 +521,6 @@ export default function PropertyDetailClient({
                   />
                 </Field>
               </div>
-              <div className="sm:col-span-3">
-                <Field label="Purchase price">
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={details.purchasePrice}
-                    onChange={(e) => setDetails({ ...details, purchasePrice: e.target.value })}
-                    placeholder="450000"
-                    className={inputCls}
-                  />
-                </Field>
-              </div>
-              <div className="sm:col-span-3">
-                <Field label="Purchase date">
-                  <input
-                    type="date"
-                    value={details.purchaseDate}
-                    onChange={(e) => setDetails({ ...details, purchaseDate: e.target.value })}
-                    className={inputCls}
-                  />
-                </Field>
-              </div>
             </div>
             {detailsError && (
               <div className="flex items-center gap-2 rounded-lg border border-loss/30 bg-loss/10 px-3 py-2 text-sm text-loss">
@@ -578,22 +549,6 @@ export default function PropertyDetailClient({
                 <DetailItem label="City" value={property.city} />
                 <DetailItem label="State" value={property.state} />
                 <DetailItem label="ZIP code" value={property.zip} />
-              </dl>
-            </div>
-            <div className="border-t border-[var(--border)] pt-4">
-              <p className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)] mb-2">
-                Purchase
-              </p>
-              <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
-                <DetailItem
-                  label="Purchase price"
-                  value={
-                    property.purchasePrice != null
-                      ? formatCurrency(property.purchasePrice)
-                      : null
-                  }
-                />
-                <DetailItem label="Purchase date" value={property.purchaseDate} />
               </dl>
             </div>
           </div>
