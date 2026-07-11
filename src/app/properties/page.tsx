@@ -53,6 +53,10 @@ export default async function PropertiesPage({
       currentTenantName: current?.name ?? null,
       monthlyRent: current?.monthlyRent ?? null,
       purchasePrice: p.purchasePrice,
+      downPayment: p.downPayment,
+      purchaseDate: p.purchaseDate,
+      currentValue: p.currentValue,
+      valueAsOf: p.valueAsOf,
       yieldPct: yieldPct(summary.net, p.purchasePrice, elapsed),
     };
   });

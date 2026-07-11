@@ -19,6 +19,7 @@ import {
 import { cn, formatCurrency, signedClass } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Field, SummaryTile, inputCls } from "@/components/properties/shared";
+import { REALTOR_PCT, CLOSING_PCT } from "@/lib/property";
 import YearPicker from "@/components/layout/YearPicker";
 
 interface Row {
@@ -38,6 +39,10 @@ interface Row {
   currentTenantName: string | null;
   monthlyRent: number | null;
   purchasePrice: number | null;
+  downPayment: number | null;
+  purchaseDate: string | null;
+  currentValue: number | null;
+  valueAsOf: string | null;
   yieldPct: number | null;
 }
 
@@ -91,6 +96,22 @@ export default function PropertiesClient({
     priceSum > 0 && elapsed > 0
       ? ((netWithPrice / elapsed) * 12 / priceSum) * 100
       : null;
+
+  // Portfolio appreciation across properties that have a current value.
+  const valued = activeRows.filter((r) => r.currentValue != null && r.purchasePrice);
+  const portValue = valued.reduce((s, r) => s + (r.currentValue ?? 0), 0);
+  const portCost = valued.reduce((s, r) => s + (r.purchasePrice ?? 0), 0);
+  const portDown = valued.reduce((s, r) => s + (r.downPayment ?? 0), 0);
+  const portGain = portValue - portCost;
+  const portApprPct = portCost > 0 ? portGain / portCost : 0;
+  // Net if the whole portfolio sold today (6% realtor + 2% closing).
+  const portNetProceeds = valued.reduce((s, r) => {
+    const cv = r.currentValue ?? 0;
+    return s + cv - cv * (REALTOR_PCT + CLOSING_PCT);
+  }, 0);
+  const portSaleProfit = portNetProceeds - portCost;
+  const portCoC = portDown > 0 ? portSaleProfit / portDown : null;
+  const hasAppr = valued.length > 0;
 
   async function setArchived(id: string, archived: boolean) {
     setBusyId(id);
@@ -302,6 +323,37 @@ export default function PropertiesClient({
         </div>
       )}
 
+      {/* Appreciation strip */}
+      {hasAppr && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <SummaryTile
+            label="Portfolio value"
+            value={portValue}
+            tone="pos"
+            caption={valued.length < activeRows.length ? `${valued.length} of ${activeRows.length} valued` : "current estimates"}
+          />
+          <SummaryTile
+            label="Appreciation"
+            variant="percent"
+            value={`${portApprPct >= 0 ? "+" : ""}${(portApprPct * 100).toFixed(1)}%`}
+            caption={`${portGain >= 0 ? "+" : ""}${formatCurrency(portGain)} vs cost`}
+            captionTone={portGain >= 0 ? "text-profit" : "text-loss"}
+          />
+          <SummaryTile
+            label="Net if sold"
+            value={portSaleProfit}
+            tone="net"
+            caption="after 6% realtor + 2% closing"
+          />
+          <SummaryTile
+            label="Cash-on-cash"
+            variant="percent"
+            value={portCoC != null ? `${portCoC >= 0 ? "+" : ""}${(portCoC * 100).toFixed(0)}%` : "—"}
+            caption="on down payments"
+          />
+        </div>
+      )}
+
       {/* Active property list */}
       {activeRows.length === 0 ? (
         archivedRows.length === 0 && (
@@ -387,6 +439,10 @@ function PropertyCard({
 }) {
   const bars = r.monthlyNet.slice(0, Math.max(1, elapsed));
   const maxAbs = Math.max(1, ...bars.map((v) => Math.abs(v)));
+  const apprPct =
+    r.currentValue != null && r.purchasePrice
+      ? (r.currentValue - r.purchasePrice) / r.purchasePrice
+      : null;
 
   return (
     <div
@@ -474,6 +530,18 @@ function PropertyCard({
                 }}
               />
             ))}
+          </div>
+        )}
+
+        {/* Zone D2 — value & appreciation */}
+        {apprPct != null && (
+          <div className="flex items-center justify-between text-xs mt-2">
+            <span className="text-[var(--muted-foreground)] font-data">
+              Value {formatCurrency(r.currentValue ?? 0)}
+            </span>
+            <span className={cn("font-data font-semibold", apprPct >= 0 ? "text-profit" : "text-loss")}>
+              {apprPct >= 0 ? "+" : ""}{(apprPct * 100).toFixed(1)}%
+            </span>
           </div>
         )}
 
