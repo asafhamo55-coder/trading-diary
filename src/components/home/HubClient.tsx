@@ -8,6 +8,7 @@ import type { EChartsCoreOption } from "echarts/core";
 import { cn, formatCurrency } from "@/lib/utils";
 import Logo from "@/components/layout/Logo";
 import YearPicker from "@/components/layout/YearPicker";
+import ThemeToggle from "@/components/layout/ThemeToggle";
 
 interface RevExp {
   revenue: number;
@@ -179,9 +180,12 @@ export default function HubClient({
             Your unified financial overview
           </p>
         </div>
-        {availableYears.length > 0 && (
-          <YearPicker years={availableYears} selected={year} />
-        )}
+        <div className="flex items-center gap-2">
+          {availableYears.length > 0 && (
+            <YearPicker years={availableYears} selected={year} />
+          )}
+          <ThemeToggle collapsed />
+        </div>
       </div>
 
       {/* Consolidated equity summary */}

@@ -15,6 +15,7 @@ import {
   PiggyBank,
   Tag,
   BarChart3,
+  Sparkles,
   AlertCircle,
   CreditCard,
   Landmark,
@@ -175,6 +176,10 @@ export default function HomeClient({
           {availableYears.length > 0 && (
             <YearPicker years={availableYears} selected={year} />
           )}
+          <Link href="/home/coach" className={secondaryBtn}>
+            <Sparkles className="w-4 h-4 text-[#00D68F]" />
+            Coach
+          </Link>
           <Link href="/home/insights" className={secondaryBtn}>
             <BarChart3 className="w-4 h-4" />
             Insights

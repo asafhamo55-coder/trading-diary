@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { List, BarChart3, ClipboardCheck, Tag } from "lucide-react";
+import { List, BarChart3, Sparkles, ClipboardCheck, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
   { label: "Ledger", icon: List, href: "/home", exact: true },
   { label: "Insights", icon: BarChart3, href: "/home/insights" },
+  { label: "Coach", icon: Sparkles, href: "/home/coach" },
   { label: "Review", icon: ClipboardCheck, href: "/home/review" },
   { label: "Categories", icon: Tag, href: "/home/categories" },
 ];
