@@ -4,6 +4,7 @@ import { jsonResponse, errorResponse, getAccount } from "@/lib/api-helpers";
 import { ensureHomeSchema } from "@/lib/home-schema";
 import { seedDefaultCategories } from "@/lib/home-data";
 import { extractRows, externalKey, classify } from "@/lib/home-import";
+import { SMALL_EXCLUDE_THRESHOLD } from "@/lib/home";
 
 // POST /api/home/import — import a CSV statement into a home account.
 // Body: { homeAccountId, csv, filename? }
@@ -123,6 +124,11 @@ export async function POST(req: NextRequest) {
           excluded = true;
           excludeReason = "Auto: card payment / transfer";
         }
+      }
+      // Auto-exclude small-value rows (noise) below the threshold.
+      if (!excluded && Math.abs(r.amount) < SMALL_EXCLUDE_THRESHOLD) {
+        excluded = true;
+        excludeReason = `Auto: under $${SMALL_EXCLUDE_THRESHOLD}`;
       }
       const needsReview = !excluded && categoryId === null && propertyId === null;
       if (needsReview) needsReviewCount++;

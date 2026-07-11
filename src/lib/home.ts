@@ -4,6 +4,9 @@
 export type HomeAccountType = "BOFA_CHECKING" | "BOFA_CARD" | "AMEX" | "OTHER";
 export type HomeCategoryKind = "SPENDING" | "INCOME" | "TRANSFER";
 
+/** Transactions with |amount| below this are auto-excluded as small-value noise. */
+export const SMALL_EXCLUDE_THRESHOLD = 20;
+
 export const ACCOUNT_TYPES: {
   key: HomeAccountType;
   label: string;

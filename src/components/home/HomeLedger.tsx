@@ -7,6 +7,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import HomeCategorySelect, { type Selection } from "@/components/home/HomeCategorySelect";
 import {
   buildCategoryTree,
+  SMALL_EXCLUDE_THRESHOLD,
   type HomeAccountDTO,
   type HomeCategoryDTO,
   type HomeTransactionDTO,
@@ -160,6 +161,40 @@ export default function HomeLedger({
     }
   }
 
+  const [excludingSmall, setExcludingSmall] = useState(false);
+  const smallCount = useMemo(
+    () =>
+      transactions.filter(
+        (t) => !t.isExcluded && Math.abs(t.amount) < SMALL_EXCLUDE_THRESHOLD
+      ).length,
+    [transactions]
+  );
+
+  async function excludeSmall() {
+    setExcludingSmall(true);
+    setSaveError(null);
+    try {
+      const res = await fetch("/api/home/exclude-small", { method: "POST" });
+      if (res.ok) {
+        // Optimistically exclude the same rows the server just did.
+        const updates = transactions
+          .filter((t) => !t.isExcluded && Math.abs(t.amount) < SMALL_EXCLUDE_THRESHOLD)
+          .map((t) => ({
+            id: t.id,
+            isExcluded: true,
+            excludeReason: `Under $${SMALL_EXCLUDE_THRESHOLD}`,
+          }));
+        onApplyEdits(updates);
+      } else {
+        setSaveError("Couldn't exclude small transactions. Please try again.");
+      }
+    } catch {
+      setSaveError("Couldn't exclude small transactions. Check your connection.");
+    } finally {
+      setExcludingSmall(false);
+    }
+  }
+
   async function remove(id: string) {
     const res = await fetch(`/api/home/transactions/${id}`, { method: "DELETE" });
     if (res.ok) {
@@ -221,6 +256,17 @@ export default function HomeLedger({
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] pl-8 pr-2 py-1.5 text-xs text-[var(--foreground)] focus:outline-none"
             />
           </div>
+          {smallCount > 0 && (
+            <button
+              onClick={excludeSmall}
+              disabled={excludingSmall}
+              title={`Exclude all ${smallCount} transactions under $${SMALL_EXCLUDE_THRESHOLD}`}
+              className="pressable inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:border-[color:var(--ring)]/40 transition-colors disabled:opacity-60"
+            >
+              {excludingSmall ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <EyeOff className="w-3.5 h-3.5" />}
+              Exclude &lt; ${SMALL_EXCLUDE_THRESHOLD} ({smallCount})
+            </button>
+          )}
         </div>
       )}
 
