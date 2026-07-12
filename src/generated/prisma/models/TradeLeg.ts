@@ -48,6 +48,7 @@ export type TradeLegMinAggregateOutputType = {
   quantity: number | null
   commission: number | null
   legOrder: number | null
+  externalKey: string | null
 }
 
 export type TradeLegMaxAggregateOutputType = {
@@ -58,6 +59,7 @@ export type TradeLegMaxAggregateOutputType = {
   quantity: number | null
   commission: number | null
   legOrder: number | null
+  externalKey: string | null
 }
 
 export type TradeLegCountAggregateOutputType = {
@@ -68,6 +70,7 @@ export type TradeLegCountAggregateOutputType = {
   quantity: number
   commission: number
   legOrder: number
+  externalKey: number
   _all: number
 }
 
@@ -94,6 +97,7 @@ export type TradeLegMinAggregateInputType = {
   quantity?: true
   commission?: true
   legOrder?: true
+  externalKey?: true
 }
 
 export type TradeLegMaxAggregateInputType = {
@@ -104,6 +108,7 @@ export type TradeLegMaxAggregateInputType = {
   quantity?: true
   commission?: true
   legOrder?: true
+  externalKey?: true
 }
 
 export type TradeLegCountAggregateInputType = {
@@ -114,6 +119,7 @@ export type TradeLegCountAggregateInputType = {
   quantity?: true
   commission?: true
   legOrder?: true
+  externalKey?: true
   _all?: true
 }
 
@@ -211,6 +217,7 @@ export type TradeLegGroupByOutputType = {
   quantity: number
   commission: number
   legOrder: number
+  externalKey: string | null
   _count: TradeLegCountAggregateOutputType | null
   _avg: TradeLegAvgAggregateOutputType | null
   _sum: TradeLegSumAggregateOutputType | null
@@ -244,6 +251,7 @@ export type TradeLegWhereInput = {
   quantity?: Prisma.FloatFilter<"TradeLeg"> | number
   commission?: Prisma.FloatFilter<"TradeLeg"> | number
   legOrder?: Prisma.IntFilter<"TradeLeg"> | number
+  externalKey?: Prisma.StringNullableFilter<"TradeLeg"> | string | null
   trade?: Prisma.XOR<Prisma.TradeScalarRelationFilter, Prisma.TradeWhereInput>
 }
 
@@ -255,6 +263,7 @@ export type TradeLegOrderByWithRelationInput = {
   quantity?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
+  externalKey?: Prisma.SortOrderInput | Prisma.SortOrder
   trade?: Prisma.TradeOrderByWithRelationInput
 }
 
@@ -269,6 +278,7 @@ export type TradeLegWhereUniqueInput = Prisma.AtLeast<{
   quantity?: Prisma.FloatFilter<"TradeLeg"> | number
   commission?: Prisma.FloatFilter<"TradeLeg"> | number
   legOrder?: Prisma.IntFilter<"TradeLeg"> | number
+  externalKey?: Prisma.StringNullableFilter<"TradeLeg"> | string | null
   trade?: Prisma.XOR<Prisma.TradeScalarRelationFilter, Prisma.TradeWhereInput>
 }, "id">
 
@@ -280,6 +290,7 @@ export type TradeLegOrderByWithAggregationInput = {
   quantity?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
+  externalKey?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TradeLegCountOrderByAggregateInput
   _avg?: Prisma.TradeLegAvgOrderByAggregateInput
   _max?: Prisma.TradeLegMaxOrderByAggregateInput
@@ -298,6 +309,7 @@ export type TradeLegScalarWhereWithAggregatesInput = {
   quantity?: Prisma.FloatWithAggregatesFilter<"TradeLeg"> | number
   commission?: Prisma.FloatWithAggregatesFilter<"TradeLeg"> | number
   legOrder?: Prisma.IntWithAggregatesFilter<"TradeLeg"> | number
+  externalKey?: Prisma.StringNullableWithAggregatesFilter<"TradeLeg"> | string | null
 }
 
 export type TradeLegCreateInput = {
@@ -307,6 +319,7 @@ export type TradeLegCreateInput = {
   quantity: number
   commission?: number
   legOrder: number
+  externalKey?: string | null
   trade: Prisma.TradeCreateNestedOneWithoutEntriesInput
 }
 
@@ -318,6 +331,7 @@ export type TradeLegUncheckedCreateInput = {
   quantity: number
   commission?: number
   legOrder: number
+  externalKey?: string | null
 }
 
 export type TradeLegUpdateInput = {
@@ -327,6 +341,7 @@ export type TradeLegUpdateInput = {
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trade?: Prisma.TradeUpdateOneRequiredWithoutEntriesNestedInput
 }
 
@@ -338,6 +353,7 @@ export type TradeLegUncheckedUpdateInput = {
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeLegCreateManyInput = {
@@ -348,6 +364,7 @@ export type TradeLegCreateManyInput = {
   quantity: number
   commission?: number
   legOrder: number
+  externalKey?: string | null
 }
 
 export type TradeLegUpdateManyMutationInput = {
@@ -357,6 +374,7 @@ export type TradeLegUpdateManyMutationInput = {
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeLegUncheckedUpdateManyInput = {
@@ -367,6 +385,7 @@ export type TradeLegUncheckedUpdateManyInput = {
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeLegListRelationFilter = {
@@ -387,6 +406,7 @@ export type TradeLegCountOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
+  externalKey?: Prisma.SortOrder
 }
 
 export type TradeLegAvgOrderByAggregateInput = {
@@ -404,6 +424,7 @@ export type TradeLegMaxOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
+  externalKey?: Prisma.SortOrder
 }
 
 export type TradeLegMinOrderByAggregateInput = {
@@ -414,6 +435,7 @@ export type TradeLegMinOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
+  externalKey?: Prisma.SortOrder
 }
 
 export type TradeLegSumOrderByAggregateInput = {
@@ -476,6 +498,7 @@ export type TradeLegCreateWithoutTradeInput = {
   quantity: number
   commission?: number
   legOrder: number
+  externalKey?: string | null
 }
 
 export type TradeLegUncheckedCreateWithoutTradeInput = {
@@ -485,6 +508,7 @@ export type TradeLegUncheckedCreateWithoutTradeInput = {
   quantity: number
   commission?: number
   legOrder: number
+  externalKey?: string | null
 }
 
 export type TradeLegCreateOrConnectWithoutTradeInput = {
@@ -524,6 +548,7 @@ export type TradeLegScalarWhereInput = {
   quantity?: Prisma.FloatFilter<"TradeLeg"> | number
   commission?: Prisma.FloatFilter<"TradeLeg"> | number
   legOrder?: Prisma.IntFilter<"TradeLeg"> | number
+  externalKey?: Prisma.StringNullableFilter<"TradeLeg"> | string | null
 }
 
 export type TradeLegCreateManyTradeInput = {
@@ -533,6 +558,7 @@ export type TradeLegCreateManyTradeInput = {
   quantity: number
   commission?: number
   legOrder: number
+  externalKey?: string | null
 }
 
 export type TradeLegUpdateWithoutTradeInput = {
@@ -542,6 +568,7 @@ export type TradeLegUpdateWithoutTradeInput = {
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeLegUncheckedUpdateWithoutTradeInput = {
@@ -551,6 +578,7 @@ export type TradeLegUncheckedUpdateWithoutTradeInput = {
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeLegUncheckedUpdateManyWithoutTradeInput = {
@@ -560,6 +588,7 @@ export type TradeLegUncheckedUpdateManyWithoutTradeInput = {
   quantity?: Prisma.FloatFieldUpdateOperationsInput | number
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -572,6 +601,7 @@ export type TradeLegSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   quantity?: boolean
   commission?: boolean
   legOrder?: boolean
+  externalKey?: boolean
   trade?: boolean | Prisma.TradeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLeg"]>
 
@@ -583,6 +613,7 @@ export type TradeLegSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   quantity?: boolean
   commission?: boolean
   legOrder?: boolean
+  externalKey?: boolean
   trade?: boolean | Prisma.TradeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLeg"]>
 
@@ -594,6 +625,7 @@ export type TradeLegSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   quantity?: boolean
   commission?: boolean
   legOrder?: boolean
+  externalKey?: boolean
   trade?: boolean | Prisma.TradeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLeg"]>
 
@@ -605,9 +637,10 @@ export type TradeLegSelectScalar = {
   quantity?: boolean
   commission?: boolean
   legOrder?: boolean
+  externalKey?: boolean
 }
 
-export type TradeLegOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tradeId" | "legType" | "price" | "quantity" | "commission" | "legOrder", ExtArgs["result"]["tradeLeg"]>
+export type TradeLegOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tradeId" | "legType" | "price" | "quantity" | "commission" | "legOrder" | "externalKey", ExtArgs["result"]["tradeLeg"]>
 export type TradeLegInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   trade?: boolean | Prisma.TradeDefaultArgs<ExtArgs>
 }
@@ -631,6 +664,7 @@ export type $TradeLegPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     quantity: number
     commission: number
     legOrder: number
+    externalKey: string | null
   }, ExtArgs["result"]["tradeLeg"]>
   composites: {}
 }
@@ -1062,6 +1096,7 @@ export interface TradeLegFieldRefs {
   readonly quantity: Prisma.FieldRef<"TradeLeg", 'Float'>
   readonly commission: Prisma.FieldRef<"TradeLeg", 'Float'>
   readonly legOrder: Prisma.FieldRef<"TradeLeg", 'Int'>
+  readonly externalKey: Prisma.FieldRef<"TradeLeg", 'String'>
 }
     
 

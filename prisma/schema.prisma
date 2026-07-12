@@ -177,8 +177,10 @@ model TradeLeg {
   quantity    Float
   commission  Float   @default(0)
   legOrder    Int
+  externalKey String? // idempotency key for email-ingested legs (Gmail message-id)
 
   @@index([tradeId])
+  @@index([externalKey])
 }
 
 enum LegType {

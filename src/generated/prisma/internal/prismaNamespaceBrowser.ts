@@ -214,7 +214,8 @@ export const TradeLegScalarFieldEnum = {
   price: 'price',
   quantity: 'quantity',
   commission: 'commission',
-  legOrder: 'legOrder'
+  legOrder: 'legOrder',
+  externalKey: 'externalKey'
 } as const
 
 export type TradeLegScalarFieldEnum = (typeof TradeLegScalarFieldEnum)[keyof typeof TradeLegScalarFieldEnum]

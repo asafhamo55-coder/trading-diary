@@ -1,0 +1,71 @@
+// Parses broker trade-confirmation email subjects into structured fills.
+//
+// Example subject:  "BOUGHT 100 NOW @ 110.7944 (UXXX97634)"
+//   → { action: "BUY", symbol: "NOW", qty: 100, price: 110.7944, account: "UXXX97634" }
+//
+// Only plain share fills are supported. Option fills (which carry an
+// expiry/strike/right between the symbol and the price, e.g.
+// "BOUGHT 1 NOW Jan16'26 110 Call @ 2.35") are intentionally rejected so we
+// never mis-log them as shares — the caller surfaces the reason to the user.
+
+export type FillAction = "BUY" | "SELL";
+
+export type ParsedFill = {
+  action: FillAction;
+  symbol: string;
+  qty: number;
+  price: number;
+  account: string | null;
+};
+
+export type ParseResult =
+  | { ok: true; fill: ParsedFill }
+  | { ok: false; reason: string };
+
+// action  qty            symbol           @   price          (account)?
+const SUBJECT_RE =
+  /^\s*(BOUGHT|SOLD)\s+([\d,]+(?:\.\d+)?)\s+([A-Za-z][A-Za-z.\-]*)\s+@\s+\$?([\d,]+(?:\.\d+)?)\s*(?:\(([^)]+)\))?\s*$/i;
+
+// A fill that names the action+qty but has extra tokens before the "@" is
+// almost always an option (expiry / strike / Call|Put). Detect it so we can
+// give a precise "options not supported" message instead of a generic failure.
+const OPTIONISH_RE =
+  /^\s*(?:BOUGHT|SOLD)\s+[\d,]+(?:\.\d+)?\s+[A-Za-z][A-Za-z.\-]*\s+.+@/i;
+
+function toNumber(raw: string): number {
+  return parseFloat(raw.replace(/,/g, ""));
+}
+
+export function parseBrokerSubject(subject: string): ParseResult {
+  const s = (subject ?? "").trim();
+  if (!s) return { ok: false, reason: "Empty subject" };
+
+  const m = SUBJECT_RE.exec(s);
+  if (!m) {
+    if (OPTIONISH_RE.test(s)) {
+      return {
+        ok: false,
+        reason: "Looks like an option or multi-leg fill — not supported yet",
+      };
+    }
+    return { ok: false, reason: "Not a recognized broker fill subject" };
+  }
+
+  const [, verb, qtyRaw, symbolRaw, priceRaw, accountRaw] = m;
+  const qty = toNumber(qtyRaw);
+  const price = toNumber(priceRaw);
+
+  if (!(qty > 0)) return { ok: false, reason: `Invalid quantity: "${qtyRaw}"` };
+  if (!(price > 0)) return { ok: false, reason: `Invalid price: "${priceRaw}"` };
+
+  return {
+    ok: true,
+    fill: {
+      action: verb.toUpperCase() === "BOUGHT" ? "BUY" : "SELL",
+      symbol: symbolRaw.toUpperCase(),
+      qty,
+      price,
+      account: accountRaw ? accountRaw.trim() : null,
+    },
+  };
+}

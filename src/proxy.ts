@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE, expectedAuthCookie } from "@/lib/auth";
 
-const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/auth/logout"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/api/auth/login",
+  "/api/auth/logout",
+  // Token-authenticated (INGEST_TOKEN bearer) — used by the Gmail add-on, which
+  // can't carry the app password cookie. The route enforces its own auth.
+  "/api/trades/ingest-email",
+];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
