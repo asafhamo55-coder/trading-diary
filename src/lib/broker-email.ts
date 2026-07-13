@@ -22,15 +22,23 @@ export type ParseResult =
   | { ok: true; fill: ParsedFill }
   | { ok: false; reason: string };
 
-// action  qty            symbol           @   price          (account)?
-const SUBJECT_RE =
-  /^\s*(BOUGHT|SOLD)\s+([\d,]+(?:\.\d+)?)\s+([A-Za-z][A-Za-z.\-]*)\s+@\s+\$?([\d,]+(?:\.\d+)?)\s*(?:\(([^)]+)\))?\s*$/i;
+// Optional forward/reply prefixes (possibly stacked, e.g. "Fwd: Re: ...") that
+// email clients prepend — we accept them so a forwarded fill parses the same.
+const PREFIX = String.raw`(?:(?:Fwd?|Re):\s*)*`;
+
+// prefix  action  qty            symbol           @   price          (account)?
+const SUBJECT_RE = new RegExp(
+  String.raw`^\s*${PREFIX}(BOUGHT|SOLD)\s+([\d,]+(?:\.\d+)?)\s+([A-Za-z][A-Za-z.\-]*)\s+@\s+\$?([\d,]+(?:\.\d+)?)\s*(?:\(([^)]+)\))?\s*$`,
+  "i",
+);
 
 // A fill that names the action+qty but has extra tokens before the "@" is
 // almost always an option (expiry / strike / Call|Put). Detect it so we can
 // give a precise "options not supported" message instead of a generic failure.
-const OPTIONISH_RE =
-  /^\s*(?:BOUGHT|SOLD)\s+[\d,]+(?:\.\d+)?\s+[A-Za-z][A-Za-z.\-]*\s+.+@/i;
+const OPTIONISH_RE = new RegExp(
+  String.raw`^\s*${PREFIX}(?:BOUGHT|SOLD)\s+[\d,]+(?:\.\d+)?\s+[A-Za-z][A-Za-z.\-]*\s+.+@`,
+  "i",
+);
 
 function toNumber(raw: string): number {
   return parseFloat(raw.replace(/,/g, ""));

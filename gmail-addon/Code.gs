@@ -28,7 +28,7 @@ function onGmailMessage(e) {
       .addSection(
         CardService.newCardSection().addWidget(
           CardService.newTextParagraph().setText(
-            "This email doesn't look like a share fill.\n\nExpected a subject like:\n<b>BOUGHT 100 NOW @ 110.7944</b>")))
+            'This email does not look like a share fill. Expected a subject like: BOUGHT 100 NOW @ 110.7944')))
       .build();
   }
 
@@ -66,7 +66,8 @@ function onGmailMessage(e) {
 /** Mirror of src/lib/broker-email.ts — plain shares only. */
 function parseSubject(subject) {
   if (!subject) return null;
-  var re = /^\s*(BOUGHT|SOLD)\s+([\d,]+(?:\.\d+)?)\s+([A-Za-z][A-Za-z.\-]*)\s+@\s+\$?([\d,]+(?:\.\d+)?)\s*(?:\(([^)]+)\))?\s*$/i;
+  // Accept optional forward/reply prefixes ("Fwd:", "Fw:", "Re:", possibly stacked).
+  var re = /^\s*(?:(?:Fwd?|Re):\s*)*(BOUGHT|SOLD)\s+([\d,]+(?:\.\d+)?)\s+([A-Za-z][A-Za-z.\-]*)\s+@\s+\$?([\d,]+(?:\.\d+)?)\s*(?:\(([^)]+)\))?\s*$/i;
   var m = re.exec(subject);
   if (!m) return null;
   return {
@@ -111,12 +112,9 @@ function logTrade(e) {
   try { data = JSON.parse(resp.getContentText()); } catch (err) { data = { error: resp.getContentText() }; }
 
   var ok = code >= 200 && code < 300 && data && data.ok;
-  var text = ok ? (data.duplicate ? 'Already logged ✓' : data.message) : ('Error: ' + ((data && data.error) || ('HTTP ' + code)));
+  var text = ok ? (data.duplicate ? 'Already logged' : data.message) : ('Error: ' + ((data && data.error) || ('HTTP ' + code)));
 
-  var builder = CardService.newActionResponseBuilder()
-    .setNotification(CardService.newNotification().setText(text));
-  if (ok && data.deepLink) {
-    builder.setOpenLink(CardService.newOpenLink().setUrl(APP_URL + data.deepLink));
-  }
-  return builder.build();
+  return CardService.newActionResponseBuilder()
+    .setNotification(CardService.newNotification().setText(text))
+    .build();
 }
