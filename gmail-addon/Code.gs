@@ -112,7 +112,14 @@ function logTrade(e) {
   try { data = JSON.parse(resp.getContentText()); } catch (err) { data = { error: resp.getContentText() }; }
 
   var ok = code >= 200 && code < 300 && data && data.ok;
-  var text = ok ? (data.duplicate ? 'Already logged' : data.message) : ('Error: ' + ((data && data.error) || ('HTTP ' + code)));
+  // data.error may be our own string, or Vercel's platform { code, message } object.
+  var errMsg;
+  if (data && data.error) {
+    errMsg = typeof data.error === 'string' ? data.error : (data.error.message || JSON.stringify(data.error));
+  } else {
+    errMsg = 'HTTP ' + code;
+  }
+  var text = ok ? (data.duplicate ? 'Already logged' : data.message) : ('Error: ' + errMsg);
 
   return CardService.newActionResponseBuilder()
     .setNotification(CardService.newNotification().setText(text))
