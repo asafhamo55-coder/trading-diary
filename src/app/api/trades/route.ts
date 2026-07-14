@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
 
     const data = parsed.data;
 
-    // Calculate commissions for each leg. Manual legs carry no per-fill date, so
-    // default filledAt to the trade date.
+    // Calculate commissions for each leg. Use the per-leg fill date from the
+    // form, falling back to the trade date when a leg has none.
     const entriesWithComm = data.entries.map((leg) => ({
       ...leg,
       commission: calculateCommission(
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         leg.quantity,
         account.commissionPerShare
       ),
-      filledAt: data.tradeDate,
+      filledAt: leg.filledAt ? new Date(leg.filledAt) : data.tradeDate,
     }));
 
     // Get leverage for this symbol (case-insensitive)

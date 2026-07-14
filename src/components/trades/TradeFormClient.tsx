@@ -24,6 +24,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 interface LegInput {
   price: string;
   quantity: string;
+  filledAt: string;
 }
 
 export interface TradeFormValues {
@@ -87,8 +88,8 @@ const DEFAULTS: TradeFormValues = {
   tradeType: "",
   isSwingContinuation: false,
   isAsset: false,
-  buyLegs: [{ price: "", quantity: "" }],
-  sellLegs: [{ price: "", quantity: "" }],
+  buyLegs: [{ price: "", quantity: "", filledAt: "" }],
+  sellLegs: [{ price: "", quantity: "", filledAt: "" }],
   entryReason: "",
   exitReason: "",
   conclusions: "",
@@ -195,19 +196,20 @@ export default function TradeFormClient({
           price: number;
           quantity: number;
           legOrder: number;
+          filledAt: string;
         }[] = [];
         values.buyLegs.forEach((leg, i) => {
           const price = parseFloat(leg.price);
           const quantity = parseFloat(leg.quantity);
           if (price > 0 && quantity > 0) {
-            entries.push({ legType: "BUY", price, quantity, legOrder: i + 1 });
+            entries.push({ legType: "BUY", price, quantity, legOrder: i + 1, filledAt: leg.filledAt || values.tradeDate });
           }
         });
         values.sellLegs.forEach((leg, i) => {
           const price = parseFloat(leg.price);
           const quantity = parseFloat(leg.quantity);
           if (price > 0 && quantity > 0) {
-            entries.push({ legType: "SELL", price, quantity, legOrder: i + 1 });
+            entries.push({ legType: "SELL", price, quantity, legOrder: i + 1, filledAt: leg.filledAt || values.tradeDate });
           }
         });
 
@@ -416,7 +418,7 @@ export default function TradeFormClient({
             name="buyLegs"
             watchLegs={watchAll.buyLegs}
             register={register}
-            append={() => appendBuy({ price: "", quantity: "" })}
+            append={() => appendBuy({ price: "", quantity: "", filledAt: "" })}
             remove={removeBuy}
             commissionPerShare={commissionPerShare}
             inputClass={inputClass}
@@ -430,7 +432,7 @@ export default function TradeFormClient({
             name="sellLegs"
             watchLegs={watchAll.sellLegs}
             register={register}
-            append={() => appendSell({ price: "", quantity: "" })}
+            append={() => appendSell({ price: "", quantity: "", filledAt: "" })}
             remove={removeSell}
             commissionPerShare={commissionPerShare}
             inputClass={inputClass}
@@ -693,6 +695,14 @@ function LegsSection({
             >
               <div className="flex h-9 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--muted)] text-xs font-data font-semibold text-[var(--muted-foreground)]">
                 {index + 1}
+              </div>
+              <div className="w-[150px]">
+                <label className={labelClass}>Date</label>
+                <input
+                  type="date"
+                  {...register(`${name}.${index}.filledAt` as const)}
+                  className={cn(inputClass, "font-mono")}
+                />
               </div>
               <div className="flex-1 min-w-[120px]">
                 <label className={labelClass}>Price</label>

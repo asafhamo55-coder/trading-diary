@@ -13,14 +13,16 @@ import type { Trade } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 function tradeToFormValues(trade: Trade): Partial<TradeFormValues> {
+  const legDate = (e: Trade["entries"][number]) =>
+    (e.filledAt ?? trade.tradeDate).slice(0, 10);
   const buyLegs = trade.entries
     .filter((e) => e.legType === "BUY")
     .sort((a, b) => a.legOrder - b.legOrder)
-    .map((e) => ({ price: String(e.price), quantity: String(e.quantity) }));
+    .map((e) => ({ price: String(e.price), quantity: String(e.quantity), filledAt: legDate(e) }));
   const sellLegs = trade.entries
     .filter((e) => e.legType === "SELL")
     .sort((a, b) => a.legOrder - b.legOrder)
-    .map((e) => ({ price: String(e.price), quantity: String(e.quantity) }));
+    .map((e) => ({ price: String(e.price), quantity: String(e.quantity), filledAt: legDate(e) }));
 
   return {
     tradeDate: trade.tradeDate.slice(0, 10),
@@ -29,8 +31,8 @@ function tradeToFormValues(trade: Trade): Partial<TradeFormValues> {
     tradeType: trade.tradeType ?? "",
     isSwingContinuation: trade.isSwingContinuation,
     isAsset: trade.isAsset ?? false,
-    buyLegs: buyLegs.length > 0 ? buyLegs : [{ price: "", quantity: "" }],
-    sellLegs: sellLegs.length > 0 ? sellLegs : [{ price: "", quantity: "" }],
+    buyLegs: buyLegs.length > 0 ? buyLegs : [{ price: "", quantity: "", filledAt: "" }],
+    sellLegs: sellLegs.length > 0 ? sellLegs : [{ price: "", quantity: "", filledAt: "" }],
     entryReason: trade.entryReason ?? "",
     exitReason: trade.exitReason ?? "",
     conclusions: trade.conclusions ?? "",

@@ -8,6 +8,8 @@ export const tradeLegSchema = z.object({
   price: z.number().positive("Price must be positive"),
   quantity: z.number().positive("Quantity must be positive"),
   legOrder: z.number().int().min(1).max(5),
+  // Optional per-leg fill date (YYYY-MM-DD). Absent → route defaults it.
+  filledAt: z.string().optional().nullable(),
 });
 
 export const createTradeSchema = z.object({

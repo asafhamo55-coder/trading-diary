@@ -46,9 +46,9 @@ export async function PUT(
 
     // If entries are being updated, recalculate everything
     if (data.entries) {
-      // Legs are deleted + recreated below, which would drop each leg's
-      // filledAt. Preserve it by matching existing legs on legType+legOrder;
-      // fall back to the (new or existing) trade date for legs without a match.
+      // Legs are deleted + recreated below. Use the per-leg date submitted from
+      // the edit form; if a leg has none, preserve the existing leg's filledAt
+      // (matched on legType+legOrder), else fall back to the trade date.
       const existing = await prisma.trade.findUnique({
         where: { id },
         select: { tradeDate: true, entries: { select: { legType: true, legOrder: true, filledAt: true } } },
@@ -65,7 +65,9 @@ export async function PUT(
           leg.quantity,
           account.commissionPerShare
         ),
-        filledAt: prevFilledAt.get(`${leg.legType}:${leg.legOrder}`) ?? fallbackDate,
+        filledAt: leg.filledAt
+          ? new Date(leg.filledAt)
+          : prevFilledAt.get(`${leg.legType}:${leg.legOrder}`) ?? fallbackDate,
       }));
 
       const assetLevs = await prisma.assetLeverage.findMany({
