@@ -49,6 +49,7 @@ export type TradeLegMinAggregateOutputType = {
   commission: number | null
   legOrder: number | null
   externalKey: string | null
+  filledAt: Date | null
 }
 
 export type TradeLegMaxAggregateOutputType = {
@@ -60,6 +61,7 @@ export type TradeLegMaxAggregateOutputType = {
   commission: number | null
   legOrder: number | null
   externalKey: string | null
+  filledAt: Date | null
 }
 
 export type TradeLegCountAggregateOutputType = {
@@ -71,6 +73,7 @@ export type TradeLegCountAggregateOutputType = {
   commission: number
   legOrder: number
   externalKey: number
+  filledAt: number
   _all: number
 }
 
@@ -98,6 +101,7 @@ export type TradeLegMinAggregateInputType = {
   commission?: true
   legOrder?: true
   externalKey?: true
+  filledAt?: true
 }
 
 export type TradeLegMaxAggregateInputType = {
@@ -109,6 +113,7 @@ export type TradeLegMaxAggregateInputType = {
   commission?: true
   legOrder?: true
   externalKey?: true
+  filledAt?: true
 }
 
 export type TradeLegCountAggregateInputType = {
@@ -120,6 +125,7 @@ export type TradeLegCountAggregateInputType = {
   commission?: true
   legOrder?: true
   externalKey?: true
+  filledAt?: true
   _all?: true
 }
 
@@ -218,6 +224,7 @@ export type TradeLegGroupByOutputType = {
   commission: number
   legOrder: number
   externalKey: string | null
+  filledAt: Date | null
   _count: TradeLegCountAggregateOutputType | null
   _avg: TradeLegAvgAggregateOutputType | null
   _sum: TradeLegSumAggregateOutputType | null
@@ -252,6 +259,7 @@ export type TradeLegWhereInput = {
   commission?: Prisma.FloatFilter<"TradeLeg"> | number
   legOrder?: Prisma.IntFilter<"TradeLeg"> | number
   externalKey?: Prisma.StringNullableFilter<"TradeLeg"> | string | null
+  filledAt?: Prisma.DateTimeNullableFilter<"TradeLeg"> | Date | string | null
   trade?: Prisma.XOR<Prisma.TradeScalarRelationFilter, Prisma.TradeWhereInput>
 }
 
@@ -264,6 +272,7 @@ export type TradeLegOrderByWithRelationInput = {
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
   externalKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  filledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   trade?: Prisma.TradeOrderByWithRelationInput
 }
 
@@ -279,6 +288,7 @@ export type TradeLegWhereUniqueInput = Prisma.AtLeast<{
   commission?: Prisma.FloatFilter<"TradeLeg"> | number
   legOrder?: Prisma.IntFilter<"TradeLeg"> | number
   externalKey?: Prisma.StringNullableFilter<"TradeLeg"> | string | null
+  filledAt?: Prisma.DateTimeNullableFilter<"TradeLeg"> | Date | string | null
   trade?: Prisma.XOR<Prisma.TradeScalarRelationFilter, Prisma.TradeWhereInput>
 }, "id">
 
@@ -291,6 +301,7 @@ export type TradeLegOrderByWithAggregationInput = {
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
   externalKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  filledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TradeLegCountOrderByAggregateInput
   _avg?: Prisma.TradeLegAvgOrderByAggregateInput
   _max?: Prisma.TradeLegMaxOrderByAggregateInput
@@ -310,6 +321,7 @@ export type TradeLegScalarWhereWithAggregatesInput = {
   commission?: Prisma.FloatWithAggregatesFilter<"TradeLeg"> | number
   legOrder?: Prisma.IntWithAggregatesFilter<"TradeLeg"> | number
   externalKey?: Prisma.StringNullableWithAggregatesFilter<"TradeLeg"> | string | null
+  filledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TradeLeg"> | Date | string | null
 }
 
 export type TradeLegCreateInput = {
@@ -320,6 +332,7 @@ export type TradeLegCreateInput = {
   commission?: number
   legOrder: number
   externalKey?: string | null
+  filledAt?: Date | string | null
   trade: Prisma.TradeCreateNestedOneWithoutEntriesInput
 }
 
@@ -332,6 +345,7 @@ export type TradeLegUncheckedCreateInput = {
   commission?: number
   legOrder: number
   externalKey?: string | null
+  filledAt?: Date | string | null
 }
 
 export type TradeLegUpdateInput = {
@@ -342,6 +356,7 @@ export type TradeLegUpdateInput = {
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
   externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trade?: Prisma.TradeUpdateOneRequiredWithoutEntriesNestedInput
 }
 
@@ -354,6 +369,7 @@ export type TradeLegUncheckedUpdateInput = {
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
   externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TradeLegCreateManyInput = {
@@ -365,6 +381,7 @@ export type TradeLegCreateManyInput = {
   commission?: number
   legOrder: number
   externalKey?: string | null
+  filledAt?: Date | string | null
 }
 
 export type TradeLegUpdateManyMutationInput = {
@@ -375,6 +392,7 @@ export type TradeLegUpdateManyMutationInput = {
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
   externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TradeLegUncheckedUpdateManyInput = {
@@ -386,6 +404,7 @@ export type TradeLegUncheckedUpdateManyInput = {
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
   externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TradeLegListRelationFilter = {
@@ -407,6 +426,7 @@ export type TradeLegCountOrderByAggregateInput = {
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
   externalKey?: Prisma.SortOrder
+  filledAt?: Prisma.SortOrder
 }
 
 export type TradeLegAvgOrderByAggregateInput = {
@@ -425,6 +445,7 @@ export type TradeLegMaxOrderByAggregateInput = {
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
   externalKey?: Prisma.SortOrder
+  filledAt?: Prisma.SortOrder
 }
 
 export type TradeLegMinOrderByAggregateInput = {
@@ -436,6 +457,7 @@ export type TradeLegMinOrderByAggregateInput = {
   commission?: Prisma.SortOrder
   legOrder?: Prisma.SortOrder
   externalKey?: Prisma.SortOrder
+  filledAt?: Prisma.SortOrder
 }
 
 export type TradeLegSumOrderByAggregateInput = {
@@ -499,6 +521,7 @@ export type TradeLegCreateWithoutTradeInput = {
   commission?: number
   legOrder: number
   externalKey?: string | null
+  filledAt?: Date | string | null
 }
 
 export type TradeLegUncheckedCreateWithoutTradeInput = {
@@ -509,6 +532,7 @@ export type TradeLegUncheckedCreateWithoutTradeInput = {
   commission?: number
   legOrder: number
   externalKey?: string | null
+  filledAt?: Date | string | null
 }
 
 export type TradeLegCreateOrConnectWithoutTradeInput = {
@@ -549,6 +573,7 @@ export type TradeLegScalarWhereInput = {
   commission?: Prisma.FloatFilter<"TradeLeg"> | number
   legOrder?: Prisma.IntFilter<"TradeLeg"> | number
   externalKey?: Prisma.StringNullableFilter<"TradeLeg"> | string | null
+  filledAt?: Prisma.DateTimeNullableFilter<"TradeLeg"> | Date | string | null
 }
 
 export type TradeLegCreateManyTradeInput = {
@@ -559,6 +584,7 @@ export type TradeLegCreateManyTradeInput = {
   commission?: number
   legOrder: number
   externalKey?: string | null
+  filledAt?: Date | string | null
 }
 
 export type TradeLegUpdateWithoutTradeInput = {
@@ -569,6 +595,7 @@ export type TradeLegUpdateWithoutTradeInput = {
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
   externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TradeLegUncheckedUpdateWithoutTradeInput = {
@@ -579,6 +606,7 @@ export type TradeLegUncheckedUpdateWithoutTradeInput = {
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
   externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TradeLegUncheckedUpdateManyWithoutTradeInput = {
@@ -589,6 +617,7 @@ export type TradeLegUncheckedUpdateManyWithoutTradeInput = {
   commission?: Prisma.FloatFieldUpdateOperationsInput | number
   legOrder?: Prisma.IntFieldUpdateOperationsInput | number
   externalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -602,6 +631,7 @@ export type TradeLegSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   commission?: boolean
   legOrder?: boolean
   externalKey?: boolean
+  filledAt?: boolean
   trade?: boolean | Prisma.TradeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLeg"]>
 
@@ -614,6 +644,7 @@ export type TradeLegSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   commission?: boolean
   legOrder?: boolean
   externalKey?: boolean
+  filledAt?: boolean
   trade?: boolean | Prisma.TradeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLeg"]>
 
@@ -626,6 +657,7 @@ export type TradeLegSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   commission?: boolean
   legOrder?: boolean
   externalKey?: boolean
+  filledAt?: boolean
   trade?: boolean | Prisma.TradeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeLeg"]>
 
@@ -638,9 +670,10 @@ export type TradeLegSelectScalar = {
   commission?: boolean
   legOrder?: boolean
   externalKey?: boolean
+  filledAt?: boolean
 }
 
-export type TradeLegOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tradeId" | "legType" | "price" | "quantity" | "commission" | "legOrder" | "externalKey", ExtArgs["result"]["tradeLeg"]>
+export type TradeLegOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tradeId" | "legType" | "price" | "quantity" | "commission" | "legOrder" | "externalKey" | "filledAt", ExtArgs["result"]["tradeLeg"]>
 export type TradeLegInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   trade?: boolean | Prisma.TradeDefaultArgs<ExtArgs>
 }
@@ -665,6 +698,7 @@ export type $TradeLegPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     commission: number
     legOrder: number
     externalKey: string | null
+    filledAt: Date | null
   }, ExtArgs["result"]["tradeLeg"]>
   composites: {}
 }
@@ -1097,6 +1131,7 @@ export interface TradeLegFieldRefs {
   readonly commission: Prisma.FieldRef<"TradeLeg", 'Float'>
   readonly legOrder: Prisma.FieldRef<"TradeLeg", 'Int'>
   readonly externalKey: Prisma.FieldRef<"TradeLeg", 'String'>
+  readonly filledAt: Prisma.FieldRef<"TradeLeg", 'DateTime'>
 }
     
 

@@ -177,7 +177,8 @@ model TradeLeg {
   quantity    Float
   commission  Float   @default(0)
   legOrder    Int
-  externalKey String? // idempotency key for email-ingested legs (Gmail message-id)
+  externalKey String?   // idempotency key for email-ingested legs (Gmail message-id)
+  filledAt    DateTime? // when this buy/sell was filled/logged (email date for ingested fills)
 
   @@index([tradeId])
   @@index([externalKey])

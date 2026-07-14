@@ -136,6 +136,7 @@ export async function POST(req: NextRequest) {
           commission,
           legOrder: nextLegOrder,
           externalKey: messageId,
+          filledAt: when,
         },
       });
 
@@ -187,7 +188,7 @@ export async function POST(req: NextRequest) {
           ...computed,
           entries: {
             create: [
-              { legType, price: fill.price, quantity: fill.qty, commission, legOrder: 1, externalKey: messageId },
+              { legType, price: fill.price, quantity: fill.qty, commission, legOrder: 1, externalKey: messageId, filledAt: when },
             ],
           },
         },

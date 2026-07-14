@@ -17,6 +17,16 @@ import {
 import { cn, formatCurrency, formatPercent, formatNumber } from "@/lib/utils";
 import type { Trade } from "@/lib/types";
 
+const LEG_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Format a leg's filledAt (ISO date or datetime string) as a compact "Mon D".
+function formatLegDate(iso: string | null): string {
+  if (!iso) return "—";
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  if (!y || !m || !d) return "—";
+  return `${LEG_MONTHS[m - 1]} ${d}`;
+}
+
 export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
@@ -274,6 +284,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                   <thead>
                     <tr className="border-b border-[var(--border)] bg-[var(--muted)]/40 text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
                       <th className="px-3 py-2 text-left font-semibold">#</th>
+                      <th className="px-3 py-2 text-left font-semibold">Date</th>
                       <th className="px-3 py-2 text-right font-semibold">Price</th>
                       <th className="px-3 py-2 text-right font-semibold">Quantity</th>
                       <th className="px-3 py-2 text-right font-semibold">
@@ -290,6 +301,9 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                       >
                         <td className="px-3 py-2 font-data text-[var(--muted-foreground)]">
                           {leg.legOrder}
+                        </td>
+                        <td className="px-3 py-2 font-data text-[var(--muted-foreground)]">
+                          {formatLegDate(leg.filledAt)}
                         </td>
                         <td className="px-3 py-2 text-right font-data">
                           {formatCurrency(leg.price)}
@@ -322,6 +336,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                   <thead>
                     <tr className="border-b border-[var(--border)] bg-[var(--muted)]/40 text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
                       <th className="px-3 py-2 text-left font-semibold">#</th>
+                      <th className="px-3 py-2 text-left font-semibold">Date</th>
                       <th className="px-3 py-2 text-right font-semibold">Price</th>
                       <th className="px-3 py-2 text-right font-semibold">Quantity</th>
                       <th className="px-3 py-2 text-right font-semibold">
@@ -338,6 +353,9 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
                       >
                         <td className="px-3 py-2 font-data text-[var(--muted-foreground)]">
                           {leg.legOrder}
+                        </td>
+                        <td className="px-3 py-2 font-data text-[var(--muted-foreground)]">
+                          {formatLegDate(leg.filledAt)}
                         </td>
                         <td className="px-3 py-2 text-right font-data">
                           {formatCurrency(leg.price)}

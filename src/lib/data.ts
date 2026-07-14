@@ -532,6 +532,12 @@ function serializeTrade(trade: any) {
     tradeDate: trade.tradeDate instanceof Date ? trade.tradeDate.toISOString().split("T")[0] : trade.tradeDate,
     createdAt: trade.createdAt instanceof Date ? trade.createdAt.toISOString() : trade.createdAt,
     updatedAt: trade.updatedAt instanceof Date ? trade.updatedAt.toISOString() : trade.updatedAt,
+    entries: Array.isArray(trade.entries)
+      ? trade.entries.map((e: any) => ({
+          ...e,
+          filledAt: e.filledAt instanceof Date ? e.filledAt.toISOString() : e.filledAt ?? null,
+        }))
+      : trade.entries,
   };
 }
 

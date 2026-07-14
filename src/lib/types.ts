@@ -10,6 +10,7 @@ export interface TradeLeg {
   quantity: number;
   commission: number;
   legOrder: number;
+  filledAt: string | null;
 }
 
 export interface Trade {

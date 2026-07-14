@@ -27,9 +27,9 @@ export const DEMO_TRADES: Trade[] = [
     id: "t1", accountId: "demo-account", tradeDate: "2026-01-26", month: 1,
     symbol: "PG", direction: "LONG", tradeType: "Retest Long", isSwingContinuation: false, isAsset: false,
     entries: [
-      { id: "l1", legType: "BUY", price: 148.87, quantity: 141, commission: 1.45, legOrder: 1 },
-      { id: "l2", legType: "SELL", price: 164.23, quantity: 70, commission: 0.79, legOrder: 1 },
-      { id: "l3", legType: "SELL", price: 155.00, quantity: 71, commission: 0.76, legOrder: 2 },
+      { id: "l1", legType: "BUY", price: 148.87, quantity: 141, commission: 1.45, legOrder: 1, filledAt: "2026-01-26" },
+      { id: "l2", legType: "SELL", price: 164.23, quantity: 70, commission: 0.79, legOrder: 1, filledAt: "2026-02-10" },
+      { id: "l3", legType: "SELL", price: 155.00, quantity: 71, commission: 0.76, legOrder: 2, filledAt: "2026-02-12" },
     ],
     totalPositionValue: 20991, totalShares: 141, sharesInProcess: 0,
     avgBuyPrice: 148.87, avgSellPrice: 159.58, totalPnL: 1507.08, riskReward: null,

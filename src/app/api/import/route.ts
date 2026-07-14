@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
               account.commissionPerShare
             ),
             legOrder: j + 1,
+            filledAt: tradeDate,
           })),
           ...t.sellLegs.map((l, j) => ({
             legType: "SELL" as const,
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest) {
               account.commissionPerShare
             ),
             legOrder: j + 1,
+            filledAt: tradeDate,
           })),
         ];
 

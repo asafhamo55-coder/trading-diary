@@ -46,6 +46,18 @@ export async function PUT(
 
     // If entries are being updated, recalculate everything
     if (data.entries) {
+      // Legs are deleted + recreated below, which would drop each leg's
+      // filledAt. Preserve it by matching existing legs on legType+legOrder;
+      // fall back to the (new or existing) trade date for legs without a match.
+      const existing = await prisma.trade.findUnique({
+        where: { id },
+        select: { tradeDate: true, entries: { select: { legType: true, legOrder: true, filledAt: true } } },
+      });
+      const prevFilledAt = new Map(
+        (existing?.entries ?? []).map((e) => [`${e.legType}:${e.legOrder}`, e.filledAt])
+      );
+      const fallbackDate = data.tradeDate ?? existing?.tradeDate ?? null;
+
       const entriesWithComm = data.entries.map((leg) => ({
         ...leg,
         commission: calculateCommission(
@@ -53,6 +65,7 @@ export async function PUT(
           leg.quantity,
           account.commissionPerShare
         ),
+        filledAt: prevFilledAt.get(`${leg.legType}:${leg.legOrder}`) ?? fallbackDate,
       }));
 
       const assetLevs = await prisma.assetLeverage.findMany({

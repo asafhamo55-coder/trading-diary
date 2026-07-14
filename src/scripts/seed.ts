@@ -691,6 +691,7 @@ async function main() {
         quantity: l.qty,
         commission: comm(l.price, l.qty),
         legOrder: i + 1,
+        filledAt: new Date(t.date),
       })),
       ...t.sellLegs.map((l, i) => ({
         legType: "SELL" as const,
@@ -698,6 +699,7 @@ async function main() {
         quantity: l.qty,
         commission: comm(l.price, l.qty),
         legOrder: i + 1,
+        filledAt: new Date(t.date),
       })),
     ];
 
