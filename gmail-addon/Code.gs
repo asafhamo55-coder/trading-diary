@@ -46,6 +46,8 @@ function onGmailMessage(e) {
     CardService.newTextInput().setFieldName('qty').setTitle('Quantity').setValue(String(fill.qty)));
   section.addWidget(
     CardService.newTextInput().setFieldName('price').setTitle('Price').setValue(String(fill.price)));
+  section.addWidget(
+    CardService.newTextInput().setFieldName('account').setTitle('Account').setValue(fill.account || ''));
 
   var action = CardService.newAction()
     .setFunctionName('logTrade')
@@ -70,11 +72,18 @@ function parseSubject(subject) {
   var re = /^\s*(?:(?:Fwd?|Re):\s*)*(BOUGHT|SOLD)\s+([\d,]+(?:\.\d+)?)\s+([A-Za-z][A-Za-z.\-]*)\s+@\s+\$?([\d,]+(?:\.\d+)?)\s*(?:\(([^)]+)\))?\s*$/i;
   var m = re.exec(subject);
   if (!m) return null;
+  // Account tag is masked like "UXXX97634"; the account number is the trailing digits.
+  var acct = '';
+  if (m[5]) {
+    var am = String(m[5]).match(/(\d+)\s*$/);
+    acct = am ? am[1] : String(m[5]).trim();
+  }
   return {
     action: m[1].toUpperCase() === 'BOUGHT' ? 'BUY' : 'SELL',
     symbol: m[3].toUpperCase(),
     qty: parseFloat(m[2].replace(/,/g, '')),
-    price: parseFloat(m[4].replace(/,/g, ''))
+    price: parseFloat(m[4].replace(/,/g, '')),
+    account: acct
   };
 }
 
@@ -91,6 +100,7 @@ function logTrade(e) {
     action: val('action'),
     qty: Number(val('qty')),
     price: Number(val('price')),
+    account: val('account'),
     dateISO: e.parameters.dateISO,
     messageId: e.parameters.messageId
   };

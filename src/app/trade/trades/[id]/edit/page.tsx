@@ -27,6 +27,7 @@ function tradeToFormValues(trade: Trade): Partial<TradeFormValues> {
   return {
     tradeDate: trade.tradeDate.slice(0, 10),
     symbol: trade.symbol,
+    brokerAccount: trade.brokerAccount ?? "",
     direction: trade.direction,
     tradeType: trade.tradeType ?? "",
     isSwingContinuation: trade.isSwingContinuation,

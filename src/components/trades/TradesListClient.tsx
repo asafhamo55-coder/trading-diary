@@ -87,6 +87,7 @@ export default function TradesListClient({
     const headers = [
       "Date",
       "Symbol",
+      "Account",
       "Direction",
       "Trade Type",
       "Asset",
@@ -126,6 +127,7 @@ export default function TradesListClient({
       return [
         t.tradeDate.slice(0, 10),
         t.symbol,
+        t.brokerAccount ?? "",
         t.direction,
         t.tradeType ?? "",
         t.isAsset ? "Y" : "N",
@@ -434,6 +436,11 @@ export default function TradesListClient({
                       </td>
                       <td className="px-4 py-3 font-semibold tracking-tight group-hover:text-[#3B82F6] transition-colors">
                         {trade.symbol}
+                        {trade.brokerAccount && (
+                          <span className="block text-[11px] font-data font-normal text-[var(--muted-foreground)]">
+                            {trade.brokerAccount}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span

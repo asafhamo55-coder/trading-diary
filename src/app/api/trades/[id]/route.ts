@@ -112,6 +112,7 @@ export async function PUT(
           tradeDate: data.tradeDate ?? undefined,
           month: data.month ?? undefined,
           symbol: data.symbol?.toUpperCase(),
+          brokerAccount: data.brokerAccount ?? null,
           direction: data.direction ?? undefined,
           tradeType: data.tradeType ?? undefined,
           isSwingContinuation: data.isSwingContinuation ?? undefined,

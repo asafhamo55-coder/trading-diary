@@ -25,7 +25,7 @@ export const DEMO_ERROR_DEFINITIONS: ErrorDefinition[] = [
 export const DEMO_TRADES: Trade[] = [
   {
     id: "t1", accountId: "demo-account", tradeDate: "2026-01-26", month: 1,
-    symbol: "PG", direction: "LONG", tradeType: "Retest Long", isSwingContinuation: false, isAsset: false,
+    symbol: "PG", brokerAccount: "97634", direction: "LONG", tradeType: "Retest Long", isSwingContinuation: false, isAsset: false,
     entries: [
       { id: "l1", legType: "BUY", price: 148.87, quantity: 141, commission: 1.45, legOrder: 1, filledAt: "2026-01-26" },
       { id: "l2", legType: "SELL", price: 164.23, quantity: 70, commission: 0.79, legOrder: 1, filledAt: "2026-02-10" },

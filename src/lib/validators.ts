@@ -16,6 +16,7 @@ export const createTradeSchema = z.object({
   tradeDate: z.string().transform((s) => new Date(s)),
   month: z.number().int().min(1).max(12),
   symbol: z.string().min(1, "Symbol is required").max(20),
+  brokerAccount: z.string().max(40).optional().nullable(),
   direction: directionSchema,
   tradeType: z.string().optional().nullable(),
   isSwingContinuation: z.boolean().default(false),

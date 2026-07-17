@@ -123,6 +123,7 @@ model Trade {
   tradeDate         DateTime
   month             Int
   symbol            String
+  brokerAccount     String?  // broker account number from the fill (e.g. "97634"); part of a trade's identity
   direction         Direction
   tradeType         String?
   isSwingContinuation Boolean @default(false)
@@ -161,6 +162,7 @@ model Trade {
   @@index([accountId, month])
   @@index([accountId, tradeDate])
   @@index([symbol])
+  @@index([accountId, symbol, brokerAccount, isCompleted])
 }
 
 enum Direction {

@@ -176,6 +176,7 @@ export const TradeScalarFieldEnum = {
   tradeDate: 'tradeDate',
   month: 'month',
   symbol: 'symbol',
+  brokerAccount: 'brokerAccount',
   direction: 'direction',
   tradeType: 'tradeType',
   isSwingContinuation: 'isSwingContinuation',

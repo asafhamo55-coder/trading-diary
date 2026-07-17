@@ -44,6 +44,17 @@ function toNumber(raw: string): number {
   return parseFloat(raw.replace(/,/g, ""));
 }
 
+// The broker account tag in a subject is masked like "UXXX97634"; the account
+// number is the trailing digit run ("97634"). Falls back to the trimmed input
+// if it holds no digits, or null when empty.
+export function brokerAccountNumber(raw: string | null | undefined): string | null {
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  if (!s) return null;
+  const m = s.match(/(\d+)\s*$/);
+  return m ? m[1] : s;
+}
+
 export function parseBrokerSubject(subject: string): ParseResult {
   const s = (subject ?? "").trim();
   if (!s) return { ok: false, reason: "Empty subject" };

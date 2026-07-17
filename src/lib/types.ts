@@ -19,6 +19,7 @@ export interface Trade {
   tradeDate: string;
   month: number;
   symbol: string;
+  brokerAccount: string | null;
   direction: Direction;
   tradeType: string | null;
   isSwingContinuation: boolean;

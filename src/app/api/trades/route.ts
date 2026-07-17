@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
         tradeDate: data.tradeDate,
         month: data.month,
         symbol: data.symbol.toUpperCase(),
+        brokerAccount: data.brokerAccount ?? null,
         direction: data.direction,
         tradeType: data.tradeType,
         isSwingContinuation: data.isSwingContinuation,

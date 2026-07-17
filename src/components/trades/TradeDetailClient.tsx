@@ -187,6 +187,9 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
             </div>
             <p className="text-sm text-[var(--muted-foreground)] mt-1.5">
               <span className="font-data">{trade.tradeDate}</span>
+              {trade.brokerAccount && (
+                <> {" \u00B7 "}<span className="font-data">Acct {trade.brokerAccount}</span></>
+              )}
               {trade.tradeType && ` \u00B7 ${trade.tradeType}`}
               {trade.isSwingContinuation && " \u00B7 Swing Continuation"}
             </p>

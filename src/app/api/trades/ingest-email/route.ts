@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { jsonResponse, errorResponse, getAccount } from "@/lib/api-helpers";
 import { computeAllTradeFields, calculateCommission } from "@/lib/calculations/trade";
-import { parseBrokerSubject, type FillAction } from "@/lib/broker-email";
+import { parseBrokerSubject, brokerAccountNumber, type FillAction } from "@/lib/broker-email";
 
 // POST /api/trades/ingest-email
 //
@@ -29,6 +29,7 @@ type ResolvedFill = {
   symbol: string;
   qty: number;
   price: number;
+  account: string | null;
 };
 
 function resolveFill(body: Record<string, unknown>):
@@ -39,6 +40,11 @@ function resolveFill(body: Record<string, unknown>):
   const qty = body.qty;
   const price = body.price;
 
+  // The account is sent explicitly by the add-on; fall back to null.
+  const account = body.account != null && String(body.account).trim() !== ""
+    ? String(body.account)
+    : null;
+
   // Explicit (edited-in-card) values take precedence when all present.
   if (action && symbol && qty != null && price != null) {
     const a = String(action).toUpperCase();
@@ -47,14 +53,14 @@ function resolveFill(body: Record<string, unknown>):
     const p = Number(price);
     if (!(q > 0)) return { ok: false, reason: `Invalid quantity: ${qty}` };
     if (!(p > 0)) return { ok: false, reason: `Invalid price: ${price}` };
-    return { ok: true, fill: { action: a as FillAction, symbol: String(symbol).toUpperCase(), qty: q, price: p } };
+    return { ok: true, fill: { action: a as FillAction, symbol: String(symbol).toUpperCase(), qty: q, price: p, account } };
   }
 
   // Otherwise parse the raw subject.
   const parsed = parseBrokerSubject(String(body.subject ?? ""));
   if (!parsed.ok) return { ok: false, reason: parsed.reason };
-  const { action: pa, symbol: ps, qty: pq, price: pp } = parsed.fill;
-  return { ok: true, fill: { action: pa, symbol: ps, qty: pq, price: pp } };
+  const { action: pa, symbol: ps, qty: pq, price: pp, account: pacct } = parsed.fill;
+  return { ok: true, fill: { action: pa, symbol: ps, qty: pq, price: pp, account: account ?? pacct } };
 }
 
 export async function POST(req: NextRequest) {
@@ -71,6 +77,7 @@ export async function POST(req: NextRequest) {
     const resolved = resolveFill(body);
     if (!resolved.ok) return errorResponse(resolved.reason, 422);
     const fill = resolved.fill;
+    const brokerAccount = brokerAccountNumber(fill.account);
 
     const account = await getAccount();
 
@@ -113,9 +120,11 @@ export async function POST(req: NextRequest) {
     });
     const riskUnit = review?.riskUnit ?? 0;
 
-    // ── Find the open trade for this symbol, or open a new one ─────
+    // ── Find the open trade for this symbol+account, or open a new one ─
+    // A trade's identity is (symbol, brokerAccount): the same symbol filled on
+    // two different accounts stays as two separate open trades.
     const openTrade = await prisma.trade.findFirst({
-      where: { accountId: account.id, symbol: fill.symbol, isCompleted: false },
+      where: { accountId: account.id, symbol: fill.symbol, brokerAccount, isCompleted: false },
       include: { entries: { orderBy: { legOrder: "asc" } } },
       orderBy: { tradeDate: "desc" },
     });
@@ -183,6 +192,7 @@ export async function POST(req: NextRequest) {
           tradeDate: when,
           month,
           symbol: fill.symbol,
+          brokerAccount,
           direction: NEW_TRADE_DIRECTION,
           tradeType: NEW_TRADE_TYPE,
           ...computed,

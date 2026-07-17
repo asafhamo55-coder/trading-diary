@@ -68,6 +68,7 @@ export type TradeMinAggregateOutputType = {
   tradeDate: Date | null
   month: number | null
   symbol: string | null
+  brokerAccount: string | null
   direction: $Enums.Direction | null
   tradeType: string | null
   isSwingContinuation: boolean | null
@@ -102,6 +103,7 @@ export type TradeMaxAggregateOutputType = {
   tradeDate: Date | null
   month: number | null
   symbol: string | null
+  brokerAccount: string | null
   direction: $Enums.Direction | null
   tradeType: string | null
   isSwingContinuation: boolean | null
@@ -136,6 +138,7 @@ export type TradeCountAggregateOutputType = {
   tradeDate: number
   month: number
   symbol: number
+  brokerAccount: number
   direction: number
   tradeType: number
   isSwingContinuation: number
@@ -208,6 +211,7 @@ export type TradeMinAggregateInputType = {
   tradeDate?: true
   month?: true
   symbol?: true
+  brokerAccount?: true
   direction?: true
   tradeType?: true
   isSwingContinuation?: true
@@ -242,6 +246,7 @@ export type TradeMaxAggregateInputType = {
   tradeDate?: true
   month?: true
   symbol?: true
+  brokerAccount?: true
   direction?: true
   tradeType?: true
   isSwingContinuation?: true
@@ -276,6 +281,7 @@ export type TradeCountAggregateInputType = {
   tradeDate?: true
   month?: true
   symbol?: true
+  brokerAccount?: true
   direction?: true
   tradeType?: true
   isSwingContinuation?: true
@@ -397,6 +403,7 @@ export type TradeGroupByOutputType = {
   tradeDate: Date
   month: number
   symbol: string
+  brokerAccount: string | null
   direction: $Enums.Direction
   tradeType: string | null
   isSwingContinuation: boolean
@@ -454,6 +461,7 @@ export type TradeWhereInput = {
   tradeDate?: Prisma.DateTimeFilter<"Trade"> | Date | string
   month?: Prisma.IntFilter<"Trade"> | number
   symbol?: Prisma.StringFilter<"Trade"> | string
+  brokerAccount?: Prisma.StringNullableFilter<"Trade"> | string | null
   direction?: Prisma.EnumDirectionFilter<"Trade"> | $Enums.Direction
   tradeType?: Prisma.StringNullableFilter<"Trade"> | string | null
   isSwingContinuation?: Prisma.BoolFilter<"Trade"> | boolean
@@ -491,6 +499,7 @@ export type TradeOrderByWithRelationInput = {
   tradeDate?: Prisma.SortOrder
   month?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  brokerAccount?: Prisma.SortOrderInput | Prisma.SortOrder
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrderInput | Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
@@ -531,6 +540,7 @@ export type TradeWhereUniqueInput = Prisma.AtLeast<{
   tradeDate?: Prisma.DateTimeFilter<"Trade"> | Date | string
   month?: Prisma.IntFilter<"Trade"> | number
   symbol?: Prisma.StringFilter<"Trade"> | string
+  brokerAccount?: Prisma.StringNullableFilter<"Trade"> | string | null
   direction?: Prisma.EnumDirectionFilter<"Trade"> | $Enums.Direction
   tradeType?: Prisma.StringNullableFilter<"Trade"> | string | null
   isSwingContinuation?: Prisma.BoolFilter<"Trade"> | boolean
@@ -568,6 +578,7 @@ export type TradeOrderByWithAggregationInput = {
   tradeDate?: Prisma.SortOrder
   month?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  brokerAccount?: Prisma.SortOrderInput | Prisma.SortOrder
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrderInput | Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
@@ -610,6 +621,7 @@ export type TradeScalarWhereWithAggregatesInput = {
   tradeDate?: Prisma.DateTimeWithAggregatesFilter<"Trade"> | Date | string
   month?: Prisma.IntWithAggregatesFilter<"Trade"> | number
   symbol?: Prisma.StringWithAggregatesFilter<"Trade"> | string
+  brokerAccount?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
   direction?: Prisma.EnumDirectionWithAggregatesFilter<"Trade"> | $Enums.Direction
   tradeType?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
   isSwingContinuation?: Prisma.BoolWithAggregatesFilter<"Trade"> | boolean
@@ -643,6 +655,7 @@ export type TradeCreateInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -680,6 +693,7 @@ export type TradeUncheckedCreateInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -715,6 +729,7 @@ export type TradeUpdateInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -752,6 +767,7 @@ export type TradeUncheckedUpdateInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -788,6 +804,7 @@ export type TradeCreateManyInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -821,6 +838,7 @@ export type TradeUpdateManyMutationInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -855,6 +873,7 @@ export type TradeUncheckedUpdateManyInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -899,6 +918,7 @@ export type TradeCountOrderByAggregateInput = {
   tradeDate?: Prisma.SortOrder
   month?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  brokerAccount?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
@@ -951,6 +971,7 @@ export type TradeMaxOrderByAggregateInput = {
   tradeDate?: Prisma.SortOrder
   month?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  brokerAccount?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
@@ -985,6 +1006,7 @@ export type TradeMinOrderByAggregateInput = {
   tradeDate?: Prisma.SortOrder
   month?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
+  brokerAccount?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   tradeType?: Prisma.SortOrder
   isSwingContinuation?: Prisma.SortOrder
@@ -1119,6 +1141,7 @@ export type TradeCreateWithoutAccountInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -1154,6 +1177,7 @@ export type TradeUncheckedCreateWithoutAccountInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -1219,6 +1243,7 @@ export type TradeScalarWhereInput = {
   tradeDate?: Prisma.DateTimeFilter<"Trade"> | Date | string
   month?: Prisma.IntFilter<"Trade"> | number
   symbol?: Prisma.StringFilter<"Trade"> | string
+  brokerAccount?: Prisma.StringNullableFilter<"Trade"> | string | null
   direction?: Prisma.EnumDirectionFilter<"Trade"> | $Enums.Direction
   tradeType?: Prisma.StringNullableFilter<"Trade"> | string | null
   isSwingContinuation?: Prisma.BoolFilter<"Trade"> | boolean
@@ -1252,6 +1277,7 @@ export type TradeCreateWithoutEntriesInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -1288,6 +1314,7 @@ export type TradeUncheckedCreateWithoutEntriesInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -1338,6 +1365,7 @@ export type TradeUpdateWithoutEntriesInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1374,6 +1402,7 @@ export type TradeUncheckedUpdateWithoutEntriesInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1408,6 +1437,7 @@ export type TradeCreateWithoutTradeErrorsInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -1444,6 +1474,7 @@ export type TradeUncheckedCreateWithoutTradeErrorsInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -1494,6 +1525,7 @@ export type TradeUpdateWithoutTradeErrorsInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1530,6 +1562,7 @@ export type TradeUncheckedUpdateWithoutTradeErrorsInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1564,6 +1597,7 @@ export type TradeCreateManyAccountInput = {
   tradeDate: Date | string
   month: number
   symbol: string
+  brokerAccount?: string | null
   direction: $Enums.Direction
   tradeType?: string | null
   isSwingContinuation?: boolean
@@ -1597,6 +1631,7 @@ export type TradeUpdateWithoutAccountInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1632,6 +1667,7 @@ export type TradeUncheckedUpdateWithoutAccountInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1667,6 +1703,7 @@ export type TradeUncheckedUpdateManyWithoutAccountInput = {
   tradeDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.IntFieldUpdateOperationsInput | number
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
+  brokerAccount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   direction?: Prisma.EnumDirectionFieldUpdateOperationsInput | $Enums.Direction
   tradeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSwingContinuation?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1741,6 +1778,7 @@ export type TradeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   tradeDate?: boolean
   month?: boolean
   symbol?: boolean
+  brokerAccount?: boolean
   direction?: boolean
   tradeType?: boolean
   isSwingContinuation?: boolean
@@ -1779,6 +1817,7 @@ export type TradeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   tradeDate?: boolean
   month?: boolean
   symbol?: boolean
+  brokerAccount?: boolean
   direction?: boolean
   tradeType?: boolean
   isSwingContinuation?: boolean
@@ -1814,6 +1853,7 @@ export type TradeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   tradeDate?: boolean
   month?: boolean
   symbol?: boolean
+  brokerAccount?: boolean
   direction?: boolean
   tradeType?: boolean
   isSwingContinuation?: boolean
@@ -1849,6 +1889,7 @@ export type TradeSelectScalar = {
   tradeDate?: boolean
   month?: boolean
   symbol?: boolean
+  brokerAccount?: boolean
   direction?: boolean
   tradeType?: boolean
   isSwingContinuation?: boolean
@@ -1877,7 +1918,7 @@ export type TradeSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TradeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "tradeDate" | "month" | "symbol" | "direction" | "tradeType" | "isSwingContinuation" | "isAsset" | "totalPositionValue" | "totalShares" | "sharesInProcess" | "avgBuyPrice" | "avgSellPrice" | "totalPnL" | "riskReward" | "returnOnPosition" | "riskAmount" | "totalCommissions" | "isCompleted" | "entryReason" | "exitReason" | "conclusions" | "chartUrl" | "notes" | "dailyHigh" | "dailyClose" | "moneyLeftHighPct" | "moneyLeftClosePct" | "createdAt" | "updatedAt", ExtArgs["result"]["trade"]>
+export type TradeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "tradeDate" | "month" | "symbol" | "brokerAccount" | "direction" | "tradeType" | "isSwingContinuation" | "isAsset" | "totalPositionValue" | "totalShares" | "sharesInProcess" | "avgBuyPrice" | "avgSellPrice" | "totalPnL" | "riskReward" | "returnOnPosition" | "riskAmount" | "totalCommissions" | "isCompleted" | "entryReason" | "exitReason" | "conclusions" | "chartUrl" | "notes" | "dailyHigh" | "dailyClose" | "moneyLeftHighPct" | "moneyLeftClosePct" | "createdAt" | "updatedAt", ExtArgs["result"]["trade"]>
 export type TradeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   entries?: boolean | Prisma.Trade$entriesArgs<ExtArgs>
@@ -1904,6 +1945,7 @@ export type $TradePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     tradeDate: Date
     month: number
     symbol: string
+    brokerAccount: string | null
     direction: $Enums.Direction
     tradeType: string | null
     isSwingContinuation: boolean
@@ -2361,6 +2403,7 @@ export interface TradeFieldRefs {
   readonly tradeDate: Prisma.FieldRef<"Trade", 'DateTime'>
   readonly month: Prisma.FieldRef<"Trade", 'Int'>
   readonly symbol: Prisma.FieldRef<"Trade", 'String'>
+  readonly brokerAccount: Prisma.FieldRef<"Trade", 'String'>
   readonly direction: Prisma.FieldRef<"Trade", 'Direction'>
   readonly tradeType: Prisma.FieldRef<"Trade", 'String'>
   readonly isSwingContinuation: Prisma.FieldRef<"Trade", 'Boolean'>

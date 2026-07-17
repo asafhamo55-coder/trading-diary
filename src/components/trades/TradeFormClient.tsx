@@ -30,6 +30,7 @@ interface LegInput {
 export interface TradeFormValues {
   tradeDate: string;
   symbol: string;
+  brokerAccount: string;
   direction: Direction;
   tradeType: string;
   isSwingContinuation: boolean;
@@ -84,6 +85,7 @@ const DEFAULTS: TradeFormValues = {
   // long-lived tab/PWA session. Do NOT compute a date at module scope here.
   tradeDate: "",
   symbol: "",
+  brokerAccount: "",
   direction: "LONG",
   tradeType: "",
   isSwingContinuation: false,
@@ -236,6 +238,7 @@ export default function TradeFormClient({
           tradeDate: values.tradeDate,
           month: new Date(values.tradeDate + "T00:00:00").getMonth() + 1,
           symbol: values.symbol.trim().toUpperCase(),
+          brokerAccount: values.brokerAccount.trim() || null,
           direction: values.direction,
           tradeType: values.tradeType || null,
           isSwingContinuation: values.isSwingContinuation,
@@ -344,6 +347,15 @@ export default function TradeFormClient({
                   placeholder="AAPL"
                   {...register("symbol")}
                   className={cn(inputClass, "uppercase")}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Account</label>
+                <input
+                  type="text"
+                  placeholder="97634"
+                  {...register("brokerAccount")}
+                  className={cn(inputClass, "font-mono")}
                 />
               </div>
               <div>
