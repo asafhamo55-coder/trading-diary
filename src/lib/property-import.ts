@@ -65,6 +65,7 @@ const CATEGORY_MAP: Record<string, { key: string; type: PropertyTxType }> = {
   Maintenance: { key: "CLEANING_MAINT", type: "EXPENSE" },
   "Management fees (Expense)": { key: "MANAGEMENT", type: "EXPENSE" },
   Repairs: { key: "REPAIRS", type: "EXPENSE" },
+  "Dues and Fees": { key: "HOA", type: "EXPENSE" },
 };
 
 /** Compose a lossless description from the source category / sub-cat / payee. */

@@ -10,8 +10,7 @@
   "addOns": {
     "common": {
       "name": "Trading Diary Logger",
-      "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/trending_up_black_48dp.png",
-      "useLocaleFromApp": true
+      "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/trending_up_black_48dp.png"
     },
     "gmail": {
       "contextualTriggers": [

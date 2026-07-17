@@ -15,7 +15,7 @@
 import type { PropertyStatement } from "../property-import";
 
 export const LAUREL_CT_STATEMENT: PropertyStatement = {
-  nickname: "1053 Laurel Ct NW",
+  nickname: "1053 Laurel Ct NW, Unit 1",
   address: "1053 Laurel Ct NW, Unit 1, Rockdale County, GA, 30012, US",
   notes: [
     "2-unit property; this statement covers Unit 1.",

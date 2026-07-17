@@ -2,6 +2,9 @@ import { jsonResponse, errorResponse, getAccount } from "@/lib/api-helpers";
 import { importPropertyStatement, type PropertyStatement } from "@/lib/property-import";
 import { NORTH_PEAK_STATEMENT } from "@/lib/property-statements/260-north-peak";
 import { LAUREL_CT_STATEMENT } from "@/lib/property-statements/1053-laurel-ct";
+import { LAUREL_CT_UNIT2_STATEMENT } from "@/lib/property-statements/1053-laurel-ct-unit2";
+import { WINDGATE_CIR_STATEMENT } from "@/lib/property-statements/1104-windgate-cir";
+import { RIVERSIDE_ROAD_STATEMENT } from "@/lib/property-statements/2505-riverside-road";
 
 // One-shot: load every parsed property payment statement into the DB for the
 // current account. Idempotent (keyed on address) — safe to re-trigger; each run
@@ -11,7 +14,13 @@ import { LAUREL_CT_STATEMENT } from "@/lib/property-statements/1053-laurel-ct";
 // PropertyTransaction / Tenant tables do not exist yet.
 //
 // Trigger one property with ?address=<full address>, or all when omitted.
-const STATEMENTS: PropertyStatement[] = [NORTH_PEAK_STATEMENT, LAUREL_CT_STATEMENT];
+const STATEMENTS: PropertyStatement[] = [
+  NORTH_PEAK_STATEMENT,
+  LAUREL_CT_STATEMENT,
+  LAUREL_CT_UNIT2_STATEMENT,
+  WINDGATE_CIR_STATEMENT,
+  RIVERSIDE_ROAD_STATEMENT,
+];
 
 async function run(addressFilter: string | null) {
   const account = await getAccount();
