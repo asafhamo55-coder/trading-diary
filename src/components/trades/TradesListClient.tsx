@@ -374,6 +374,7 @@ export default function TradesListClient({
               <tr className="border-b border-[var(--border)] bg-[var(--muted)]/40 text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
                 <th className="px-4 py-3 text-left font-semibold">Date</th>
                 <th className="px-4 py-3 text-left font-semibold">Symbol</th>
+                <th className="px-4 py-3 text-left font-semibold">Account</th>
                 <th className="px-4 py-3 text-left font-semibold">Direction</th>
                 <th className="px-4 py-3 text-left font-semibold">Type</th>
                 <th className="px-4 py-3 text-right font-semibold">Shares</th>
@@ -388,7 +389,7 @@ export default function TradesListClient({
             <tbody>
               {filteredTrades.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="px-4 py-16">
+                  <td colSpan={12} className="px-4 py-16">
                     <div className="flex flex-col items-center justify-center text-center">
                       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--muted)]">
                         <SearchX className="h-7 w-7 text-[var(--muted-foreground)]" />
@@ -436,11 +437,9 @@ export default function TradesListClient({
                       </td>
                       <td className="px-4 py-3 font-semibold tracking-tight group-hover:text-[#3B82F6] transition-colors">
                         {trade.symbol}
-                        {trade.brokerAccount && (
-                          <span className="block text-[11px] font-data font-normal text-[var(--muted-foreground)]">
-                            {trade.brokerAccount}
-                          </span>
-                        )}
+                      </td>
+                      <td className="px-4 py-3 font-data text-[var(--muted-foreground)] whitespace-nowrap">
+                        {trade.brokerAccount ?? "—"}
                       </td>
                       <td className="px-4 py-3">
                         <span
