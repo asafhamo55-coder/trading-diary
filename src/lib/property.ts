@@ -307,6 +307,111 @@ export function yieldPct(
   return (annualized / purchasePrice) * 100;
 }
 
+// A segment that names a unit rather than the building: "Unit 2", "Apt 4B",
+// "#3", "Suite C". Stripped when deriving a building key so the units of one
+// address collapse together.
+const UNIT_SEGMENT_RE =
+  /^(?:#\s*\S+|(?:unit|apt|apartment|ste|suite|bldg)\s*\.?\s*\S*)$/i;
+const TRAILING_UNIT_RE =
+  /[\s,]+(?:#\s*\S+|(?:unit|apt|apartment|ste|suite|bldg)\s*\.?\s*\S+)\s*$/i;
+
+function normalizePart(v?: string | null): string {
+  return (v ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+/**
+ * Key identifying the physical building a property sits in, so the units of a
+ * multi-unit address group together. Prefers the structured `street` (+ city /
+ * state / zip); falls back to the full address with its unit segment removed,
+ * because imported properties carry only `address` — e.g.
+ * "1053 Laurel Ct NW, Unit 1, Rockdale County, GA, 30012, US". Properties with
+ * neither fall back to their own id, so they never group with each other.
+ */
+export function buildingKey(p: {
+  id: string;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  address?: string | null;
+}): string {
+  const street = (p.street ?? "").trim();
+  if (street) {
+    return [street.replace(TRAILING_UNIT_RE, ""), p.city, p.state, p.zip]
+      .map(normalizePart)
+      .filter(Boolean)
+      .join(" | ");
+  }
+  const fromAddress = (p.address ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s && !UNIT_SEGMENT_RE.test(s))
+    .map(normalizePart)
+    .join(", ");
+  return fromAddress || p.id;
+}
+
+/** Cash returned over the period as a percentage of the cash invested. */
+export function cashOnCashPct(net: number, downPayment: number | null): number | null {
+  if (!downPayment || downPayment <= 0) return null;
+  return (net / downPayment) * 100;
+}
+
+export interface BuildingCash {
+  /** Net (income − expenses) summed across every unit of the building. */
+  net: number;
+  /** Down payments summed across every unit — the cash that bought it. */
+  downPayment: number;
+  unitCount: number;
+  cashOnCashPct: number | null;
+}
+
+/**
+ * Roll each property's year net and down payment up to its building, so the
+ * units of a multi-unit address report one combined return on the cash that
+ * bought the building. Down payments are summed rather than read off a single
+ * unit, which stays correct whether the cash is recorded on one unit or split
+ * across several. Returns the building's stats keyed by property id, so every
+ * unit of a building reads the same figure.
+ */
+export function buildingCashByProperty(
+  properties: {
+    id: string;
+    street?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip?: string | null;
+    address?: string | null;
+    downPayment: number | null;
+    net: number;
+  }[]
+): Map<string, BuildingCash> {
+  const groups = new Map<
+    string,
+    { net: number; downPayment: number; ids: string[] }
+  >();
+  for (const p of properties) {
+    const key = buildingKey(p);
+    const g = groups.get(key) ?? { net: 0, downPayment: 0, ids: [] };
+    g.net += p.net;
+    g.downPayment += p.downPayment ?? 0;
+    g.ids.push(p.id);
+    groups.set(key, g);
+  }
+
+  const byProperty = new Map<string, BuildingCash>();
+  for (const g of groups.values()) {
+    const stats: BuildingCash = {
+      net: g.net,
+      downPayment: g.downPayment,
+      unitCount: g.ids.length,
+      cashOnCashPct: cashOnCashPct(g.net, g.downPayment),
+    };
+    for (const id of g.ids) byProperty.set(id, stats);
+  }
+  return byProperty;
+}
+
 export interface PropertyYearSummary {
   income: number;
   expenses: number;

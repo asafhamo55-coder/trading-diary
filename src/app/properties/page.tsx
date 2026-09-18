@@ -8,6 +8,7 @@ import {
   currentTenantOf,
   monthsElapsed,
   yieldPct,
+  buildingCashByProperty,
 } from "@/lib/property";
 import { todayInEastern } from "@/lib/utils";
 import PropertiesClient from "@/components/properties/PropertiesClient";
@@ -61,9 +62,33 @@ export default async function PropertiesPage({
     };
   });
 
+  // Return on the cash invested, rolled up to the building so a multi-unit
+  // address reports one figure across its units (see `buildingCashByProperty`).
+  const cashByProperty = buildingCashByProperty(
+    properties.map((p, i) => ({
+      id: p.id,
+      street: p.street,
+      city: p.city,
+      state: p.state,
+      zip: p.zip,
+      address: p.address,
+      downPayment: p.downPayment,
+      net: rows[i].net,
+    }))
+  );
+  const rowsWithCash = rows.map((r) => {
+    const cash = cashByProperty.get(r.id);
+    return {
+      ...r,
+      cashOnCashPct: cash?.cashOnCashPct ?? null,
+      cashInvested: cash?.downPayment ?? 0,
+      unitCount: cash?.unitCount ?? 1,
+    };
+  });
+
   return (
     <PropertiesClient
-      rows={rows}
+      rows={rowsWithCash}
       year={year}
       availableYears={availableYears}
       elapsed={elapsed}

@@ -44,6 +44,12 @@ interface Row {
   currentValue: number | null;
   valueAsOf: string | null;
   yieldPct: number | null;
+  /** Return on cash invested, summed across the units of this building. */
+  cashOnCashPct: number | null;
+  /** Down payment(s) behind that return — the building's, not just this unit's. */
+  cashInvested: number;
+  /** Units sharing this building; > 1 means the figure spans siblings. */
+  unitCount: number;
 }
 
 export default function PropertiesClient({
@@ -346,10 +352,10 @@ export default function PropertiesClient({
             caption="after 6% realtor + 2% closing"
           />
           <SummaryTile
-            label="Cash-on-cash"
+            label="If sold, on cash"
             variant="percent"
             value={portCoC != null ? `${portCoC >= 0 ? "+" : ""}${(portCoC * 100).toFixed(0)}%` : "—"}
-            caption="on down payments"
+            caption="sale profit vs down payments"
           />
         </div>
       )}
@@ -438,6 +444,8 @@ function PropertyCard({
   onUnarchive?: () => void;
 }) {
   const bars = r.monthlyNet.slice(0, Math.max(1, elapsed));
+  // Mid-year: the cash figure is what came back so far, not a full-year result.
+  const partialYear = elapsed > 0 && elapsed < 12;
   const maxAbs = Math.max(1, ...bars.map((v) => Math.abs(v)));
   const apprPct =
     r.currentValue != null && r.purchasePrice
@@ -541,6 +549,29 @@ function PropertyCard({
             </span>
             <span className={cn("font-data font-semibold", apprPct >= 0 ? "text-profit" : "text-loss")}>
               {apprPct >= 0 ? "+" : ""}{(apprPct * 100).toFixed(1)}%
+            </span>
+          </div>
+        )}
+
+        {/* Zone D3 — return on the cash invested */}
+        {r.cashOnCashPct != null && (
+          <div className="flex items-center justify-between gap-2 text-xs mt-2 pt-2 border-t border-[var(--border)]">
+            <span className="flex items-center gap-1.5 min-w-0 text-[var(--muted-foreground)]">
+              <span className="truncate">Cash-on-cash{partialYear ? " · YTD" : ""}</span>
+              {r.unitCount > 1 && (
+                <span className="shrink-0 text-[10px] font-medium uppercase tracking-wider rounded px-1.5 py-0.5 bg-[var(--muted)] text-[var(--muted-foreground)]">
+                  {r.unitCount} units
+                </span>
+              )}
+            </span>
+            <span
+              className={cn(
+                "font-data font-semibold shrink-0",
+                signedClass(r.cashOnCashPct)
+              )}
+            >
+              {r.cashOnCashPct >= 0 ? "+" : ""}
+              {r.cashOnCashPct.toFixed(1)}% on {formatCurrency(r.cashInvested)}
             </span>
           </div>
         )}
