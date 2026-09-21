@@ -52,6 +52,8 @@ interface Row {
   unitCount: number;
   /** Entries kept for tax but left out of the figures on this card. */
   taxOnlyCount: number;
+  /** Active building with no down payment recorded — cash-on-cash can't be computed. */
+  needsDownPayment: boolean;
 }
 
 export default function PropertiesClient({
@@ -574,6 +576,16 @@ function PropertyCard({
             >
               {r.cashOnCashPct >= 0 ? "+" : ""}
               {r.cashOnCashPct.toFixed(1)}% on {formatCurrency(r.cashInvested)}
+            </span>
+          </div>
+        )}
+
+        {/* Zone D3b — no basis on file, so invite one instead of guessing */}
+        {r.cashOnCashPct == null && r.needsDownPayment && r.txCount > 0 && (
+          <div className="flex items-center justify-between gap-2 text-xs mt-2 pt-2 border-t border-[var(--border)]">
+            <span className="truncate text-[var(--muted-foreground)]">Cash-on-cash</span>
+            <span className="shrink-0 text-[var(--muted-foreground)]">
+              Add a down payment
             </span>
           </div>
         )}

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPropertyById } from "@/lib/property-data";
+import { getProperties, getPropertyById } from "@/lib/property-data";
 import { parseYear, resolveSelectedYear } from "@/lib/year";
 import {
   summarizeYear,
@@ -8,6 +8,7 @@ import {
   occupancyForYear,
   yieldPct,
   forReturns,
+  buildingCashForYear,
 } from "@/lib/property";
 import { todayInEastern } from "@/lib/utils";
 import PropertyDetailClient from "@/components/properties/PropertyDetailClient";
@@ -45,6 +46,10 @@ export default async function PropertyDetailPage({
   const occ = occupancyForYear(property.tenants, year, today);
   const yieldValue = yieldPct(summary.net, property.purchasePrice, elapsed);
 
+  // Cash-on-cash is a building-level figure, so it needs this property's
+  // siblings — the same helper the properties list uses, so the two agree.
+  const cash = buildingCashForYear(await getProperties(), year).get(property.id) ?? null;
+
   return (
     <PropertyDetailClient
       property={{
@@ -75,6 +80,7 @@ export default async function PropertyDetailPage({
       elapsed={elapsed}
       occupancy={occ}
       yieldPct={yieldValue}
+      cash={cash}
     />
   );
 }

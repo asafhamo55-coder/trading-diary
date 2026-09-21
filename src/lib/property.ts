@@ -459,3 +459,48 @@ export function summarizeYear(
   }));
   return { income, expenses, net: income - expenses, byCategory };
 }
+
+
+/**
+ * Building-level cash stats for a year, keyed by property id — the one
+ * definition behind the cash-on-cash figure on both the properties list and a
+ * property's detail page. Archived properties are dropped before the rollup
+ * (they are out of the portfolio, so neither their net nor their down payment
+ * should move it), and tax-only entries are filtered out like every other
+ * performance figure.
+ */
+export function buildingCashForYear(
+  properties: {
+    id: string;
+    street?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip?: string | null;
+    address?: string | null;
+    downPayment: number | null;
+    archivedAt?: string | null;
+    transactions: {
+      year: number;
+      type: PropertyTxType;
+      category: string;
+      amount: number;
+      taxOnly?: boolean;
+    }[];
+  }[],
+  year: number
+): Map<string, BuildingCash> {
+  return buildingCashByProperty(
+    properties
+      .filter((p) => !p.archivedAt)
+      .map((p) => ({
+        id: p.id,
+        street: p.street,
+        city: p.city,
+        state: p.state,
+        zip: p.zip,
+        address: p.address,
+        downPayment: p.downPayment,
+        net: summarizeYear(forReturns(p.transactions), year).net,
+      }))
+  );
+}

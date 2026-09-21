@@ -8,7 +8,7 @@ import {
   currentTenantOf,
   monthsElapsed,
   yieldPct,
-  buildingCashByProperty,
+  buildingCashForYear,
   forReturns,
   taxOnlyCount,
 } from "@/lib/property";
@@ -68,26 +68,10 @@ export default async function PropertiesPage({
   });
 
   // Return on the cash invested, rolled up to the building so a multi-unit
-  // address reports one figure across its units (see `buildingCashByProperty`).
-  // Archived properties are left out entirely: they are no longer part of the
-  // portfolio, so neither their net nor their down payment should move the
-  // figure — and they get no cash-on-cash row of their own, since the lookup
-  // has no entry for them.
-  const cashByProperty = buildingCashByProperty(
-    properties
-      .map((p, i) => ({
-        id: p.id,
-        street: p.street,
-        city: p.city,
-        state: p.state,
-        zip: p.zip,
-        address: p.address,
-        downPayment: p.downPayment,
-        net: rows[i].net,
-        archived: p.archivedAt !== null,
-      }))
-      .filter((p) => !p.archived)
-  );
+  // address reports one figure across its units. Shared with the detail page so
+  // the two never disagree; archived properties and tax-only entries are
+  // excluded inside the helper.
+  const cashByProperty = buildingCashForYear(properties, year);
   const rowsWithCash = rows.map((r) => {
     const cash = cashByProperty.get(r.id);
     return {
@@ -95,6 +79,9 @@ export default async function PropertiesPage({
       cashOnCashPct: cash?.cashOnCashPct ?? null,
       cashInvested: cash?.downPayment ?? 0,
       unitCount: cash?.unitCount ?? 1,
+      // Active building with entries but no down payment on file anywhere —
+      // the card invites you to add one rather than guessing at a basis.
+      needsDownPayment: cash != null && cash.downPayment <= 0,
     };
   });
 

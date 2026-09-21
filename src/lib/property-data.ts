@@ -256,19 +256,22 @@ export async function getPropertyYearNet(year: number): Promise<number> {
   return monthly.reduce((sum, n) => sum + n, 0);
 }
 
-/** Distinct years that have property transactions, for the year picker. */
+/**
+ * Distinct years that have property transactions, for the year picker.
+ * Archived properties are excluded so the picker can't offer a year whose only
+ * data belongs to them — every figure on the page is active-only, so such a
+ * year would render an empty page.
+ */
 export async function getPropertyYears(): Promise<number[]> {
-  try {
+  return withSchemaHeal(async () => {
     const accountId = await firstAccountId();
     if (!accountId) return [];
     const rows = await prisma.propertyTransaction.findMany({
-      where: { property: { accountId } },
+      where: { property: { accountId, archivedAt: null } },
       select: { year: true },
       distinct: ["year"],
       orderBy: { year: "desc" },
     });
     return rows.map((r) => r.year);
-  } catch {
-    return [];
-  }
+  }, []);
 }

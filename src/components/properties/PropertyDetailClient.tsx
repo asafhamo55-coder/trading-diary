@@ -43,6 +43,7 @@ import {
   monthlyNet,
   forReturns,
   taxOnlyCount,
+  type BuildingCash,
   type PropertyYearSummary,
   type PropertyTransactionDTO,
   type TenantDTO,
@@ -79,6 +80,7 @@ export default function PropertyDetailClient({
   elapsed,
   occupancy,
   yieldPct,
+  cash,
 }: {
   property: PropertyInfo;
   year: number;
@@ -94,6 +96,8 @@ export default function PropertyDetailClient({
   elapsed: number;
   occupancy: { occupiedMonths: number; totalMonths: number; pct: number };
   yieldPct: number | null;
+  /** Building-level return on the cash invested; null for an archived property. */
+  cash: BuildingCash | null;
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -386,7 +390,7 @@ export default function PropertyDetailClient({
       )}
 
       {/* Snapshot KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <SummaryTile
           label={`Net · ${year}`}
           value={summary.net}
@@ -403,6 +407,24 @@ export default function PropertyDetailClient({
           value={yieldPct != null ? `${yieldPct.toFixed(1)}%` : "—"}
           variant="percent"
           caption={yieldPct == null ? "Add purchase price" : undefined}
+        />
+        <SummaryTile
+          label="Cash-on-cash"
+          value={
+            cash?.cashOnCashPct != null
+              ? `${cash.cashOnCashPct >= 0 ? "+" : ""}${cash.cashOnCashPct.toFixed(1)}%`
+              : "—"
+          }
+          variant="percent"
+          caption={
+            cash?.cashOnCashPct != null
+              ? `on ${formatCurrency(cash.downPayment)}${
+                  cash.unitCount > 1 ? ` · ${cash.unitCount} units` : ""
+                }`
+              : isArchived
+                ? "Archived"
+                : "Add a down payment"
+          }
         />
         <SummaryTile
           label="Occupancy"
