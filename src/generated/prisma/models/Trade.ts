@@ -1104,10 +1104,6 @@ export type EnumDirectionFieldUpdateOperationsInput = {
   set?: $Enums.Direction
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type TradeCreateNestedOneWithoutEntriesInput = {
   create?: Prisma.XOR<Prisma.TradeCreateWithoutEntriesInput, Prisma.TradeUncheckedCreateWithoutEntriesInput>
   connectOrCreate?: Prisma.TradeCreateOrConnectWithoutEntriesInput

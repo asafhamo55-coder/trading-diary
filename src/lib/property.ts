@@ -56,6 +56,8 @@ export interface PropertyTransactionDTO {
   category: string;
   amount: number;
   description: string | null;
+  /** Counted for tax, ignored by every performance figure. See `forReturns`. */
+  taxOnly: boolean;
 }
 
 export interface PropertyDTO {
@@ -222,6 +224,21 @@ export function sortTenantsByRecency(tenants: TenantDTO[]): TenantDTO[] {
 /** Signed contribution of a transaction to net income (+income, −expense). */
 export function signedAmount(t: { type: PropertyTxType; amount: number }): number {
   return t.type === "INCOME" ? t.amount : -t.amount;
+}
+
+/**
+ * The entries that count toward how the property performed. `taxOnly` entries
+ * belong on the tax report but not in net / yield / cash-on-cash / cash-flow,
+ * so every performance figure filters through here while the tax summary reads
+ * the unfiltered list. One summarizer, two inputs — the definitions can't drift.
+ */
+export function forReturns<T extends { taxOnly?: boolean }>(transactions: T[]): T[] {
+  return transactions.filter((t) => !t.taxOnly);
+}
+
+/** How many of these entries are marked tax-only. */
+export function taxOnlyCount(transactions: { taxOnly?: boolean }[]): number {
+  return transactions.reduce((n, t) => n + (t.taxOnly ? 1 : 0), 0);
 }
 
 export const MONTH_ABBR = [

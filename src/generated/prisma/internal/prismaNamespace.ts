@@ -1709,6 +1709,7 @@ export const PropertyTransactionScalarFieldEnum = {
   category: 'category',
   amount: 'amount',
   description: 'description',
+  taxOnly: 'taxOnly',
   createdAt: 'createdAt'
 } as const
 
@@ -2020,6 +2021,13 @@ export type ListEnumPropertyTxTypeFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'Direction'
  */
 export type EnumDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Direction'>
@@ -2030,13 +2038,6 @@ export type EnumDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'Direction[]'
  */
 export type ListEnumDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Direction[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 

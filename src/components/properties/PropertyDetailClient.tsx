@@ -18,6 +18,8 @@ import {
   BarChart3,
   Receipt,
   CircleAlert,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { cn, formatCurrency, signedClass } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,8 @@ import {
   categoryLabel,
   getCategory,
   monthlyNet,
+  forReturns,
+  taxOnlyCount,
   type PropertyYearSummary,
   type PropertyTransactionDTO,
   type TenantDTO,
@@ -67,6 +71,7 @@ export default function PropertyDetailClient({
   year,
   availableYears,
   summary,
+  taxSummary,
   prevSummary,
   transactions,
   tenants,
@@ -78,7 +83,10 @@ export default function PropertyDetailClient({
   property: PropertyInfo;
   year: number;
   availableYears: number[];
+  /** Performance view — tax-only entries excluded. Drives every figure below. */
   summary: PropertyYearSummary;
+  /** Tax view — every entry, including the tax-only ones. Schedule E section. */
+  taxSummary: PropertyYearSummary;
   prevSummary: PropertyYearSummary;
   transactions: PropertyTransactionDTO[];
   tenants: TenantDTO[];
@@ -95,6 +103,7 @@ export default function PropertyDetailClient({
   const [archiving, setArchiving] = useState(false);
   const [editingTx, setEditingTx] = useState<PropertyTransactionDTO | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [togglingTxId, setTogglingTxId] = useState<string | null>(null);
   const isArchived = property.archivedAt !== null;
 
   // Editable property details (address parts + purchase info).
@@ -236,8 +245,11 @@ export default function PropertyDetailClient({
     }
   }
 
-  // Cash-flow: signed net per month for the selected year.
-  const net = monthlyNet(transactions);
+  // Cash-flow: signed net per month, tax-only entries excluded like every
+  // other performance figure on this page.
+  const returnsTx = forReturns(transactions);
+  const flaggedCount = taxOnlyCount(transactions);
+  const net = monthlyNet(returnsTx);
   const cashMaxAbs = Math.max(1, ...net.map((v) => Math.abs(v)));
 
   // Year-over-year change vs. prior year's net (only when prior year has data).
@@ -247,6 +259,24 @@ export default function PropertyDetailClient({
     : null;
 
   const monthsTracked = new Set(transactions.map((t) => t.month)).size;
+
+  // Flip an entry between "counts toward returns" and "tax report only".
+  async function handleToggleTaxOnly(tx: PropertyTransactionDTO) {
+    setTogglingTxId(tx.id);
+    try {
+      const res = await fetch(
+        `/api/properties/${property.id}/transactions/${tx.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taxOnly: !tx.taxOnly }),
+        }
+      );
+      if (res.ok) router.refresh();
+    } finally {
+      setTogglingTxId(null);
+    }
+  }
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full">
@@ -388,7 +418,11 @@ export default function PropertyDetailClient({
           label="Entries"
           value={transactions.length}
           variant="count"
-          caption={`${monthsTracked} month${monthsTracked !== 1 ? "s" : ""} tracked`}
+          caption={
+            flaggedCount > 0
+              ? `${flaggedCount} tax-only · ${monthsTracked} mo tracked`
+              : `${monthsTracked} month${monthsTracked !== 1 ? "s" : ""} tracked`
+          }
         />
       </div>
 
@@ -583,7 +617,7 @@ export default function PropertyDetailClient({
           meta="Schedule E style"
         />
 
-        {summary.byCategory.length === 0 ? (
+        {taxSummary.byCategory.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-8">
             <FileText className="w-8 h-8 text-[var(--border)] mb-3" />
             <p className="text-sm text-[var(--muted-foreground)]">
@@ -594,24 +628,32 @@ export default function PropertyDetailClient({
           <div className="space-y-4">
             <SummaryGroup
               title="Income"
-              rows={summary.byCategory.filter((c) => c.type === "INCOME")}
-              total={summary.income}
+              rows={taxSummary.byCategory.filter((c) => c.type === "INCOME")}
+              total={taxSummary.income}
               tone="pos"
             />
             <SummaryGroup
               title="Expenses"
-              rows={summary.byCategory.filter((c) => c.type === "EXPENSE")}
-              total={summary.expenses}
+              rows={taxSummary.byCategory.filter((c) => c.type === "EXPENSE")}
+              total={taxSummary.expenses}
               tone="neg"
-              percentOf={summary.expenses}
+              percentOf={taxSummary.expenses}
             />
             <div className="flex items-center justify-between rounded-lg bg-[var(--muted)]/40 px-3 py-2.5 mt-1">
-              <span className="text-sm font-semibold text-[var(--foreground)]">
-                Net operating income
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-[var(--foreground)]">
+                  Net operating income
+                </span>
+                {flaggedCount > 0 && (
+                  <span className="block text-xs text-[var(--muted-foreground)] mt-0.5">
+                    Includes {flaggedCount} tax-only entr
+                    {flaggedCount !== 1 ? "ies" : "y"} left out of the figures above
+                  </span>
+                )}
               </span>
-              <span className={cn("text-lg font-bold font-data tracking-tight tabular-nums", signedClass(summary.net))}>
-                {summary.net >= 0 ? "+" : ""}
-                {formatCurrency(summary.net)}
+              <span className={cn("text-lg font-bold font-data tracking-tight tabular-nums shrink-0", signedClass(taxSummary.net))}>
+                {taxSummary.net >= 0 ? "+" : ""}
+                {formatCurrency(taxSummary.net)}
               </span>
             </div>
           </div>
@@ -694,6 +736,11 @@ export default function PropertyDetailClient({
         <SectionHeader
           icon={<Receipt className="w-3.5 h-3.5 text-accent-amber" />}
           title={`Entries · ${year}`}
+          meta={
+            flaggedCount > 0
+              ? `${flaggedCount} of ${transactions.length} counted for tax only`
+              : undefined
+          }
         />
         {transactions.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-8">
@@ -720,7 +767,10 @@ export default function PropertyDetailClient({
                   {transactions.map((t) => (
                     <tr
                       key={t.id}
-                      className="border-b border-[var(--border)]/60 last:border-0 group hover:bg-[var(--muted)]/40 transition-colors"
+                      className={cn(
+                        "border-b border-[var(--border)]/60 last:border-0 group hover:bg-[var(--muted)]/40 transition-colors",
+                        t.taxOnly && "opacity-60"
+                      )}
                     >
                       <td
                         className="py-3 text-[var(--muted-foreground)] font-data whitespace-nowrap"
@@ -729,7 +779,10 @@ export default function PropertyDetailClient({
                         {t.date.slice(5)}
                       </td>
                       <td className="py-3 text-[var(--foreground)]">
-                        {categoryLabel(t.category)}
+                        <span className="inline-flex items-center gap-1.5">
+                          {categoryLabel(t.category)}
+                          {t.taxOnly && <TaxOnlyBadge />}
+                        </span>
                       </td>
                       <td className="py-3 text-[var(--muted-foreground)] truncate max-w-[200px]">
                         {t.description || "—"}
@@ -737,14 +790,29 @@ export default function PropertyDetailClient({
                       <td
                         className={cn(
                           "py-3 text-right font-data font-semibold tabular-nums whitespace-nowrap",
-                          t.type === "INCOME" ? "text-profit" : "text-loss"
+                          t.type === "INCOME" ? "text-profit" : "text-loss",
+                          t.taxOnly && "line-through decoration-from-font"
                         )}
                       >
                         {t.type === "INCOME" ? "+" : "−"}
                         {formatCurrency(t.amount)}
                       </td>
                       <td className="py-3 text-right">
-                        <div className="inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                        <div
+                          className={cn(
+                            "inline-flex items-center gap-0.5 transition-opacity",
+                            // A flagged row keeps its toggle visible, so the
+                            // state is always reversible without hunting.
+                            t.taxOnly
+                              ? "opacity-100"
+                              : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+                          )}
+                        >
+                          <TaxOnlyToggle
+                            taxOnly={t.taxOnly}
+                            busy={togglingTxId === t.id}
+                            onClick={() => handleToggleTaxOnly(t)}
+                          />
                           <Button
                             variant="ghost"
                             size="icon-sm"
@@ -772,10 +840,19 @@ export default function PropertyDetailClient({
             {/* Mobile stacked list */}
             <div className="sm:hidden divide-y divide-[var(--border)]">
               {transactions.map((t) => (
-                <div key={t.id} className="flex items-center justify-between gap-3 py-3">
+                <div
+                  key={t.id}
+                  className={cn(
+                    "flex items-center justify-between gap-3 py-3",
+                    t.taxOnly && "opacity-60"
+                  )}
+                >
                   <div className="min-w-0">
                     <p className="text-sm text-[var(--foreground)] truncate">
-                      {categoryLabel(t.category)}
+                      <span className="inline-flex items-center gap-1.5">
+                        {categoryLabel(t.category)}
+                        {t.taxOnly && <TaxOnlyBadge />}
+                      </span>
                     </p>
                     <p className="text-xs text-[var(--muted-foreground)] truncate">
                       {t.date.slice(5)}
@@ -786,12 +863,18 @@ export default function PropertyDetailClient({
                     <span
                       className={cn(
                         "font-data font-semibold tabular-nums text-sm whitespace-nowrap",
-                        t.type === "INCOME" ? "text-profit" : "text-loss"
+                        t.type === "INCOME" ? "text-profit" : "text-loss",
+                        t.taxOnly && "line-through decoration-from-font"
                       )}
                     >
                       {t.type === "INCOME" ? "+" : "−"}
                       {formatCurrency(t.amount)}
                     </span>
+                    <TaxOnlyToggle
+                      taxOnly={t.taxOnly}
+                      busy={togglingTxId === t.id}
+                      onClick={() => handleToggleTaxOnly(t)}
+                    />
                     <Button
                       variant="ghost"
                       size="icon-sm"
@@ -825,6 +908,49 @@ export default function PropertyDetailClient({
         />
       )}
     </div>
+  );
+}
+
+/** Marks an entry as kept for the tax report but out of the performance figures. */
+function TaxOnlyBadge() {
+  return (
+    <span className="shrink-0 text-[10px] font-medium uppercase tracking-wider rounded px-1.5 py-0.5 bg-[var(--muted)] text-[var(--muted-foreground)]">
+      Tax only
+    </span>
+  );
+}
+
+function TaxOnlyToggle({
+  taxOnly,
+  busy,
+  onClick,
+}: {
+  taxOnly: boolean;
+  busy: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      onClick={onClick}
+      disabled={busy}
+      title={
+        taxOnly
+          ? "Counted for tax only — click to include it in gain & yield"
+          : "Counted everywhere — click to keep it for tax only"
+      }
+      aria-label={taxOnly ? "Include entry in gain & yield" : "Count entry for tax only"}
+      aria-pressed={taxOnly}
+    >
+      {busy ? (
+        <Loader2 className="w-4 h-4 animate-spin" />
+      ) : taxOnly ? (
+        <EyeOff className="w-4 h-4" />
+      ) : (
+        <Eye className="w-4 h-4" />
+      )}
+    </Button>
   );
 }
 

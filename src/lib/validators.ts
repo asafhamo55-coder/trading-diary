@@ -134,6 +134,8 @@ export const createPropertyTransactionSchema = z.object({
   category: z.string().min(1, "Category is required"),
   amount: z.number().positive("Amount must be positive"),
   description: z.string().max(300).optional().nullable(),
+  // Keep the entry on the tax report but out of every performance figure.
+  taxOnly: z.boolean().optional(),
 });
 
 export const updatePropertyTransactionSchema = createPropertyTransactionSchema.partial();

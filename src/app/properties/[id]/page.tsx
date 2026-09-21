@@ -7,6 +7,7 @@ import {
   monthsElapsed,
   occupancyForYear,
   yieldPct,
+  forReturns,
 } from "@/lib/property";
 import { todayInEastern } from "@/lib/utils";
 import PropertyDetailClient from "@/components/properties/PropertyDetailClient";
@@ -32,8 +33,12 @@ export default async function PropertyDetailPage({
   const availableYears = txYears.length ? txYears : [currentYear];
   const year = resolveSelectedYear(parseYear(sp.year), availableYears);
 
-  const summary = summarizeYear(property.transactions, year);
-  const prevSummary = summarizeYear(property.transactions, year - 1);
+  // Two views of the same year: `taxSummary` keeps every entry for Schedule E,
+  // while `summary` drops the tax-only ones and drives all performance figures.
+  const returnsTx = forReturns(property.transactions);
+  const taxSummary = summarizeYear(property.transactions, year);
+  const summary = summarizeYear(returnsTx, year);
+  const prevSummary = summarizeYear(returnsTx, year - 1);
   const yearTx = property.transactions.filter((t) => t.year === year);
   const today = todayInEastern();
   const elapsed = monthsElapsed(year, today);
@@ -62,6 +67,7 @@ export default async function PropertyDetailPage({
       year={year}
       availableYears={availableYears}
       summary={summary}
+      taxSummary={taxSummary}
       prevSummary={prevSummary}
       transactions={yearTx}
       tenants={property.tenants}

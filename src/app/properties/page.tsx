@@ -9,6 +9,8 @@ import {
   monthsElapsed,
   yieldPct,
   buildingCashByProperty,
+  forReturns,
+  taxOnlyCount,
 } from "@/lib/property";
 import { todayInEastern } from "@/lib/utils";
 import PropertiesClient from "@/components/properties/PropertiesClient";
@@ -34,7 +36,9 @@ export default async function PropertiesPage({
 
   const rows = properties.map((p) => {
     const yearTx = p.transactions.filter((t) => t.year === year);
-    const summary = summarizeYear(p.transactions, year);
+    // Performance figures read the tax-only entries out; the entry count below
+    // still describes the full list, since that is what the detail page shows.
+    const summary = summarizeYear(forReturns(p.transactions), year);
     const occ = occupancyForYear(p.tenants, year, today);
     const current = currentTenantOf(p.tenants, today);
     return {
@@ -46,7 +50,8 @@ export default async function PropertiesPage({
       income: summary.income,
       expenses: summary.expenses,
       net: summary.net,
-      monthlyNet: monthlyNet(yearTx),
+      monthlyNet: monthlyNet(forReturns(yearTx)),
+      taxOnlyCount: taxOnlyCount(yearTx),
       hasTenants: p.tenants.length > 0,
       occupiedMonths: occ.occupiedMonths,
       occupancyMonths: occ.totalMonths,

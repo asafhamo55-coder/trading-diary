@@ -152,6 +152,7 @@ export const PropertyTransactionScalarFieldEnum = {
   category: 'category',
   amount: 'amount',
   description: 'description',
+  taxOnly: 'taxOnly',
   createdAt: 'createdAt'
 } as const
 

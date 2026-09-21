@@ -107,6 +107,21 @@ export function mapStatementRows(rows: StatementRow[]): MappedTransaction[] {
   });
 }
 
+/**
+ * Identity of an entry across a re-import. A statement reload deletes and
+ * recreates every row, so the `taxOnly` flag is re-applied by matching on the
+ * fields the statement itself produces. A flag survives only if the entry came
+ * back identical — a changed amount or date is a different entry, not a match.
+ */
+function entryKey(t: {
+  date: string;
+  category: string;
+  amount: number;
+  description: string | null;
+}): string {
+  return [t.date, t.category, t.amount.toFixed(2), t.description ?? ""].join("|");
+}
+
 export interface ImportResult {
   propertyId: string;
   created: boolean;
@@ -129,6 +144,9 @@ export async function importPropertyStatement(
 ): Promise<ImportResult> {
   const txs = mapStatementRows(statement.rows);
 
+  // Tax-only flags carried across the delete-and-recreate below.
+  const taxOnlyKeys = new Set<string>();
+
   const result = await prisma.$transaction(async (tx) => {
     const existing = await tx.property.findFirst({
       where: { accountId, address: statement.address },
@@ -148,6 +166,22 @@ export async function importPropertyStatement(
       propertyId = existing.id;
       created = false;
       await tx.property.update({ where: { id: propertyId }, data });
+      // Remember which entries were marked tax-only, so the wipe below doesn't
+      // silently clear them and quietly move the property's gain figures.
+      const flagged = await tx.propertyTransaction.findMany({
+        where: { propertyId, taxOnly: true },
+        select: { date: true, category: true, amount: true, description: true },
+      });
+      for (const f of flagged) {
+        taxOnlyKeys.add(
+          entryKey({
+            date: f.date.toISOString().slice(0, 10),
+            category: f.category,
+            amount: f.amount,
+            description: f.description,
+          })
+        );
+      }
       // Replace prior imported children so re-imports don't accumulate dupes.
       await tx.propertyTransaction.deleteMany({ where: { propertyId } });
       await tx.tenant.deleteMany({ where: { propertyId } });
@@ -183,6 +217,7 @@ export async function importPropertyStatement(
         category: t.category,
         amount: t.amount,
         description: t.description,
+        taxOnly: taxOnlyKeys.has(entryKey(t)),
       })),
     });
 

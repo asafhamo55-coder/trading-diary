@@ -47,6 +47,7 @@ function serializeTx(t: {
   category: string;
   amount: number;
   description: string | null;
+  taxOnly: boolean;
 }): PropertyTransactionDTO {
   return {
     id: t.id,
@@ -58,6 +59,7 @@ function serializeTx(t: {
     category: t.category,
     amount: t.amount,
     description: t.description,
+    taxOnly: t.taxOnly,
   };
 }
 
@@ -202,37 +204,41 @@ export async function getPropertyById(id: string): Promise<PropertyWithTx | null
 
 /** Net (income − expenses) per calendar month for the given year, across all properties. */
 export async function getPropertyMonthlyNet(year: number): Promise<number[]> {
-  const net = Array.from({ length: 12 }, () => 0);
-  try {
+  const zeros = Array.from({ length: 12 }, () => 0);
+  // Heals the schema on the first call after a deploy that adds a column,
+  // rather than silently reporting a flat zero year.
+  return withSchemaHeal(async () => {
+    const net = Array.from({ length: 12 }, () => 0);
     const accountId = await firstAccountId();
     if (!accountId) return net;
     const txs = await prisma.propertyTransaction.findMany({
       // Exclude archived properties so the hub total matches the /properties
       // page, which sums active properties only.
-      where: { year, property: { accountId, archivedAt: null } },
+      // taxOnly entries belong on the tax report only, never in performance.
+      where: { year, taxOnly: false, property: { accountId, archivedAt: null } },
       select: { month: true, type: true, amount: true },
     });
     for (const t of txs) {
       net[t.month - 1] += signedAmount({ type: t.type, amount: t.amount });
     }
     return net;
-  } catch {
-    return net;
-  }
+  }, zeros);
 }
 
 /** Income (revenue) and expenses per calendar month for the year, across all properties. */
 export async function getPropertyMonthlyRevExp(
   year: number
 ): Promise<{ revenue: number; expense: number }[]> {
-  const rows = Array.from({ length: 12 }, () => ({ revenue: 0, expense: 0 }));
-  try {
+  const zeros = Array.from({ length: 12 }, () => ({ revenue: 0, expense: 0 }));
+  return withSchemaHeal(async () => {
+    const rows = Array.from({ length: 12 }, () => ({ revenue: 0, expense: 0 }));
     const accountId = await firstAccountId();
     if (!accountId) return rows;
     const txs = await prisma.propertyTransaction.findMany({
       // Exclude archived properties so the hub total matches the /properties
       // page, which sums active properties only.
-      where: { year, property: { accountId, archivedAt: null } },
+      // taxOnly entries belong on the tax report only, never in performance.
+      where: { year, taxOnly: false, property: { accountId, archivedAt: null } },
       select: { month: true, type: true, amount: true },
     });
     for (const t of txs) {
@@ -242,9 +248,7 @@ export async function getPropertyMonthlyRevExp(
       else rows[idx].expense += t.amount;
     }
     return rows;
-  } catch {
-    return rows;
-  }
+  }, zeros);
 }
 
 export async function getPropertyYearNet(year: number): Promise<number> {

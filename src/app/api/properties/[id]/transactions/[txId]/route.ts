@@ -37,6 +37,7 @@ export async function PATCH(
     if (data.category !== undefined) patch.category = data.category;
     if (data.amount !== undefined) patch.amount = data.amount;
     if (data.description !== undefined) patch.description = data.description ?? null;
+    if (data.taxOnly !== undefined) patch.taxOnly = data.taxOnly;
     if (data.date !== undefined) {
       const d = new Date(data.date);
       if (Number.isNaN(d.getTime())) return errorResponse("Invalid date");

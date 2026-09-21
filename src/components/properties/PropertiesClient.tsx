@@ -50,6 +50,8 @@ interface Row {
   cashInvested: number;
   /** Units sharing this building; > 1 means the figure spans siblings. */
   unitCount: number;
+  /** Entries kept for tax but left out of the figures on this card. */
+  taxOnlyCount: number;
 }
 
 export default function PropertiesClient({
@@ -580,6 +582,7 @@ function PropertyCard({
         <div className="flex items-center justify-between text-xs text-[var(--muted-foreground)] mt-2 pt-2 border-t border-[var(--border)]">
           <span>
             {r.txCount} entr{r.txCount !== 1 ? "ies" : "y"}
+            {r.taxOnlyCount > 0 && ` · ${r.taxOnlyCount} tax only`}
           </span>
           {r.yieldPct != null && (
             <span className="font-data">{r.yieldPct.toFixed(1)}% yield</span>

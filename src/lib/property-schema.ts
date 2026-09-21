@@ -70,6 +70,10 @@ export async function ensurePropertySchema(): Promise<void> {
   await prisma.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS "PropertyTransaction_propertyId_year_idx" ON "PropertyTransaction"("propertyId", "year")`
   );
+  // Entries kept for the tax report but ignored by every performance figure.
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "PropertyTransaction" ADD COLUMN IF NOT EXISTS "taxOnly" BOOLEAN NOT NULL DEFAULT false`
+  );
 
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "Tenant" (

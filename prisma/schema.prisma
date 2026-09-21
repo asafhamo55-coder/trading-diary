@@ -90,6 +90,9 @@ model PropertyTransaction {
   category    String
   amount      Float              // always positive; sign implied by `type`
   description String?
+  // Counted for tax (Schedule E) but ignored by every performance figure —
+  // net, yield, cash-on-cash, cash-flow charts. See `forReturns` in property.ts.
+  taxOnly     Boolean            @default(false)
 
   createdAt   DateTime @default(now())
 
