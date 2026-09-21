@@ -295,9 +295,14 @@ export function occupancyForYear(
   if (totalMonths === 0) return { occupiedMonths: 0, totalMonths: 0, pct: 0 };
   let occupied = 0;
   for (let m = 1; m <= totalMonths; m++) {
-    // Month m of `year` counts as occupied if any lease overlaps it.
-    const monthStart = `${year}-${String(m).padStart(2, "0")}-01`;
-    const monthEnd = `${year}-${String(m).padStart(2, "0")}-28`;
+    // Month m of `year` counts as occupied if any lease overlaps it. The month
+    // end must be its real last day: pinning it to the 28th dropped the first
+    // month of any lease starting on the 29th–31st, while still counting the
+    // last month of one ending then — an asymmetry that understated occupancy.
+    const mm = String(m).padStart(2, "0");
+    const lastDay = new Date(Date.UTC(year, m, 0)).getUTCDate();
+    const monthStart = `${year}-${mm}-01`;
+    const monthEnd = `${year}-${mm}-${lastDay}`;
     const covered = tenants.some(
       (t) => t.leaseStart <= monthEnd && (t.leaseEnd === null || t.leaseEnd >= monthStart)
     );
@@ -324,13 +329,24 @@ export function yieldPct(
   return (annualized / purchasePrice) * 100;
 }
 
-// A segment that names a unit rather than the building: "Unit 2", "Apt 4B",
-// "#3", "Suite C". Stripped when deriving a building key so the units of one
-// address collapse together.
-const UNIT_SEGMENT_RE =
-  /^(?:#\s*\S+|(?:unit|apt|apartment|ste|suite|bldg)\s*\.?\s*\S*)$/i;
-const TRAILING_UNIT_RE =
-  /[\s,]+(?:#\s*\S+|(?:unit|apt|apartment|ste|suite|bldg)\s*\.?\s*\S+)\s*$/i;
+// Words that introduce a unit designator inside an address.
+const UNIT_WORDS = "unit|apt|apartment|ste|suite|bldg|building|fl|floor|rm|room";
+// The identifier that must follow one of those words for it to really be a unit:
+// something containing a digit ("2", "4B", "A-1") or a lone letter ("B").
+// Without this, a street named "7 Bldg Way" would lose its name.
+const UNIT_ID = "(?:[A-Za-z0-9-]*[0-9][A-Za-z0-9-]*|[A-Za-z])";
+// A whole address segment that names a unit rather than the building.
+const UNIT_SEGMENT_RE = new RegExp(
+  `^(?:#\\s*\\S+|(?:${UNIT_WORDS})\\s*\\.?\\s*${UNIT_ID})$`,
+  "i"
+);
+// The same, appended to a street line: "1053 Laurel Ct NW #2".
+const TRAILING_UNIT_RE = new RegExp(
+  `[\\s,]+(?:#\\s*\\S+|(?:${UNIT_WORDS})\\s*\\.?\\s*${UNIT_ID})\\s*$`,
+  "i"
+);
+const ZIP_RE = /^\d{5}(?:-\d{4})?$/;
+const STATE_RE = /^[A-Za-z]{2}$/;
 
 function normalizePart(v?: string | null): string {
   return (v ?? "").trim().toLowerCase().replace(/\s+/g, " ");
@@ -338,11 +354,19 @@ function normalizePart(v?: string | null): string {
 
 /**
  * Key identifying the physical building a property sits in, so the units of a
- * multi-unit address group together. Prefers the structured `street` (+ city /
- * state / zip); falls back to the full address with its unit segment removed,
- * because imported properties carry only `address` — e.g.
- * "1053 Laurel Ct NW, Unit 1, Rockdale County, GA, 30012, US". Properties with
- * neither fall back to their own id, so they never group with each other.
+ * multi-unit address group together.
+ *
+ * Both sources of address data reduce to the SAME canonical shape —
+ * `street|state|zip` — because a property may carry structured parts (once its
+ * address has been edited in the UI) or only the single `address` string it was
+ * imported with, and the two units of one building can differ in which. Keying
+ * each format differently would silently split a building in half.
+ *
+ * City is deliberately left out: a street plus state plus ZIP already pins a
+ * building, and ZIP position inside a free-form address is not reliable. When
+ * neither state nor ZIP is recorded, the remaining address detail is folded in
+ * so two same-named streets in different towns still stay apart. Properties
+ * with no address at all fall back to their own id and never group.
  */
 export function buildingKey(p: {
   id: string;
@@ -352,20 +376,28 @@ export function buildingKey(p: {
   zip?: string | null;
   address?: string | null;
 }): string {
-  const street = (p.street ?? "").trim();
-  if (street) {
-    return [street.replace(TRAILING_UNIT_RE, ""), p.city, p.state, p.zip]
-      .map(normalizePart)
-      .filter(Boolean)
-      .join(" | ");
+  const structuredStreet = (p.street ?? "").trim();
+  let street: string;
+  let state = normalizePart(p.state);
+  let zip = normalizePart(p.zip);
+  let extra = "";
+
+  if (structuredStreet) {
+    street = normalizePart(structuredStreet.replace(TRAILING_UNIT_RE, ""));
+    if (!state && !zip) extra = normalizePart(p.city);
+  } else {
+    const segments = (p.address ?? "")
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean);
+    const kept = segments.filter((v) => !UNIT_SEGMENT_RE.test(v));
+    street = normalizePart(kept[0] ?? "");
+    if (!zip) zip = normalizePart(segments.find((v) => ZIP_RE.test(v)) ?? "");
+    if (!state) state = normalizePart(segments.find((v) => STATE_RE.test(v)) ?? "");
+    if (!state && !zip) extra = kept.slice(1).map(normalizePart).join(" ");
   }
-  const fromAddress = (p.address ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter((s) => s && !UNIT_SEGMENT_RE.test(s))
-    .map(normalizePart)
-    .join(", ");
-  return fromAddress || p.id;
+
+  return [street, state, zip, extra].filter(Boolean).join("|") || p.id;
 }
 
 /** Cash returned over the period as a percentage of the cash invested. */
@@ -445,10 +477,12 @@ export function summarizeYear(
   let income = 0;
   let expenses = 0;
   const totals = new Map<string, number>();
+  const types = new Map<string, PropertyTxType>();
   for (const t of rows) {
     if (t.type === "INCOME") income += t.amount;
     else expenses += t.amount;
     totals.set(t.category, (totals.get(t.category) ?? 0) + t.amount);
+    types.set(t.category, t.type);
   }
   // Preserve the catalog order for a stable, tax-form-like layout.
   const byCategory = PROPERTY_CATEGORIES.filter((c) => totals.has(c.key)).map((c) => ({
@@ -457,6 +491,18 @@ export function summarizeYear(
     type: c.type,
     total: totals.get(c.key) ?? 0,
   }));
+  // A category outside the catalog (stale data, a renamed key) still moves the
+  // totals, so it has to appear in the breakdown too — otherwise the tax lines
+  // silently fail to sum to the net printed beneath them. Listed after the
+  // catalog rows, in a stable order.
+  for (const key of [...totals.keys()].filter((k) => !CATEGORY_BY_KEY.has(k)).sort()) {
+    byCategory.push({
+      key,
+      label: categoryLabel(key),
+      type: types.get(key) ?? "EXPENSE",
+      total: totals.get(key) ?? 0,
+    });
+  }
   return { income, expenses, net: income - expenses, byCategory };
 }
 
