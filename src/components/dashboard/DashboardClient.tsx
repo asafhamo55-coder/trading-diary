@@ -58,7 +58,6 @@ interface Trade {
   direction: string;
   totalPnL: number | null;
   riskReward: number | null;
-  [key: string]: unknown;
 }
 
 interface DashboardClientProps {

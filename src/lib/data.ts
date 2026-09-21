@@ -2,6 +2,8 @@
 // Used by page components to get real data
 
 import { prisma } from "./db";
+import type { Prisma } from "@/generated/prisma/client";
+import type { Trade } from "./types";
 import { tradeDateYearFilter } from "./year";
 import { DEMO_TRADES, DEMO_ACCOUNT, DEMO_MONTHLY_REVIEWS, DEMO_ERROR_DEFINITIONS, getDemoStats, getDemoMonthlyPnL, getDemoEquityCurve } from "./demo-data";
 
@@ -526,14 +528,24 @@ function emptyInsights(): DashboardInsights {
 }
 
 // Serialize Prisma objects to plain JSON (dates → strings)
-function serializeTrade(trade: any) {
+// The row shape every trade query above asks Prisma for.
+type PrismaTradeRow = Prisma.TradeGetPayload<{
+  include: {
+    entries: true;
+    tradeErrors: { include: { errorDefinition: true } };
+  };
+}>;
+
+type PrismaMonthlyReviewRow = Prisma.MonthlyReviewGetPayload<object>;
+
+function serializeTrade(trade: PrismaTradeRow): Trade {
   return {
     ...trade,
     tradeDate: trade.tradeDate instanceof Date ? trade.tradeDate.toISOString().split("T")[0] : trade.tradeDate,
     createdAt: trade.createdAt instanceof Date ? trade.createdAt.toISOString() : trade.createdAt,
     updatedAt: trade.updatedAt instanceof Date ? trade.updatedAt.toISOString() : trade.updatedAt,
     entries: Array.isArray(trade.entries)
-      ? trade.entries.map((e: any) => ({
+      ? trade.entries.map((e) => ({
           ...e,
           filledAt: e.filledAt instanceof Date ? e.filledAt.toISOString() : e.filledAt ?? null,
         }))
@@ -541,7 +553,7 @@ function serializeTrade(trade: any) {
   };
 }
 
-function serializeReview(review: any) {
+function serializeReview(review: PrismaMonthlyReviewRow) {
   return {
     ...review,
     createdAt: review.createdAt instanceof Date ? review.createdAt.toISOString() : review.createdAt,
