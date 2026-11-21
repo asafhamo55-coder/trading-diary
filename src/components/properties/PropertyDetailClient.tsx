@@ -1,10 +1,9 @@
 "use client";
 
+import PropertyRecommendations from "@/components/advisor/PropertyRecommendations";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
-  ArrowLeft,
   Plus,
   Trash2,
   Loader2,
@@ -25,13 +24,21 @@ import { cn, formatCurrency, signedClass } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Field,
-  SummaryTile,
   SegmentedControl,
   SectionHeader,
   inputCls,
   MONTH_ABBR,
 } from "@/components/properties/shared";
 import YearPicker from "@/components/layout/YearPicker";
+import { PageHeader } from "@/components/ui/page-header";
+import { Kpi } from "@/components/ui/stat-tile";
+import { StatusPill } from "@/components/ui/badge";
+import { useDisplayCurrency } from "@/components/ui/currency";
+import { notifyPropertiesChanged } from "@/components/layout/use-property-nav";
+import { formatShortDate, type AttentionItem } from "@/lib/property-attention";
+import type { PropertyRecord } from "@/lib/property-profile";
+import { AttentionPanel } from "@/components/properties/AttentionPanel";
+import { PropertyRecordSections } from "@/components/properties/record/PropertyRecordSections";
 import TenantsSection from "@/components/properties/TenantsSection";
 import PropertyValueSection from "@/components/properties/PropertyValueSection";
 import EditPropertyEntryModal from "@/components/properties/EditPropertyEntryModal";
@@ -43,6 +50,7 @@ import {
   monthlyNet,
   forReturns,
   taxOnlyCount,
+  currentTenantOf,
   type BuildingCash,
   type PropertyYearSummary,
   type PropertyTransactionDTO,
@@ -84,6 +92,8 @@ export default function PropertyDetailClient({
   occupancy,
   yieldPct,
   cash,
+  record,
+  attention,
 }: {
   property: PropertyInfo;
   year: number;
@@ -101,8 +111,13 @@ export default function PropertyDetailClient({
   yieldPct: number | null;
   /** Building-level return on the cash invested; null for an archived property. */
   cash: BuildingCash | null;
+  /** Loans, insurance, tax, management, utilities, tax basis, maintenance, documents. */
+  record: PropertyRecord;
+  /** "Needs attention" items for this property (same rules as the list). */
+  attention: AttentionItem[];
 }) {
   const router = useRouter();
+  const { money } = useDisplayCurrency();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingProperty, setDeletingProperty] = useState(false);
@@ -158,6 +173,7 @@ export default function PropertyDetailClient({
         throw new Error(data?.error || "Failed to save details");
       }
       setEditingDetails(false);
+      notifyPropertiesChanged();
       router.refresh();
     } catch (err) {
       setDetailsError(err instanceof Error ? err.message : "Failed to save details");
@@ -231,7 +247,10 @@ export default function PropertyDetailClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ archived: !isArchived }),
       });
-      if (res.ok) router.refresh();
+      if (res.ok) {
+        notifyPropertiesChanged();
+        router.refresh();
+      }
     } finally {
       setArchiving(false);
     }
@@ -244,6 +263,7 @@ export default function PropertyDetailClient({
         method: "DELETE",
       });
       if (res.ok) {
+        notifyPropertiesChanged();
         router.push("/properties");
         router.refresh();
       }
@@ -266,6 +286,9 @@ export default function PropertyDetailClient({
     : null;
 
   const monthsTracked = new Set(transactions.map((t) => t.month)).size;
+  const isResidence = property.usage === "residence";
+  const currentTenant = currentTenantOf(tenants, today);
+  const equity = property.currentValue != null ? property.currentValue - (property.mortgageBalance ?? 0) : null;
 
   // Flip an entry between "counts toward returns" and "tax report only".
   async function handleToggleTaxOnly(tx: PropertyTransactionDTO) {
@@ -286,80 +309,94 @@ export default function PropertyDetailClient({
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div className="min-w-0">
-          <Link
-            href="/properties"
-            className="pressable inline-flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors mb-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            All properties
-          </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)] truncate">
-            {property.title}
-          </h1>
-          <p className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] mt-0.5">
-            <MapPin className="w-3.5 h-3.5 shrink-0" />
-            {property.address}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <YearPicker years={availableYears} selected={year} />
-          {/* Actions menu */}
-          <div className="relative">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setMenuOpen((o) => !o)}
-              aria-label="Property actions"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </Button>
-            {menuOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setMenuOpen(false)}
-                />
-                <div className="absolute right-0 mt-1 z-50 w-48 rounded-lg border border-[var(--border)] bg-[var(--card)] shadow-xl py-1">
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      handleToggleArchive();
-                    }}
-                    disabled={archiving}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-60"
-                  >
-                    {isArchived ? (
-                      <>
-                        <ArchiveRestore className="w-4 h-4" />
-                        Restore property
-                      </>
-                    ) : (
-                      <>
-                        <Archive className="w-4 h-4" />
-                        Archive property
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setConfirmDelete(true);
-                    }}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-loss hover:bg-loss/10 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete property
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-8">
+      <PageHeader
+        back={{ href: "/properties", label: "All properties" }}
+        title={property.title}
+        meta={
+          isArchived ? (
+            <StatusPill tone="neutral" label="Archived" />
+          ) : isResidence ? (
+            <StatusPill tone="info" label="Primary residence" icon={<Home aria-hidden />} />
+          ) : currentTenant ? (
+            <StatusPill tone="success" label="Leased" />
+          ) : (
+            <StatusPill tone="danger" label="Vacant" />
+          )
+        }
+        description={
+          <span className="flex flex-col gap-0.5">
+            <span className="flex items-center gap-1">
+              <MapPin className="size-3.5 shrink-0" aria-hidden />
+              {property.address}
+            </span>
+            {!isResidence && currentTenant ? (
+              <span className="num text-xs">
+                {currentTenant.name}
+                {currentTenant.monthlyRent != null ? ` · ${money(currentTenant.monthlyRent)}/mo` : ""}
+                {currentTenant.leaseEnd ? ` · lease ends ${formatShortDate(currentTenant.leaseEnd)}` : " · month-to-month"}
+              </span>
+            ) : null}
+          </span>
+        }
+        actions={
+          <>
+            <YearPicker years={availableYears} selected={year} />
+            {/* Actions menu */}
+            <div className="relative">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-label="Property actions"
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+              >
+                <MoreVertical className="size-4" aria-hidden />
+              </Button>
+              {menuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                  <div role="menu" className="absolute right-0 z-50 mt-1 w-48 rounded-lg border border-border bg-elevated py-1 shadow-lg">
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleToggleArchive();
+                      }}
+                      disabled={archiving}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-subtle disabled:opacity-60"
+                    >
+                      {isArchived ? (
+                        <>
+                          <ArchiveRestore className="size-4" aria-hidden />
+                          Restore property
+                        </>
+                      ) : (
+                        <>
+                          <Archive className="size-4" aria-hidden />
+                          Archive property
+                        </>
+                      )}
+                    </button>
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setConfirmDelete(true);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-danger transition-colors hover:bg-danger-subtle"
+                    >
+                      <Trash2 className="size-4" aria-hidden />
+                      Delete property
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        }
+      />
 
       {/* Delete confirmation */}
       {confirmDelete && (
@@ -393,66 +430,90 @@ export default function PropertyDetailClient({
       )}
 
       {/* Snapshot KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <SummaryTile
-          label={`Net · ${year}`}
-          value={summary.net}
-          tone="net"
-          caption={
-            yoyPct != null
-              ? `${yoyPct >= 0 ? "+" : ""}${yoyPct.toFixed(0)}% YoY`
-              : undefined
-          }
-          captionTone={yoyPct != null ? signedClass(yoyPct) : undefined}
-        />
-        <SummaryTile
-          label="Yield"
-          value={yieldPct != null ? `${yieldPct.toFixed(1)}%` : "—"}
-          variant="percent"
-          caption={yieldPct == null ? "Add purchase price" : undefined}
-        />
-        <SummaryTile
-          label="Cash-on-cash"
-          value={
-            cash?.cashOnCashPct != null
-              ? `${cash.cashOnCashPct >= 0 ? "+" : ""}${cash.cashOnCashPct.toFixed(1)}%`
-              : "—"
-          }
-          variant="percent"
-          caption={
-            cash?.cashOnCashPct != null
-              ? `on ${formatCurrency(cash.downPayment)}${
-                  cash.unitCount > 1 ? ` · ${cash.unitCount} units` : ""
-                }`
-              : isArchived
-                ? "Archived"
-                : "Add a down payment"
-          }
-        />
-        <SummaryTile
-          label="Occupancy"
-          value={occupancy.totalMonths > 0 ? `${Math.round(occupancy.pct)}%` : "—"}
-          variant="percent"
-          caption={
-            occupancy.totalMonths > 0
-              ? `${occupancy.occupiedMonths}/${occupancy.totalMonths} mo`
-              : undefined
-          }
-        />
-        <SummaryTile
-          label="Entries"
-          value={transactions.length}
-          variant="count"
-          caption={
-            flaggedCount > 0
-              ? `${flaggedCount} tax-only · ${monthsTracked} mo tracked`
-              : `${monthsTracked} month${monthsTracked !== 1 ? "s" : ""} tracked`
-          }
-        />
+      <section aria-label="Property summary" className="space-y-2">
+        <div className={cn("grid grid-cols-2 gap-3", isResidence ? "sm:grid-cols-4" : "sm:grid-cols-3 lg:grid-cols-5")}>
+          <Kpi
+            label="Value"
+            value={property.currentValue != null ? money(property.currentValue, "USD", { compact: true }) : "—"}
+            valueTone={property.currentValue == null ? "muted" : "default"}
+            hint={property.valueAsOf ? `as of ${formatShortDate(property.valueAsOf)}` : "add a current value"}
+          />
+          <Kpi
+            label="Mortgage"
+            value={property.mortgageBalance != null ? money(property.mortgageBalance, "USD", { compact: true }) : "—"}
+            valueTone={property.mortgageBalance == null ? "muted" : "default"}
+            hint={property.mortgageAsOf ? `as of ${formatShortDate(property.mortgageAsOf)}` : property.mortgageBalance == null ? "not set" : undefined}
+          />
+          <Kpi
+            label="Equity"
+            value={equity != null ? money(equity, "USD", { compact: true }) : "—"}
+            valueTone={equity == null ? "muted" : equity >= 0 ? "positive" : "negative"}
+            hint={
+              equity != null && property.currentValue
+                ? `${Math.round((equity / property.currentValue) * 100)}% of value${property.mortgageBalance == null ? " · no mortgage on file" : ""}`
+                : undefined
+            }
+          />
+          <Kpi
+            label={`Net ${elapsed > 0 && elapsed < 12 ? "YTD" : year}`}
+            value={money(summary.net, "USD", { compact: true, signed: true })}
+            valueTone={summary.net > 0 ? "positive" : summary.net < 0 ? "negative" : "default"}
+            delta={
+              yoyPct != null
+                ? {
+                    value: `${yoyPct >= 0 ? "+" : "−"}${Math.abs(yoyPct).toFixed(0)}%`,
+                    direction: yoyPct > 0 ? "up" : yoyPct < 0 ? "down" : "flat",
+                    sentiment: yoyPct >= 0 ? "positive" : "negative",
+                    label: "vs last year",
+                  }
+                : undefined
+            }
+          />
+          {!isResidence ? (
+            <Kpi
+              label="Cash-on-cash"
+              value={
+                cash?.cashOnCashPct != null
+                  ? `${cash.cashOnCashPct >= 0 ? "+" : "−"}${Math.abs(cash.cashOnCashPct).toFixed(1)}%`
+                  : "—"
+              }
+              valueTone={cash?.cashOnCashPct == null ? "muted" : cash.cashOnCashPct >= 0 ? "positive" : "negative"}
+              hint={
+                cash?.cashOnCashPct != null
+                  ? `on ${money(cash.downPayment, "USD", { compact: true })}${cash.unitCount > 1 ? ` · ${cash.unitCount} units` : ""}`
+                  : isArchived
+                    ? "archived"
+                    : "add a down payment"
+              }
+            />
+          ) : null}
+        </div>
+        {!isResidence ? (
+          <p className="num flex flex-wrap gap-x-4 gap-y-1 px-1 text-xs text-muted-foreground">
+            <span>Yield {yieldPct != null ? `${yieldPct.toFixed(1)}%` : "— (add purchase price)"}</span>
+            <span>
+              Occupancy{" "}
+              {occupancy.totalMonths > 0
+                ? `${Math.round(occupancy.pct)}% (${occupancy.occupiedMonths}/${occupancy.totalMonths} mo)`
+                : "—"}
+            </span>
+            <span>
+              {transactions.length} entr{transactions.length === 1 ? "y" : "ies"}
+              {flaggedCount > 0 ? ` · ${flaggedCount} tax-only` : ""} · {monthsTracked} month
+              {monthsTracked !== 1 ? "s" : ""} tracked
+            </span>
+          </p>
+        ) : null}
+      </section>
+
+      {/* Needs attention + recommendations */}
+      <div className={cn("grid grid-cols-1 gap-4", attention.length > 0 && "lg:grid-cols-2")}>
+        {attention.length > 0 ? <AttentionPanel items={attention} /> : null}
+        <PropertyRecommendations propertyId={property.id} />
       </div>
 
       {/* Cash flow */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-surface p-5 sm:p-6">
         <SectionHeader
           icon={<BarChart3 className="w-3.5 h-3.5 text-accent-amber" />}
           title={`Cash flow · ${year}`}
@@ -512,7 +573,7 @@ export default function PropertyDetailClient({
       </div>
 
       {/* Property details — structured address + purchase info */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-surface p-5 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <SectionHeader
             icon={<Home className="w-3.5 h-3.5 text-accent-amber" />}
@@ -637,8 +698,24 @@ export default function PropertyDetailClient({
         today={today}
       />
 
+      {/* The property record */}
+      <section aria-labelledby="record-heading" className="space-y-3">
+        <h2 id="record-heading" className="text-lg font-semibold tracking-tight text-foreground">
+          Property record
+        </h2>
+        <PropertyRecordSections
+          propertyId={property.id}
+          record={record}
+          purchasePrice={property.purchasePrice}
+          today={today}
+          expenseOptions={transactions
+            .filter((t) => t.type === "EXPENSE")
+            .map((t) => ({ value: t.id, label: `${formatShortDate(t.date)} · ${categoryLabel(t.category)} · ${money(t.amount)}` }))}
+        />
+      </section>
+
       {/* Tax summary */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-surface p-5 sm:p-6">
         <SectionHeader
           icon={<FileText className="w-3.5 h-3.5 text-accent-amber" />}
           title={`Tax summary · ${year}`}
@@ -691,7 +768,7 @@ export default function PropertyDetailClient({
       {/* Add entry */}
       <form
         onSubmit={handleAdd}
-        className="bg-[var(--card)] border border-[var(--border)] border-t-2 border-t-accent-amber/40 rounded-xl p-5 shadow-sm space-y-4"
+        className="rounded-xl border border-border bg-surface p-5 space-y-4"
       >
         <h3 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Add entry</h3>
         <SegmentedControl
@@ -760,7 +837,7 @@ export default function PropertyDetailClient({
       </form>
 
       {/* Transactions list */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-surface p-5 sm:p-6">
         <SectionHeader
           icon={<Receipt className="w-3.5 h-3.5 text-accent-amber" />}
           title={`Entries · ${year}`}

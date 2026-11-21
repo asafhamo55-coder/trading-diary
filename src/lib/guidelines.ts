@@ -890,7 +890,7 @@ export interface GuidelineSummary {
 
 /**
  * Compact, model-friendly status for the household advisor snapshot (USD).
- * Not yet wired into advisor.ts — see guidelines-data.ts `getGuidelineSummary`.
+ * Sent as `tradingGuidelines` in the advisor snapshot (guidelines-data.ts `getGuidelineSummary`).
  */
 export function summarizeGuidelines(r: GuidelineResult): GuidelineSummary {
   const off = r.buckets.filter((b) => b.status !== "ok");

@@ -108,6 +108,7 @@ export type PropertyCountAggregateOutputType = {
   usage: number
   notes: number
   archivedAt: number
+  profile: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -196,6 +197,7 @@ export type PropertyCountAggregateInputType = {
   usage?: true
   notes?: true
   archivedAt?: true
+  profile?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -307,6 +309,7 @@ export type PropertyGroupByOutputType = {
   usage: string
   notes: string | null
   archivedAt: Date | null
+  profile: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: PropertyCountAggregateOutputType | null
@@ -354,11 +357,17 @@ export type PropertyWhereInput = {
   usage?: Prisma.StringFilter<"Property"> | string
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+  profile?: Prisma.JsonNullableFilter<"Property">
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   transactions?: Prisma.PropertyTransactionListRelationFilter
   tenants?: Prisma.TenantListRelationFilter
+  loans?: Prisma.PropertyLoanListRelationFilter
+  improvements?: Prisma.PropertyImprovementListRelationFilter
+  maintenance?: Prisma.PropertyMaintenanceListRelationFilter
+  documents?: Prisma.PropertyDocumentListRelationFilter
+  utilities?: Prisma.PropertyUtilityListRelationFilter
 }
 
 export type PropertyOrderByWithRelationInput = {
@@ -381,11 +390,17 @@ export type PropertyOrderByWithRelationInput = {
   usage?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  profile?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   account?: Prisma.AccountOrderByWithRelationInput
   transactions?: Prisma.PropertyTransactionOrderByRelationAggregateInput
   tenants?: Prisma.TenantOrderByRelationAggregateInput
+  loans?: Prisma.PropertyLoanOrderByRelationAggregateInput
+  improvements?: Prisma.PropertyImprovementOrderByRelationAggregateInput
+  maintenance?: Prisma.PropertyMaintenanceOrderByRelationAggregateInput
+  documents?: Prisma.PropertyDocumentOrderByRelationAggregateInput
+  utilities?: Prisma.PropertyUtilityOrderByRelationAggregateInput
 }
 
 export type PropertyWhereUniqueInput = Prisma.AtLeast<{
@@ -411,11 +426,17 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   usage?: Prisma.StringFilter<"Property"> | string
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+  profile?: Prisma.JsonNullableFilter<"Property">
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   transactions?: Prisma.PropertyTransactionListRelationFilter
   tenants?: Prisma.TenantListRelationFilter
+  loans?: Prisma.PropertyLoanListRelationFilter
+  improvements?: Prisma.PropertyImprovementListRelationFilter
+  maintenance?: Prisma.PropertyMaintenanceListRelationFilter
+  documents?: Prisma.PropertyDocumentListRelationFilter
+  utilities?: Prisma.PropertyUtilityListRelationFilter
 }, "id">
 
 export type PropertyOrderByWithAggregationInput = {
@@ -438,6 +459,7 @@ export type PropertyOrderByWithAggregationInput = {
   usage?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  profile?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PropertyCountOrderByAggregateInput
@@ -470,6 +492,7 @@ export type PropertyScalarWhereWithAggregatesInput = {
   usage?: Prisma.StringWithAggregatesFilter<"Property"> | string
   notes?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Property"> | Date | string | null
+  profile?: Prisma.JsonNullableWithAggregatesFilter<"Property">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Property"> | Date | string
 }
@@ -493,11 +516,17 @@ export type PropertyCreateInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
   transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
   tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateInput = {
@@ -520,10 +549,16 @@ export type PropertyUncheckedCreateInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
   tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanUncheckedCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementUncheckedCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentUncheckedCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUpdateInput = {
@@ -545,11 +580,17 @@ export type PropertyUpdateInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
   transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
   tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateInput = {
@@ -572,10 +613,16 @@ export type PropertyUncheckedUpdateInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
   tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUncheckedUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUncheckedUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUncheckedUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyInput = {
@@ -598,6 +645,7 @@ export type PropertyCreateManyInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -621,6 +669,7 @@ export type PropertyUpdateManyMutationInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -645,6 +694,7 @@ export type PropertyUncheckedUpdateManyInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -679,6 +729,7 @@ export type PropertyCountOrderByAggregateInput = {
   usage?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
+  profile?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -822,6 +873,76 @@ export type PropertyUpdateOneRequiredWithoutTenantsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutTenantsInput, Prisma.PropertyUpdateWithoutTenantsInput>, Prisma.PropertyUncheckedUpdateWithoutTenantsInput>
 }
 
+export type PropertyCreateNestedOneWithoutLoansInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutLoansInput, Prisma.PropertyUncheckedCreateWithoutLoansInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutLoansInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutLoansNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutLoansInput, Prisma.PropertyUncheckedCreateWithoutLoansInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutLoansInput
+  upsert?: Prisma.PropertyUpsertWithoutLoansInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutLoansInput, Prisma.PropertyUpdateWithoutLoansInput>, Prisma.PropertyUncheckedUpdateWithoutLoansInput>
+}
+
+export type PropertyCreateNestedOneWithoutImprovementsInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutImprovementsInput, Prisma.PropertyUncheckedCreateWithoutImprovementsInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutImprovementsInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutImprovementsNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutImprovementsInput, Prisma.PropertyUncheckedCreateWithoutImprovementsInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutImprovementsInput
+  upsert?: Prisma.PropertyUpsertWithoutImprovementsInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutImprovementsInput, Prisma.PropertyUpdateWithoutImprovementsInput>, Prisma.PropertyUncheckedUpdateWithoutImprovementsInput>
+}
+
+export type PropertyCreateNestedOneWithoutMaintenanceInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutMaintenanceInput, Prisma.PropertyUncheckedCreateWithoutMaintenanceInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutMaintenanceInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutMaintenanceNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutMaintenanceInput, Prisma.PropertyUncheckedCreateWithoutMaintenanceInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutMaintenanceInput
+  upsert?: Prisma.PropertyUpsertWithoutMaintenanceInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutMaintenanceInput, Prisma.PropertyUpdateWithoutMaintenanceInput>, Prisma.PropertyUncheckedUpdateWithoutMaintenanceInput>
+}
+
+export type PropertyCreateNestedOneWithoutDocumentsInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutDocumentsInput, Prisma.PropertyUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutDocumentsInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutDocumentsInput, Prisma.PropertyUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutDocumentsInput
+  upsert?: Prisma.PropertyUpsertWithoutDocumentsInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutDocumentsInput, Prisma.PropertyUpdateWithoutDocumentsInput>, Prisma.PropertyUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type PropertyCreateNestedOneWithoutUtilitiesInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutUtilitiesInput, Prisma.PropertyUncheckedCreateWithoutUtilitiesInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutUtilitiesInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutUtilitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutUtilitiesInput, Prisma.PropertyUncheckedCreateWithoutUtilitiesInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutUtilitiesInput
+  upsert?: Prisma.PropertyUpsertWithoutUtilitiesInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutUtilitiesInput, Prisma.PropertyUpdateWithoutUtilitiesInput>, Prisma.PropertyUncheckedUpdateWithoutUtilitiesInput>
+}
+
 export type PropertyCreateNestedOneWithoutTransactionsInput = {
   create?: Prisma.XOR<Prisma.PropertyCreateWithoutTransactionsInput, Prisma.PropertyUncheckedCreateWithoutTransactionsInput>
   connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutTransactionsInput
@@ -855,10 +976,16 @@ export type PropertyCreateWithoutAccountInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
   tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutAccountInput = {
@@ -880,10 +1007,16 @@ export type PropertyUncheckedCreateWithoutAccountInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
   tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanUncheckedCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementUncheckedCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentUncheckedCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutAccountInput = {
@@ -935,6 +1068,7 @@ export type PropertyScalarWhereInput = {
   usage?: Prisma.StringFilter<"Property"> | string
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+  profile?: Prisma.JsonNullableFilter<"Property">
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
 }
@@ -958,10 +1092,16 @@ export type PropertyCreateWithoutTenantsInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
   transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutTenantsInput = {
@@ -984,9 +1124,15 @@ export type PropertyUncheckedCreateWithoutTenantsInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanUncheckedCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementUncheckedCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentUncheckedCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutTenantsInput = {
@@ -1024,10 +1170,16 @@ export type PropertyUpdateWithoutTenantsInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
   transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutTenantsInput = {
@@ -1050,9 +1202,715 @@ export type PropertyUncheckedUpdateWithoutTenantsInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUncheckedUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUncheckedUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUncheckedUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyCreateWithoutLoansInput = {
+  id?: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
+  transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutLoansInput = {
+  id?: string
+  accountId: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementUncheckedCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentUncheckedCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutLoansInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutLoansInput, Prisma.PropertyUncheckedCreateWithoutLoansInput>
+}
+
+export type PropertyUpsertWithoutLoansInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutLoansInput, Prisma.PropertyUncheckedUpdateWithoutLoansInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutLoansInput, Prisma.PropertyUncheckedCreateWithoutLoansInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutLoansInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutLoansInput, Prisma.PropertyUncheckedUpdateWithoutLoansInput>
+}
+
+export type PropertyUpdateWithoutLoansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
+  transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutLoansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUncheckedUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUncheckedUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyCreateWithoutImprovementsInput = {
+  id?: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
+  transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutImprovementsInput = {
+  id?: string
+  accountId: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanUncheckedCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentUncheckedCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutImprovementsInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutImprovementsInput, Prisma.PropertyUncheckedCreateWithoutImprovementsInput>
+}
+
+export type PropertyUpsertWithoutImprovementsInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutImprovementsInput, Prisma.PropertyUncheckedUpdateWithoutImprovementsInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutImprovementsInput, Prisma.PropertyUncheckedCreateWithoutImprovementsInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutImprovementsInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutImprovementsInput, Prisma.PropertyUncheckedUpdateWithoutImprovementsInput>
+}
+
+export type PropertyUpdateWithoutImprovementsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
+  transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutImprovementsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUncheckedUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUncheckedUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyCreateWithoutMaintenanceInput = {
+  id?: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
+  transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutMaintenanceInput = {
+  id?: string
+  accountId: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanUncheckedCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementUncheckedCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentUncheckedCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutMaintenanceInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutMaintenanceInput, Prisma.PropertyUncheckedCreateWithoutMaintenanceInput>
+}
+
+export type PropertyUpsertWithoutMaintenanceInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutMaintenanceInput, Prisma.PropertyUncheckedUpdateWithoutMaintenanceInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutMaintenanceInput, Prisma.PropertyUncheckedCreateWithoutMaintenanceInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutMaintenanceInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutMaintenanceInput, Prisma.PropertyUncheckedUpdateWithoutMaintenanceInput>
+}
+
+export type PropertyUpdateWithoutMaintenanceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
+  transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutMaintenanceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUncheckedUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUncheckedUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUncheckedUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyCreateWithoutDocumentsInput = {
+  id?: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
+  transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutDocumentsInput = {
+  id?: string
+  accountId: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanUncheckedCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementUncheckedCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutDocumentsInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutDocumentsInput, Prisma.PropertyUncheckedCreateWithoutDocumentsInput>
+}
+
+export type PropertyUpsertWithoutDocumentsInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutDocumentsInput, Prisma.PropertyUncheckedUpdateWithoutDocumentsInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutDocumentsInput, Prisma.PropertyUncheckedCreateWithoutDocumentsInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutDocumentsInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutDocumentsInput, Prisma.PropertyUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type PropertyUpdateWithoutDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
+  transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUncheckedUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUncheckedUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyCreateWithoutUtilitiesInput = {
+  id?: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
+  transactions?: Prisma.PropertyTransactionCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutUtilitiesInput = {
+  id?: string
+  accountId: string
+  nickname: string
+  address: string
+  street?: string | null
+  unit?: string | null
+  city?: string | null
+  state?: string | null
+  zip?: string | null
+  purchasePrice?: number | null
+  downPayment?: number | null
+  purchaseDate?: Date | string | null
+  currentValue?: number | null
+  valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
+  usage?: string
+  notes?: string | null
+  archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedCreateNestedManyWithoutPropertyInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanUncheckedCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementUncheckedCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutUtilitiesInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutUtilitiesInput, Prisma.PropertyUncheckedCreateWithoutUtilitiesInput>
+}
+
+export type PropertyUpsertWithoutUtilitiesInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutUtilitiesInput, Prisma.PropertyUncheckedUpdateWithoutUtilitiesInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutUtilitiesInput, Prisma.PropertyUncheckedCreateWithoutUtilitiesInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutUtilitiesInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutUtilitiesInput, Prisma.PropertyUncheckedUpdateWithoutUtilitiesInput>
+}
+
+export type PropertyUpdateWithoutUtilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
+  transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutUtilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  downPayment?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usage?: Prisma.StringFieldUpdateOperationsInput | string
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUncheckedUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUncheckedUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateWithoutTransactionsInput = {
@@ -1074,10 +1932,16 @@ export type PropertyCreateWithoutTransactionsInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   account: Prisma.AccountCreateNestedOneWithoutPropertiesInput
   tenants?: Prisma.TenantCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutTransactionsInput = {
@@ -1100,9 +1964,15 @@ export type PropertyUncheckedCreateWithoutTransactionsInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutPropertyInput
+  loans?: Prisma.PropertyLoanUncheckedCreateNestedManyWithoutPropertyInput
+  improvements?: Prisma.PropertyImprovementUncheckedCreateNestedManyWithoutPropertyInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedCreateNestedManyWithoutPropertyInput
+  documents?: Prisma.PropertyDocumentUncheckedCreateNestedManyWithoutPropertyInput
+  utilities?: Prisma.PropertyUtilityUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutTransactionsInput = {
@@ -1140,10 +2010,16 @@ export type PropertyUpdateWithoutTransactionsInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   account?: Prisma.AccountUpdateOneRequiredWithoutPropertiesNestedInput
   tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutTransactionsInput = {
@@ -1166,9 +2042,15 @@ export type PropertyUncheckedUpdateWithoutTransactionsInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUncheckedUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUncheckedUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUncheckedUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyAccountInput = {
@@ -1190,6 +2072,7 @@ export type PropertyCreateManyAccountInput = {
   usage?: string
   notes?: string | null
   archivedAt?: Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1213,10 +2096,16 @@ export type PropertyUpdateWithoutAccountInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.PropertyTransactionUpdateManyWithoutPropertyNestedInput
   tenants?: Prisma.TenantUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutAccountInput = {
@@ -1238,10 +2127,16 @@ export type PropertyUncheckedUpdateWithoutAccountInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.PropertyTransactionUncheckedUpdateManyWithoutPropertyNestedInput
   tenants?: Prisma.TenantUncheckedUpdateManyWithoutPropertyNestedInput
+  loans?: Prisma.PropertyLoanUncheckedUpdateManyWithoutPropertyNestedInput
+  improvements?: Prisma.PropertyImprovementUncheckedUpdateManyWithoutPropertyNestedInput
+  maintenance?: Prisma.PropertyMaintenanceUncheckedUpdateManyWithoutPropertyNestedInput
+  documents?: Prisma.PropertyDocumentUncheckedUpdateManyWithoutPropertyNestedInput
+  utilities?: Prisma.PropertyUtilityUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateManyWithoutAccountInput = {
@@ -1263,6 +2158,7 @@ export type PropertyUncheckedUpdateManyWithoutAccountInput = {
   usage?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profile?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1275,11 +2171,21 @@ export type PropertyUncheckedUpdateManyWithoutAccountInput = {
 export type PropertyCountOutputType = {
   transactions: number
   tenants: number
+  loans: number
+  improvements: number
+  maintenance: number
+  documents: number
+  utilities: number
 }
 
 export type PropertyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   transactions?: boolean | PropertyCountOutputTypeCountTransactionsArgs
   tenants?: boolean | PropertyCountOutputTypeCountTenantsArgs
+  loans?: boolean | PropertyCountOutputTypeCountLoansArgs
+  improvements?: boolean | PropertyCountOutputTypeCountImprovementsArgs
+  maintenance?: boolean | PropertyCountOutputTypeCountMaintenanceArgs
+  documents?: boolean | PropertyCountOutputTypeCountDocumentsArgs
+  utilities?: boolean | PropertyCountOutputTypeCountUtilitiesArgs
 }
 
 /**
@@ -1306,6 +2212,41 @@ export type PropertyCountOutputTypeCountTenantsArgs<ExtArgs extends runtime.Type
   where?: Prisma.TenantWhereInput
 }
 
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeCountLoansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyLoanWhereInput
+}
+
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeCountImprovementsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyImprovementWhereInput
+}
+
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeCountMaintenanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyMaintenanceWhereInput
+}
+
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyDocumentWhereInput
+}
+
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeCountUtilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyUtilityWhereInput
+}
+
 
 export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1327,11 +2268,17 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   usage?: boolean
   notes?: boolean
   archivedAt?: boolean
+  profile?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   transactions?: boolean | Prisma.Property$transactionsArgs<ExtArgs>
   tenants?: boolean | Prisma.Property$tenantsArgs<ExtArgs>
+  loans?: boolean | Prisma.Property$loansArgs<ExtArgs>
+  improvements?: boolean | Prisma.Property$improvementsArgs<ExtArgs>
+  maintenance?: boolean | Prisma.Property$maintenanceArgs<ExtArgs>
+  documents?: boolean | Prisma.Property$documentsArgs<ExtArgs>
+  utilities?: boolean | Prisma.Property$utilitiesArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["property"]>
 
@@ -1355,6 +2302,7 @@ export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   usage?: boolean
   notes?: boolean
   archivedAt?: boolean
+  profile?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
@@ -1380,6 +2328,7 @@ export type PropertySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   usage?: boolean
   notes?: boolean
   archivedAt?: boolean
+  profile?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
@@ -1405,15 +2354,21 @@ export type PropertySelectScalar = {
   usage?: boolean
   notes?: boolean
   archivedAt?: boolean
+  profile?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "nickname" | "address" | "street" | "unit" | "city" | "state" | "zip" | "purchasePrice" | "downPayment" | "purchaseDate" | "currentValue" | "valueAsOf" | "mortgageBalance" | "mortgageAsOf" | "usage" | "notes" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
+export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "nickname" | "address" | "street" | "unit" | "city" | "state" | "zip" | "purchasePrice" | "downPayment" | "purchaseDate" | "currentValue" | "valueAsOf" | "mortgageBalance" | "mortgageAsOf" | "usage" | "notes" | "archivedAt" | "profile" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
 export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   transactions?: boolean | Prisma.Property$transactionsArgs<ExtArgs>
   tenants?: boolean | Prisma.Property$tenantsArgs<ExtArgs>
+  loans?: boolean | Prisma.Property$loansArgs<ExtArgs>
+  improvements?: boolean | Prisma.Property$improvementsArgs<ExtArgs>
+  maintenance?: boolean | Prisma.Property$maintenanceArgs<ExtArgs>
+  documents?: boolean | Prisma.Property$documentsArgs<ExtArgs>
+  utilities?: boolean | Prisma.Property$utilitiesArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PropertyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1429,6 +2384,11 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     account: Prisma.$AccountPayload<ExtArgs>
     transactions: Prisma.$PropertyTransactionPayload<ExtArgs>[]
     tenants: Prisma.$TenantPayload<ExtArgs>[]
+    loans: Prisma.$PropertyLoanPayload<ExtArgs>[]
+    improvements: Prisma.$PropertyImprovementPayload<ExtArgs>[]
+    maintenance: Prisma.$PropertyMaintenancePayload<ExtArgs>[]
+    documents: Prisma.$PropertyDocumentPayload<ExtArgs>[]
+    utilities: Prisma.$PropertyUtilityPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1450,6 +2410,7 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     usage: string
     notes: string | null
     archivedAt: Date | null
+    profile: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["property"]>
@@ -1849,6 +2810,11 @@ export interface Prisma__PropertyClient<T, Null = never, ExtArgs extends runtime
   account<T extends Prisma.AccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccountDefaultArgs<ExtArgs>>): Prisma.Prisma__AccountClient<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   transactions<T extends Prisma.Property$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tenants<T extends Prisma.Property$tenantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$tenantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loans<T extends Prisma.Property$loansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$loansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyLoanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  improvements<T extends Prisma.Property$improvementsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$improvementsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyImprovementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  maintenance<T extends Prisma.Property$maintenanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$maintenanceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyMaintenancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documents<T extends Prisma.Property$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  utilities<T extends Prisma.Property$utilitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$utilitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyUtilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1897,6 +2863,7 @@ export interface PropertyFieldRefs {
   readonly usage: Prisma.FieldRef<"Property", 'String'>
   readonly notes: Prisma.FieldRef<"Property", 'String'>
   readonly archivedAt: Prisma.FieldRef<"Property", 'DateTime'>
+  readonly profile: Prisma.FieldRef<"Property", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Property", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Property", 'DateTime'>
 }
@@ -2345,6 +3312,126 @@ export type Property$tenantsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.TenantScalarFieldEnum | Prisma.TenantScalarFieldEnum[]
+}
+
+/**
+ * Property.loans
+ */
+export type Property$loansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyLoan
+   */
+  select?: Prisma.PropertyLoanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyLoan
+   */
+  omit?: Prisma.PropertyLoanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyLoanInclude<ExtArgs> | null
+  where?: Prisma.PropertyLoanWhereInput
+  orderBy?: Prisma.PropertyLoanOrderByWithRelationInput | Prisma.PropertyLoanOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyLoanWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyLoanScalarFieldEnum | Prisma.PropertyLoanScalarFieldEnum[]
+}
+
+/**
+ * Property.improvements
+ */
+export type Property$improvementsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyImprovement
+   */
+  select?: Prisma.PropertyImprovementSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyImprovement
+   */
+  omit?: Prisma.PropertyImprovementOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyImprovementInclude<ExtArgs> | null
+  where?: Prisma.PropertyImprovementWhereInput
+  orderBy?: Prisma.PropertyImprovementOrderByWithRelationInput | Prisma.PropertyImprovementOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyImprovementWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyImprovementScalarFieldEnum | Prisma.PropertyImprovementScalarFieldEnum[]
+}
+
+/**
+ * Property.maintenance
+ */
+export type Property$maintenanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyMaintenance
+   */
+  select?: Prisma.PropertyMaintenanceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyMaintenance
+   */
+  omit?: Prisma.PropertyMaintenanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyMaintenanceInclude<ExtArgs> | null
+  where?: Prisma.PropertyMaintenanceWhereInput
+  orderBy?: Prisma.PropertyMaintenanceOrderByWithRelationInput | Prisma.PropertyMaintenanceOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyMaintenanceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyMaintenanceScalarFieldEnum | Prisma.PropertyMaintenanceScalarFieldEnum[]
+}
+
+/**
+ * Property.documents
+ */
+export type Property$documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyDocument
+   */
+  select?: Prisma.PropertyDocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyDocument
+   */
+  omit?: Prisma.PropertyDocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyDocumentInclude<ExtArgs> | null
+  where?: Prisma.PropertyDocumentWhereInput
+  orderBy?: Prisma.PropertyDocumentOrderByWithRelationInput | Prisma.PropertyDocumentOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyDocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyDocumentScalarFieldEnum | Prisma.PropertyDocumentScalarFieldEnum[]
+}
+
+/**
+ * Property.utilities
+ */
+export type Property$utilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyUtility
+   */
+  select?: Prisma.PropertyUtilitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyUtility
+   */
+  omit?: Prisma.PropertyUtilityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyUtilityInclude<ExtArgs> | null
+  where?: Prisma.PropertyUtilityWhereInput
+  orderBy?: Prisma.PropertyUtilityOrderByWithRelationInput | Prisma.PropertyUtilityOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyUtilityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyUtilityScalarFieldEnum | Prisma.PropertyUtilityScalarFieldEnum[]
 }
 
 /**

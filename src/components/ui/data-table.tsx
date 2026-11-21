@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card } from "./card";
+import { InfoTip } from "./info-tip";
+import type { ExplainKey } from "@/lib/explain";
 
 /**
  * DataTable — a styled table inside a horizontal scroll container
@@ -26,6 +28,8 @@ export interface DataTableColumn<T> {
   mobilePrimary?: boolean;
   mobileAside?: boolean;
   hideBelowLg?: boolean;
+  /** Glossary key: an ⓘ after the header (desktop table only). */
+  tip?: ExplainKey;
 }
 
 export type SortDirection = "asc" | "desc";
@@ -50,6 +54,17 @@ export interface DataTableProps<T> {
   empty?: React.ReactNode;
   footer?: React.ReactNode;
   rowClassName?: (row: T) => string | undefined;
+  /**
+   * Client-side sorting: headers become buttons that call this instead of
+   * links. Takes precedence over `sortHref`.
+   */
+  onSort?: (key: string, direction: SortDirection) => void;
+  /**
+   * Make whole rows clickable (mouse convenience). Keep a real link or button
+   * inside the row for keyboard and screen-reader users; controls inside the
+   * row should stop propagation.
+   */
+  onRowClick?: (row: T) => void;
 }
 
 /** Just the scroll container, for tables too irregular for `DataTable`. */
@@ -72,19 +87,25 @@ function SortHeader({
   col,
   sort,
   sortHref,
+  onSort,
   linkAs: LinkAs,
 }: {
   col: { key: string; header: React.ReactNode; numeric?: boolean };
   sort?: { key: string; direction: SortDirection };
-  sortHref: (key: string, direction: SortDirection) => string;
+  sortHref?: (key: string, direction: SortDirection) => string;
+  onSort?: (key: string, direction: SortDirection) => void;
   linkAs: React.ElementType;
 }) {
   const active = sort?.key === col.key;
   const next: SortDirection = active && sort?.direction === "asc" ? "desc" : "asc";
   const Icon = !active ? ChevronsUpDown : sort?.direction === "asc" ? ArrowUp : ArrowDown;
+  const Tag: React.ElementType = onSort ? "button" : LinkAs;
+  const tagProps = onSort
+    ? { type: "button", onClick: () => onSort(col.key, next) }
+    : { href: sortHref?.(col.key, next) ?? "#" };
   return (
-    <LinkAs
-      href={sortHref(col.key, next)}
+    <Tag
+      {...tagProps}
       className={cn(
         "group -mx-1.5 inline-flex items-center gap-1 rounded px-1.5 py-0.5 no-underline transition-colors hover:bg-subtle hover:text-foreground",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -97,7 +118,7 @@ function SortHeader({
         className={cn("size-3.5 shrink-0", active ? "opacity-100" : "opacity-40 group-hover:opacity-80")}
         aria-hidden
       />
-    </LinkAs>
+    </Tag>
   );
 }
 
@@ -119,7 +140,10 @@ export function DataTable<T>({
   empty,
   footer,
   rowClassName,
+  onSort,
+  onRowClick,
 }: DataTableProps<T>) {
+  const sortable = Boolean(onSort || sortHref);
   const sticky = (index: number, head = false) =>
     stickyFirstColumn && index === 0
       ? cn("sticky left-0 z-[1]", head ? "z-[3] bg-subtle" : "bg-surface group-hover/row:bg-subtle")
@@ -147,7 +171,7 @@ export function DataTable<T>({
                 <th
                   key={col.key}
                   scope="col"
-                  aria-sort={col.sortable && sortHref ? (ariaSort ?? "none") : ariaSort}
+                  aria-sort={col.sortable && sortable ? (ariaSort ?? "none") : ariaSort}
                   className={cn(
                     "sticky top-0 z-[2] whitespace-nowrap border-b border-border bg-subtle text-xs font-medium text-muted-foreground",
                     density === "compact" ? "px-3 py-2" : "px-4 py-2.5",
@@ -157,11 +181,12 @@ export function DataTable<T>({
                     col.className
                   )}
                 >
-                  {col.sortable && sortHref ? (
-                    <SortHeader col={col} sort={sort} sortHref={sortHref} linkAs={linkAs} />
+                  {col.sortable && sortable ? (
+                    <SortHeader col={col} sort={sort} sortHref={sortHref} onSort={onSort} linkAs={linkAs} />
                   ) : (
                     col.header
                   )}
+                  {col.tip ? <InfoTip tip={col.tip} className="ms-1" /> : null}
                 </th>
               );
             })}
@@ -176,8 +201,10 @@ export function DataTable<T>({
             rows.map((row) => (
               <tr
                 key={rowKey(row)}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={cn(
                   "group/row transition-colors duration-150 hover:bg-subtle/70 [&:last-child>td]:border-b-0",
+                  onRowClick && "cursor-pointer",
                   rowClassName?.(row)
                 )}
               >

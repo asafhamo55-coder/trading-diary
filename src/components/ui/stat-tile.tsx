@@ -4,6 +4,8 @@ import { ArrowDownRight, ArrowRight, ArrowUpRight, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card } from "./card";
 import { Skeleton } from "./skeleton";
+import { InfoTip } from "./info-tip";
+import type { ExplainKey } from "@/lib/explain";
 
 /* ──────────────────────────────────────────────────────────────────────
  * Kpi / StatTile — a single metric tile (HomeownerHub `Kpi` port).
@@ -35,6 +37,10 @@ export interface KpiProps {
   state?: "ready" | "loading" | "failed";
   /** Colour the value: `positive` → success, `negative` → danger. */
   valueTone?: "default" | "positive" | "negative" | "muted";
+  /** Glossary key: shows an ⓘ after the label explaining the figure. */
+  tip?: ExplainKey;
+  /** Language of the explanation (default Hebrew). */
+  tipLang?: "he" | "en";
   className?: string;
 }
 
@@ -61,13 +67,36 @@ export function Kpi({
   linkAs: LinkAs = Link,
   state = "ready",
   valueTone = "default",
+  tip,
+  tipLang,
   className,
 }: KpiProps) {
   const DeltaIcon = delta ? DELTA_ICON[delta.direction] : null;
+  // With an ⓘ the tile can't be one big <a> (no buttons inside links): the
+  // label becomes a stretched link covering the card and the ⓘ sits above it.
+  const stretched = !!(href && tip);
+  const labelNode = stretched ? (
+    <LinkAs
+      href={href}
+      className="no-underline text-inherit after:absolute after:inset-0 after:rounded-xl after:content-[''] focus-visible:outline-none"
+    >
+      {label}
+    </LinkAs>
+  ) : (
+    label
+  );
   const body = (
     <div className="@container flex h-full min-w-0 flex-col gap-2 p-4 sm:p-5">
       <div className="flex min-w-0 items-start justify-between gap-2">
-        <p className="min-w-0 break-words pt-1.5 text-sm font-medium text-muted-foreground">{label}</p>
+        <p className="min-w-0 break-words pt-1.5 text-sm font-medium text-muted-foreground">
+          {labelNode}
+          {tip ? (
+            <>
+              {" "}
+              <InfoTip tip={tip} lang={tipLang} className="relative z-10 -mt-0.5" />
+            </>
+          ) : null}
+        </p>
         {icon ? (
           <span
             className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-subtle text-primary [&_svg]:size-[18px]"
@@ -128,6 +157,20 @@ export function Kpi({
     </div>
   );
 
+  if (stretched) {
+    return (
+      <Card
+        variant="interactive"
+        className={cn(
+          "group relative h-full min-w-0 transition-[border-color,box-shadow,transform] motion-safe:hover:-translate-y-0.5",
+          "has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring has-[a:focus-visible]:ring-offset-2 has-[a:focus-visible]:ring-offset-background",
+          className
+        )}
+      >
+        {body}
+      </Card>
+    );
+  }
   if (href) {
     return (
       <LinkAs

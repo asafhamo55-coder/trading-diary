@@ -403,6 +403,37 @@ export function buildingKey(p: {
   return [street, state, zip, extra].filter(Boolean).join("|") || p.id;
 }
 
+/**
+ * Display name for a building: the street line with any trailing unit
+ * designator ("#2", "Unit 4B") removed, so a group header reads as the
+ * building rather than one of its units.
+ */
+export function stripUnitDesignator(street: string): string {
+  return street.replace(TRAILING_UNIT_RE, "").trim() || street.trim();
+}
+
+/**
+ * The unit designator of a property ("2", "4B"), from the structured `unit`
+ * field, else a unit segment of the street or one-line address. Null when
+ * none is recorded.
+ */
+export function unitLabelOf(p: {
+  unit?: string | null;
+  street?: string | null;
+  address?: string | null;
+}): string | null {
+  const clean = (v: string) => v.replace(/^#\s*/, "").replace(new RegExp(`^(?:${UNIT_WORDS})\\s*\\.?\\s*`, "i"), "").trim();
+  const unit = (p.unit ?? "").trim();
+  if (unit) return clean(unit) || unit;
+  const trailing = (p.street ?? "").match(TRAILING_UNIT_RE);
+  if (trailing) return clean(trailing[0].replace(/^[\s,]+/, ""));
+  const seg = (p.address ?? "")
+    .split(",")
+    .map((v) => v.trim())
+    .find((v) => UNIT_SEGMENT_RE.test(v));
+  return seg ? clean(seg) : null;
+}
+
 /** Cash returned over the period as a percentage of the cash invested. */
 export function cashOnCashPct(net: number, downPayment: number | null): number | null {
   if (!downPayment || downPayment <= 0) return null;

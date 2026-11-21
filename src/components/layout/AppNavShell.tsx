@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronDown, ChevronRight, LogOut } from "lucide-react";
+import { Building, ChevronDown, ChevronRight, DoorOpen, Home, LogOut } from "lucide-react";
 import {
   AppShell,
   AppShellContent,
@@ -23,6 +23,8 @@ import ThemeToggle from "@/components/layout/ThemeToggle";
 import { CurrencyToggle } from "@/components/ui/currency";
 import { NAV, buildCrumbs, resolveNav, type Crumb, type NavArea, type NavPage } from "@/lib/nav";
 import { cn } from "@/lib/utils";
+import { groupPropertyNav, unitNavLabel, type PropertyNavItem } from "@/lib/property-nav";
+import { usePropertyNav } from "@/components/layout/use-property-nav";
 
 /* ── Page-supplied breadcrumb detail ("12 Oak St", "AAPL › Edit") ───────── */
 
@@ -71,6 +73,7 @@ function AreaItem({
   activePage,
   expanded,
   onToggle,
+  extra,
 }: {
   area: NavArea;
   current: boolean;
@@ -78,11 +81,14 @@ function AreaItem({
   activePage: NavPage | null;
   expanded: boolean;
   onToggle: () => void;
+  /** More list items after the sub-pages (the property list under Properties). */
+  extra?: React.ReactNode;
 }) {
   const Icon = area.icon;
   const pages = area.pages ?? [];
-  // A single sub-page is the area itself; don't repeat it underneath.
-  const hasChildren = pages.length > 1;
+  // A single sub-page is the area itself; don't repeat it underneath —
+  // unless extra items follow it.
+  const hasChildren = pages.length > 1 || Boolean(extra);
   const listId = `nav-${area.id}-pages`;
   // aria-current: "page" when the area link IS this page; "true" when we are
   // somewhere inside the area (e.g. a property's detail page).
@@ -145,6 +151,7 @@ function AreaItem({
           {pages.map((p) => (
             <PageItem key={p.href} page={p} active={current && activePage?.href === p.href} exact={exact} />
           ))}
+          {extra}
         </ul>
       ) : null}
     </li>
@@ -183,11 +190,83 @@ function PageItem({ page, active, exact }: { page: NavPage; active: boolean; exa
   );
 }
 
+/* ── Properties: one entry per active property ───────────────────────── */
+
+const leafBase = cn(rowBase, "h-8 font-normal");
+
+function PropertyLink({ item, label, pathname }: { item: PropertyNavItem; label: string; pathname: string }) {
+  const href = `/properties/${item.id}`;
+  const active = pathname === href || pathname.startsWith(`${href}/`);
+  const Icon = item.usage === "residence" ? Home : item.unit ? DoorOpen : Building;
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      title={item.title}
+      className={cn(
+        leafBase,
+        active
+          ? "bg-subtle font-medium text-foreground [&_svg]:text-primary"
+          : "text-foreground-secondary hover:bg-subtle hover:text-foreground [&_svg]:text-muted-foreground"
+      )}
+    >
+      {active ? (
+        <span aria-hidden className="absolute inset-y-1.5 -left-[calc(0.5rem+1.5px)] w-[3px] rounded-full bg-primary" />
+      ) : null}
+      <span className="flex size-5 shrink-0 items-center justify-center">
+        <Icon aria-hidden />
+      </span>
+      <span className="flex-1 truncate">{label}</span>
+      {item.usage === "residence" ? <span className="sr-only">(primary residence)</span> : null}
+    </Link>
+  );
+}
+
+/**
+ * The property entries under "All properties". Units of one building nest
+ * under it. Hidden in the collapsed rail (the area link still leads there).
+ */
+function PropertyNavList({ items, pathname }: { items: PropertyNavItem[]; pathname: string }) {
+  const tree = React.useMemo(() => groupPropertyNav(items), [items]);
+  return (
+    <>
+      {tree.map((node) =>
+        node.kind === "property" ? (
+          <li key={node.item.id} className="md:in-rail:hidden">
+            <PropertyLink item={node.item} label={node.item.title} pathname={pathname} />
+          </li>
+        ) : (
+          <li key={`b:${node.title}`} className="md:in-rail:hidden">
+            <span className={cn(leafBase, "cursor-default text-foreground-secondary [&_svg]:text-muted-foreground")}>
+              <span className="flex size-5 shrink-0 items-center justify-center">
+                <Building aria-hidden />
+              </span>
+              <span className="flex-1 truncate">{node.title}</span>
+            </span>
+            <ul
+              aria-label={`${node.title} units`}
+              className="ml-[1.15rem] flex flex-col gap-0.5 border-l border-border pl-2"
+            >
+              {node.units.map((u) => (
+                <li key={u.id}>
+                  <PropertyLink item={u} label={unitNavLabel(u)} pathname={pathname} />
+                </li>
+              ))}
+            </ul>
+          </li>
+        )
+      )}
+    </>
+  );
+}
+
 function AppSidebarNav() {
   const pathname = usePathname() ?? "/";
   const shell = useAppShell();
   const { area: currentArea, page: activePage, exact } = resolveNav(pathname);
   const currentId = currentArea?.id ?? null;
+  const propertyItems = usePropertyNav();
+  const hasPropertyList = Boolean(propertyItems && propertyItems.length > 0);
 
   // Areas the user folded by hand. Every area starts open so any page is one
   // click away; entering an area re-opens it.
@@ -215,15 +294,23 @@ function AppSidebarNav() {
           {group.areas.map((area) => {
             const current = area.id === currentId;
             const expanded = overrides[area.id] ?? true;
+            const isProperties = area.id === "properties";
+            // On a property's page the property itself is highlighted, not "All properties".
+            const page = current && !(isProperties && hasPropertyList && !exact) ? activePage : null;
             return (
               <AreaItem
                 key={area.id}
                 area={area}
                 current={current}
                 exact={exact}
-                activePage={current ? activePage : null}
+                activePage={page}
                 expanded={expanded}
                 onToggle={() => setOverrides((o) => ({ ...o, [area.id]: !expanded }))}
+                extra={
+                  isProperties && hasPropertyList ? (
+                    <PropertyNavList items={propertyItems!} pathname={pathname} />
+                  ) : undefined
+                }
               />
             );
           })}

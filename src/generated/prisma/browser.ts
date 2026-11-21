@@ -33,6 +33,31 @@ export type Property = Prisma.PropertyModel
  */
 export type Tenant = Prisma.TenantModel
 /**
+ * Model PropertyLoan
+ * 
+ */
+export type PropertyLoan = Prisma.PropertyLoanModel
+/**
+ * Model PropertyImprovement
+ * 
+ */
+export type PropertyImprovement = Prisma.PropertyImprovementModel
+/**
+ * Model PropertyMaintenance
+ * 
+ */
+export type PropertyMaintenance = Prisma.PropertyMaintenanceModel
+/**
+ * Model PropertyDocument
+ * 
+ */
+export type PropertyDocument = Prisma.PropertyDocumentModel
+/**
+ * Model PropertyUtility
+ * 
+ */
+export type PropertyUtility = Prisma.PropertyUtilityModel
+/**
  * Model PropertyTransaction
  * 
  */
@@ -118,6 +143,11 @@ export type HouseholdProfile = Prisma.HouseholdProfileModel
  */
 export type AdvisorReport = Prisma.AdvisorReportModel
 /**
+ * Model AdvisorActionStatus
+ * 
+ */
+export type AdvisorActionStatus = Prisma.AdvisorActionStatusModel
+/**
  * Model Benefit
  * 
  */
@@ -127,3 +157,8 @@ export type Benefit = Prisma.BenefitModel
  * 
  */
 export type TradingGuideline = Prisma.TradingGuidelineModel
+/**
+ * Model AssistantQuestion
+ * 
+ */
+export type AssistantQuestion = Prisma.AssistantQuestionModel

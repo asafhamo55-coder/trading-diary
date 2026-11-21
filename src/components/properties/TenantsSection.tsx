@@ -148,7 +148,7 @@ export default function TenantsSection({
   }
 
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-surface p-5 sm:p-6">
       <div className="flex items-center justify-between mb-4">
         <SectionHeader
           icon={<Users className="w-3.5 h-3.5 text-accent-amber" />}
@@ -166,7 +166,7 @@ export default function TenantsSection({
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-5 rounded-xl border border-[var(--border)] border-t-2 border-t-accent-amber/40 bg-[var(--card)] p-4 shadow-sm space-y-4"
+          className="mb-5 rounded-xl border border-border bg-subtle/40 p-4 space-y-4"
         >
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">

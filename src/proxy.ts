@@ -18,6 +18,9 @@ const PUBLIC_PATHS = [
   "/api/savings/advisor/context",
   "/api/savings/advisor/ingest",
   "/api/savings/import", // cookie OR bearer SAVINGS_INGEST_TOKEN, enforced in the route
+  // In-app assistant's Claude Code routine — bearer SAVINGS_INGEST_TOKEN, checked in each route.
+  "/api/assistant/pending",
+  "/api/assistant/answer",
 ];
 
 export async function proxy(req: NextRequest) {

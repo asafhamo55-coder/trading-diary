@@ -15,6 +15,8 @@ import type { EquitySummary } from "@/lib/equity-coach";
 import type { Recommendation } from "@/lib/home-coach";
 import AppNavShell from "@/components/layout/AppNavShell";
 import { Kpi } from "@/components/ui/stat-tile";
+import { InfoTip } from "@/components/ui/info-tip";
+import type { ExplainKey } from "@/lib/explain";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useThemeTokens } from "@/lib/use-theme-tokens";
 
@@ -261,8 +263,8 @@ export default function HubClient({
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Monthly</p>
-          <h2 id="cash-flow-title" className="text-xl font-semibold tracking-[-0.015em] text-foreground">
-            Cash flow
+          <h2 id="cash-flow-title" className="flex items-center gap-1.5 text-xl font-semibold tracking-[-0.015em] text-foreground">
+            Cash flow <InfoTip tip="cashflow.section" />
           </h2>
           <p className="text-sm text-muted-foreground">Income and expenses across Trade, Properties &amp; Home.</p>
         </div>
@@ -279,6 +281,7 @@ export default function HubClient({
             <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
               Consolidated equity · {year}
             </p>
+            <InfoTip tip="cashflow.consolidated" />
           </div>
           <p
             className={cn(
@@ -333,6 +336,7 @@ export default function HubClient({
                 <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                   This month · {mtd.monthName} {mtd.year} · MTD
                 </p>
+                <InfoTip tip="cashflow.mtd" />
               </div>
               <p
                 className={cn(
@@ -427,7 +431,7 @@ export default function HubClient({
           const card = (
             <div
               className={cn(
-                "group relative h-full overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all duration-200",
+                "group relative h-full overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all duration-200 has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring",
                 s.ready
                   ? "hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-md cursor-pointer"
                   : "opacity-75"
@@ -452,8 +456,18 @@ export default function HubClient({
                     />
                   </span>
                   <h3 className="text-sm font-semibold text-[var(--foreground)]">
-                    {s.label}
+                    {s.ready ? (
+                      <Link
+                        href={s.href}
+                        className="text-inherit no-underline after:absolute after:inset-0 after:rounded-xl after:content-[''] focus-visible:outline-none"
+                      >
+                        {s.label}
+                      </Link>
+                    ) : (
+                      s.label
+                    )}
                   </h3>
+                  <InfoTip tip="cashflow.moduleTotal" className="relative z-10" />
                 </div>
                 {s.ready ? (
                   <ArrowUpRight className="w-4 h-4 text-[var(--muted-foreground)] transition-all group-hover:text-[var(--foreground)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -487,9 +501,9 @@ export default function HubClient({
             </div>
           );
           return s.ready ? (
-            <Link key={s.key} href={s.href} className="block pressable">
+            <div key={s.key} className="pressable">
               {card}
-            </Link>
+            </div>
           ) : (
             <div key={s.key}>{card}</div>
           );
@@ -505,6 +519,7 @@ export default function HubClient({
           <h3 className="text-sm font-semibold text-[var(--foreground)]">
             Monthly Breakdown · {year}
           </h3>
+          <InfoTip tip="cashflow.monthlyBreakdown" />
           <span className="text-xs text-[var(--muted-foreground)] hidden sm:inline">
             · revenue &amp; expense per module
           </span>
@@ -597,6 +612,7 @@ export default function HubClient({
           <h3 className="text-sm font-semibold text-[var(--foreground)]">
             Monthly Equity Analysis
           </h3>
+          <InfoTip tip="cashflow.chart" />
           <span className="text-xs text-[var(--muted-foreground)] hidden sm:inline">
             · net by source, cumulative line
           </span>
@@ -619,11 +635,12 @@ export default function HubClient({
         <>
           {/* Consolidated analysis snapshot */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            <EquityTile label={`Total in · ${year}`} value={summary.totalIncome} color="text-success" icon={<TrendingUp className="w-5 h-5" />} />
-            <EquityTile label={`Total out · ${year}`} value={summary.totalExpense} color="text-danger" icon={<PiggyBank className="w-5 h-5" />} />
-            <EquityTile label={`Net equity · ${year}`} value={summary.net} color={summary.net >= 0 ? "text-success" : "text-danger"} icon={<Sparkles className="w-5 h-5" />} signed />
+            <EquityTile label={`Total in · ${year}`} tip="cashflow.totalIn" value={summary.totalIncome} color="text-success" icon={<TrendingUp className="w-5 h-5" />} />
+            <EquityTile label={`Total out · ${year}`} tip="cashflow.totalOut" value={summary.totalExpense} color="text-danger" icon={<PiggyBank className="w-5 h-5" />} />
+            <EquityTile label={`Net equity · ${year}`} tip="cashflow.net" value={summary.net} color={summary.net >= 0 ? "text-success" : "text-danger"} icon={<Sparkles className="w-5 h-5" />} signed />
             <Kpi
               label="Retention"
+              tip="cashflow.retention"
               icon={<PiggyBank />}
               valueTone={summary.retention >= 0 ? "positive" : "negative"}
               value={`${Math.round(summary.retention * 100)}%`}
@@ -661,12 +678,14 @@ export default function HubClient({
 
 function EquityTile({
   label,
+  tip,
   value,
   color,
   icon,
   signed,
 }: {
   label: string;
+  tip?: ExplainKey;
   value: number;
   color: string;
   icon: React.ReactNode;
@@ -676,6 +695,7 @@ function EquityTile({
   return (
     <Kpi
       label={label}
+      tip={tip}
       icon={icon}
       valueTone={color === "text-danger" ? "negative" : "positive"}
       value={`${signed && value >= 0 ? "+" : ""}${formatDisplay(value, { digits: 2, fixed: true })}`}

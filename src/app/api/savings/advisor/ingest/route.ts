@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { jsonResponse, errorResponse } from "@/lib/api-helpers";
 import { checkSavingsToken } from "@/lib/ingest-auth";
 import { saveAdvisorReport } from "@/lib/savings-data";
+import { getProperties } from "@/lib/property-data";
 import { AdvisorError, parseAdvisorOutput } from "@/lib/advisor";
 
 // POST /api/savings/advisor/ingest — saves a report written outside the app by
@@ -14,7 +15,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
     if (!body || typeof body.inputHash !== "string") return errorResponse("Body needs output and inputHash");
-    const output = parseAdvisorOutput(JSON.stringify(body.output ?? null));
+    // Every active US rental must get at least one property-level recommendation.
+    const rentals = (await getProperties()).filter((p) => !p.archivedAt && p.usage !== "residence").map((p) => p.id);
+    const output = parseAdvisorOutput(JSON.stringify(body.output ?? null), { requiredPropertyIds: rentals });
     const model = typeof body.model === "string" && body.model ? body.model.slice(0, 60) : "claude-code";
     const report = await saveAdvisorReport({
       model,

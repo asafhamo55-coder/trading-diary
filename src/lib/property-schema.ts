@@ -107,6 +107,111 @@ export async function ensurePropertySchema(): Promise<void> {
     `CREATE INDEX IF NOT EXISTS "Tenant_propertyId_leaseStart_idx" ON "Tenant"("propertyId", "leaseStart")`
   );
 
+  // The property record: single-value sections in one JSON column, lists in
+  // their own tables (see prisma/schema.prisma).
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "Property" ADD COLUMN IF NOT EXISTS "profile" JSONB`
+  );
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "PropertyLoan" (
+      "id" TEXT NOT NULL,
+      "propertyId" TEXT NOT NULL,
+      "kind" TEXT NOT NULL DEFAULT 'first',
+      "lender" TEXT,
+      "servicer" TEXT,
+      "loanNumber" TEXT,
+      "portalUrl" TEXT,
+      "servicerPhone" TEXT,
+      "originalAmount" DOUBLE PRECISION,
+      "startDate" TIMESTAMP(3),
+      "termMonths" INTEGER,
+      "interestRate" DOUBLE PRECISION,
+      "rateType" TEXT NOT NULL DEFAULT 'fixed',
+      "armResetDate" TIMESTAMP(3),
+      "armIndex" TEXT,
+      "armMargin" DOUBLE PRECISION,
+      "monthlyPI" DOUBLE PRECISION,
+      "escrowMonthly" DOUBLE PRECISION,
+      "pmiMonthly" DOUBLE PRECISION,
+      "pmiRemovalDate" TIMESTAMP(3),
+      "maturityDate" TIMESTAMP(3),
+      "balance" DOUBLE PRECISION,
+      "balanceAsOf" TIMESTAMP(3),
+      "active" BOOLEAN NOT NULL DEFAULT true,
+      "notes" TEXT,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "PropertyLoan_pkey" PRIMARY KEY ("id")
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS "PropertyLoan_propertyId_idx" ON "PropertyLoan"("propertyId")`
+  );
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "PropertyImprovement" (
+      "id" TEXT NOT NULL,
+      "propertyId" TEXT NOT NULL,
+      "date" TIMESTAMP(3) NOT NULL,
+      "description" TEXT NOT NULL,
+      "amount" DOUBLE PRECISION NOT NULL,
+      "category" TEXT NOT NULL DEFAULT 'improvement',
+      "notes" TEXT,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "PropertyImprovement_pkey" PRIMARY KEY ("id")
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS "PropertyImprovement_propertyId_date_idx" ON "PropertyImprovement"("propertyId", "date")`
+  );
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "PropertyMaintenance" (
+      "id" TEXT NOT NULL,
+      "propertyId" TEXT NOT NULL,
+      "date" TIMESTAMP(3) NOT NULL,
+      "vendor" TEXT,
+      "system" TEXT,
+      "cost" DOUBLE PRECISION,
+      "notes" TEXT,
+      "transactionId" TEXT,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "PropertyMaintenance_pkey" PRIMARY KEY ("id")
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS "PropertyMaintenance_propertyId_date_idx" ON "PropertyMaintenance"("propertyId", "date")`
+  );
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "PropertyDocument" (
+      "id" TEXT NOT NULL,
+      "propertyId" TEXT NOT NULL,
+      "type" TEXT NOT NULL,
+      "title" TEXT NOT NULL,
+      "url" TEXT NOT NULL,
+      "date" TIMESTAMP(3),
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "PropertyDocument_pkey" PRIMARY KEY ("id")
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS "PropertyDocument_propertyId_idx" ON "PropertyDocument"("propertyId")`
+  );
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "PropertyUtility" (
+      "id" TEXT NOT NULL,
+      "propertyId" TEXT NOT NULL,
+      "kind" TEXT NOT NULL,
+      "provider" TEXT,
+      "accountNumber" TEXT,
+      "paidBy" TEXT NOT NULL DEFAULT 'tenant',
+      "portalUrl" TEXT,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "PropertyUtility_pkey" PRIMARY KEY ("id")
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS "PropertyUtility_propertyId_idx" ON "PropertyUtility"("propertyId")`
+  );
+
   await prisma.$executeRawUnsafe(`
     DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Property_accountId_fkey') THEN
@@ -127,6 +232,46 @@ export async function ensurePropertySchema(): Promise<void> {
     DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Tenant_propertyId_fkey') THEN
         ALTER TABLE "Tenant" ADD CONSTRAINT "Tenant_propertyId_fkey"
+        FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+      END IF;
+    END $$
+  `);
+  await prisma.$executeRawUnsafe(`
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PropertyLoan_propertyId_fkey') THEN
+        ALTER TABLE "PropertyLoan" ADD CONSTRAINT "PropertyLoan_propertyId_fkey"
+        FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+      END IF;
+    END $$
+  `);
+  await prisma.$executeRawUnsafe(`
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PropertyImprovement_propertyId_fkey') THEN
+        ALTER TABLE "PropertyImprovement" ADD CONSTRAINT "PropertyImprovement_propertyId_fkey"
+        FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+      END IF;
+    END $$
+  `);
+  await prisma.$executeRawUnsafe(`
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PropertyMaintenance_propertyId_fkey') THEN
+        ALTER TABLE "PropertyMaintenance" ADD CONSTRAINT "PropertyMaintenance_propertyId_fkey"
+        FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+      END IF;
+    END $$
+  `);
+  await prisma.$executeRawUnsafe(`
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PropertyDocument_propertyId_fkey') THEN
+        ALTER TABLE "PropertyDocument" ADD CONSTRAINT "PropertyDocument_propertyId_fkey"
+        FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+      END IF;
+    END $$
+  `);
+  await prisma.$executeRawUnsafe(`
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'PropertyUtility_propertyId_fkey') THEN
+        ALTER TABLE "PropertyUtility" ADD CONSTRAINT "PropertyUtility_propertyId_fkey"
         FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON UPDATE CASCADE ON DELETE CASCADE;
       END IF;
     END $$

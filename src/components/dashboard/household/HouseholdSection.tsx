@@ -1,4 +1,4 @@
-import { getLatestAdvisorReport, getNetWorth, getProfile } from "@/lib/savings-data";
+import { getAdvisorActionStatuses, getLatestAdvisorReport, getNetWorth, getProfile } from "@/lib/savings-data";
 import { hasAnthropicKey } from "@/lib/advisor";
 import HouseholdDashboard from "./HouseholdDashboard";
 
@@ -8,7 +8,7 @@ import HouseholdDashboard from "./HouseholdDashboard";
  * Each source fails independently so one bad query never blanks the page.
  */
 export default async function HouseholdSection() {
-  const [nw, profile, report] = await Promise.allSettled([getNetWorth(), getProfile(), getLatestAdvisorReport()]);
+  const [nw, profile, report, actions] = await Promise.allSettled([getNetWorth(), getProfile(), getLatestAdvisorReport(), getAdvisorActionStatuses()]);
   if (nw.status === "rejected") console.error("Dashboard: getNetWorth failed", nw.reason);
   if (profile.status === "rejected") console.error("Dashboard: getProfile failed", profile.reason);
   if (report.status === "rejected") console.error("Dashboard: getLatestAdvisorReport failed", report.reason);
@@ -17,6 +17,7 @@ export default async function HouseholdSection() {
       netWorth={nw.status === "fulfilled" ? nw.value : null}
       profile={profile.status === "fulfilled" ? profile.value : null}
       advisorReport={report.status === "fulfilled" ? report.value : null}
+      advisorActions={actions.status === "fulfilled" ? actions.value : null}
       hasAnthropicKey={hasAnthropicKey()}
       loadError={nw.status === "rejected" ? "The savings database didn’t respond." : null}
     />

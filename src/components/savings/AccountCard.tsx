@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { loginUrlFor } from "@/lib/provider-links";
 import { fmtDate, humanize, money, pct, statusTone } from "./format";
 import { Sparkline, Stat } from "./ui";
+import { InfoTip } from "@/components/ui/info-tip";
 
 function monthsAgo(iso: string | null | undefined, now: Date): number | null {
   if (!iso) return null;
@@ -146,19 +147,19 @@ export function AccountCard({
 
       {/* Details */}
       <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-border px-4 py-3.5 sm:px-5">
-        {a.track ? <Stat label="Track" className="col-span-2">{a.track}</Stat> : null}
+        {a.track ? <Stat label="Track" tip="savings.track" className="col-span-2">{a.track}</Stat> : null}
 
         {a.type === "rsu" ? (
           <>
             <Stat label="Ticker">{typeof details.ticker === "string" ? details.ticker : "—"}</Stat>
-            <Stat label="Unvested (not counted)">{unvested != null ? dm(unvested, cur) : "—"}</Stat>
+            <Stat label="Unvested (not counted)" tip="savings.rsuUnvested">{unvested != null ? dm(unvested, cur) : "—"}</Stat>
             {typeof details.nextVestDate === "string" ? <Stat label="Next vest">{fmtDate(details.nextVestDate)}</Stat> : null}
           </>
         ) : null}
 
         {feeApplies ? (
           <>
-            <Stat label="Fees (dep. / acc.)">
+            <Stat label="Fees (dep. / acc.)" tip="savings.feeRates">
               {hasFees ? (
                 <>
                   {pct(a.feeDepositPct)} <span className="text-muted-foreground">/</span> {pct(a.feeAccumulationPct)}
@@ -169,18 +170,20 @@ export function AccountCard({
                 </span>
               )}
             </Stat>
-            <Stat label="Annual fee cost">{hasFees ? dm(a.annualFees.total, cur) : "—"}</Stat>
+            <Stat label="Annual fee cost" tip="savings.annualFeeCost">{hasFees ? dm(a.annualFees.total, cur) : "—"}</Stat>
           </>
         ) : null}
 
         {(a.type === "pension" || a.type === "managers_insurance") && a.projectedMonthlyPension ? (
-          <Stat label="Projected pension">{dm(a.projectedMonthlyPension, cur)}/mo</Stat>
+          <Stat label="Projected pension" tip="savings.projectedPension">{dm(a.projectedMonthlyPension, cur)}/mo</Stat>
         ) : null}
-        {a.insuredSalary ? <Stat label="Insured salary">{dm(a.insuredSalary, cur)}</Stat> : null}
+        {a.insuredSalary ? <Stat label="Insured salary" tip="savings.insuredSalary">{dm(a.insuredSalary, cur)}</Stat> : null}
 
         {a.liquidity ? (
           <div className="col-span-2">
-            <dt className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">Liquidity</dt>
+            <dt className="flex items-center gap-1 text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+              Liquidity <InfoTip tip="savings.hishtalmutLiquidity" />
+            </dt>
             <dd className="mt-1 flex flex-wrap items-center gap-2 text-sm">
               {a.liquidity.status === "liquid" ? (
                 <StatusPill tone="success" icon={<LockOpen />} label="Liquid — withdrawable tax-free" />
@@ -207,7 +210,9 @@ export function AccountCard({
       {/* Deposits */}
       {a.type !== "cash" && a.type !== "rsu" && a.type !== "brokerage" ? (
         <div className="border-t border-border px-4 py-3.5 sm:px-5">
-          <p className="mb-1.5 text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">Monthly deposits</p>
+          <p className="mb-1.5 flex items-center gap-1 text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+            Monthly deposits <InfoTip tip="savings.depositsSplit" />
+          </p>
           <DepositSplit a={a} />
         </div>
       ) : null}
@@ -222,13 +227,15 @@ export function AccountCard({
         >
           {drag.costVsBenchmark > 0 ? (
             <p className="text-foreground-secondary">
-              <span className="font-semibold text-warning">10-yr fee drag {dm(drag.costVsBenchmark, cur)}</span>
+              <span className="font-semibold text-warning">10-yr fee drag {dm(drag.costVsBenchmark, cur)}</span>{" "}
+              <InfoTip tip="savings.feeDrag10y" />
               {foreign ? <span className="num text-muted-foreground"> ({money(drag.costVsBenchmark, cur)})</span> : null} vs. a
               benchmark of {pct(bench.depositPct)} / {pct(bench.accumulationPct)}.
             </p>
           ) : (
             <p className="text-foreground-secondary">
-              <span className="font-semibold text-success">At or below benchmark fees</span> ({pct(bench.depositPct)} /{" "}
+              <span className="font-semibold text-success">At or below benchmark fees</span> <InfoTip tip="savings.feeDrag10y" /> (
+              {pct(bench.depositPct)} /{" "}
               {pct(bench.accumulationPct)}).
             </p>
           )}

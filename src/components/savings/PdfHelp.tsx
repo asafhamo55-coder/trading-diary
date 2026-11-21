@@ -1,5 +1,6 @@
 import { FileText, Terminal } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 
 // Static help for /savings/import: PDFs are read by Claude Code (the
 // import-statements skill), not by the web app. See docs/savings/pdf-import.md.
@@ -12,7 +13,7 @@ export default function PdfHelp() {
       <Card className="lg:col-span-3">
         <CardHeader>
           <CardTitle as="h2" className="flex items-center gap-2">
-            <FileText className="size-4 text-primary" aria-hidden /> Have PDFs?
+            <FileText className="size-4 text-primary" aria-hidden /> Have PDFs? <InfoTip tip="import.pdf" />
           </CardTitle>
           <CardDescription>
             Statements are read by Claude Code on your computer, not uploaded here. It turns them into the JSON this page imports.
@@ -44,7 +45,9 @@ export default function PdfHelp() {
 
       <Card variant="subtle" className="lg:col-span-2">
         <CardHeader>
-          <CardTitle as="h2">How import works</CardTitle>
+          <CardTitle as="h2" className="flex items-center gap-1.5">
+            How import works <InfoTip tip="import.howItWorks" />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2 text-sm text-foreground-secondary">

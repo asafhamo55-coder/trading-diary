@@ -81,7 +81,7 @@ export default function PropertyValueSection({
   }
 
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-surface p-5 sm:p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Home className="w-4 h-4 text-[#FFB547]" />

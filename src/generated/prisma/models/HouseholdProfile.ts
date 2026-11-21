@@ -62,6 +62,7 @@ export type HouseholdProfileCountAggregateOutputType = {
   goalsText: number
   riskTolerance: number
   usdIlsRate: number
+  contacts: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -104,6 +105,7 @@ export type HouseholdProfileCountAggregateInputType = {
   goalsText?: true
   riskTolerance?: true
   usdIlsRate?: true
+  contacts?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -203,6 +205,7 @@ export type HouseholdProfileGroupByOutputType = {
   goalsText: string | null
   riskTolerance: string | null
   usdIlsRate: number | null
+  contacts: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: HouseholdProfileCountAggregateOutputType | null
@@ -238,6 +241,7 @@ export type HouseholdProfileWhereInput = {
   goalsText?: Prisma.StringNullableFilter<"HouseholdProfile"> | string | null
   riskTolerance?: Prisma.StringNullableFilter<"HouseholdProfile"> | string | null
   usdIlsRate?: Prisma.FloatNullableFilter<"HouseholdProfile"> | number | null
+  contacts?: Prisma.JsonNullableFilter<"HouseholdProfile">
   createdAt?: Prisma.DateTimeFilter<"HouseholdProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"HouseholdProfile"> | Date | string
 }
@@ -250,6 +254,7 @@ export type HouseholdProfileOrderByWithRelationInput = {
   goalsText?: Prisma.SortOrderInput | Prisma.SortOrder
   riskTolerance?: Prisma.SortOrderInput | Prisma.SortOrder
   usdIlsRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  contacts?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -265,6 +270,7 @@ export type HouseholdProfileWhereUniqueInput = Prisma.AtLeast<{
   goalsText?: Prisma.StringNullableFilter<"HouseholdProfile"> | string | null
   riskTolerance?: Prisma.StringNullableFilter<"HouseholdProfile"> | string | null
   usdIlsRate?: Prisma.FloatNullableFilter<"HouseholdProfile"> | number | null
+  contacts?: Prisma.JsonNullableFilter<"HouseholdProfile">
   createdAt?: Prisma.DateTimeFilter<"HouseholdProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"HouseholdProfile"> | Date | string
 }, "id" | "accountId">
@@ -277,6 +283,7 @@ export type HouseholdProfileOrderByWithAggregationInput = {
   goalsText?: Prisma.SortOrderInput | Prisma.SortOrder
   riskTolerance?: Prisma.SortOrderInput | Prisma.SortOrder
   usdIlsRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  contacts?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.HouseholdProfileCountOrderByAggregateInput
@@ -297,6 +304,7 @@ export type HouseholdProfileScalarWhereWithAggregatesInput = {
   goalsText?: Prisma.StringNullableWithAggregatesFilter<"HouseholdProfile"> | string | null
   riskTolerance?: Prisma.StringNullableWithAggregatesFilter<"HouseholdProfile"> | string | null
   usdIlsRate?: Prisma.FloatNullableWithAggregatesFilter<"HouseholdProfile"> | number | null
+  contacts?: Prisma.JsonNullableWithAggregatesFilter<"HouseholdProfile">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"HouseholdProfile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"HouseholdProfile"> | Date | string
 }
@@ -309,6 +317,7 @@ export type HouseholdProfileCreateInput = {
   goalsText?: string | null
   riskTolerance?: string | null
   usdIlsRate?: number | null
+  contacts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -321,6 +330,7 @@ export type HouseholdProfileUncheckedCreateInput = {
   goalsText?: string | null
   riskTolerance?: string | null
   usdIlsRate?: number | null
+  contacts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -333,6 +343,7 @@ export type HouseholdProfileUpdateInput = {
   goalsText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   riskTolerance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usdIlsRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  contacts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -345,6 +356,7 @@ export type HouseholdProfileUncheckedUpdateInput = {
   goalsText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   riskTolerance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usdIlsRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  contacts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -357,6 +369,7 @@ export type HouseholdProfileCreateManyInput = {
   goalsText?: string | null
   riskTolerance?: string | null
   usdIlsRate?: number | null
+  contacts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -369,6 +382,7 @@ export type HouseholdProfileUpdateManyMutationInput = {
   goalsText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   riskTolerance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usdIlsRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  contacts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -381,6 +395,7 @@ export type HouseholdProfileUncheckedUpdateManyInput = {
   goalsText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   riskTolerance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usdIlsRate?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  contacts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -393,6 +408,7 @@ export type HouseholdProfileCountOrderByAggregateInput = {
   goalsText?: Prisma.SortOrder
   riskTolerance?: Prisma.SortOrder
   usdIlsRate?: Prisma.SortOrder
+  contacts?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -435,6 +451,7 @@ export type HouseholdProfileSelect<ExtArgs extends runtime.Types.Extensions.Inte
   goalsText?: boolean
   riskTolerance?: boolean
   usdIlsRate?: boolean
+  contacts?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["householdProfile"]>
@@ -447,6 +464,7 @@ export type HouseholdProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   goalsText?: boolean
   riskTolerance?: boolean
   usdIlsRate?: boolean
+  contacts?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["householdProfile"]>
@@ -459,6 +477,7 @@ export type HouseholdProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   goalsText?: boolean
   riskTolerance?: boolean
   usdIlsRate?: boolean
+  contacts?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["householdProfile"]>
@@ -471,11 +490,12 @@ export type HouseholdProfileSelectScalar = {
   goalsText?: boolean
   riskTolerance?: boolean
   usdIlsRate?: boolean
+  contacts?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type HouseholdProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "members" | "goals" | "goalsText" | "riskTolerance" | "usdIlsRate" | "createdAt" | "updatedAt", ExtArgs["result"]["householdProfile"]>
+export type HouseholdProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "members" | "goals" | "goalsText" | "riskTolerance" | "usdIlsRate" | "contacts" | "createdAt" | "updatedAt", ExtArgs["result"]["householdProfile"]>
 
 export type $HouseholdProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "HouseholdProfile"
@@ -488,6 +508,7 @@ export type $HouseholdProfilePayload<ExtArgs extends runtime.Types.Extensions.In
     goalsText: string | null
     riskTolerance: string | null
     usdIlsRate: number | null
+    contacts: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["householdProfile"]>
@@ -920,6 +941,7 @@ export interface HouseholdProfileFieldRefs {
   readonly goalsText: Prisma.FieldRef<"HouseholdProfile", 'String'>
   readonly riskTolerance: Prisma.FieldRef<"HouseholdProfile", 'String'>
   readonly usdIlsRate: Prisma.FieldRef<"HouseholdProfile", 'Float'>
+  readonly contacts: Prisma.FieldRef<"HouseholdProfile", 'Json'>
   readonly createdAt: Prisma.FieldRef<"HouseholdProfile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"HouseholdProfile", 'DateTime'>
 }

@@ -70,6 +70,21 @@ export interface HouseholdMember {
   residence?: string | null; // country of residence, e.g. "US", "IL"
 }
 
+/** People who act on the household's behalf (agents, CPA, HR) — the advisor's email recipients. */
+export const CONTACT_ROLES = ["insurance_agent", "pension_agent", "cpa", "hr_benefits", "provider", "property_manager", "other"] as const;
+export type ContactRole = (typeof CONTACT_ROLES)[number];
+
+export interface HouseholdContact {
+  id: string;
+  name: string;
+  role: ContactRole;
+  country: "IL" | "US";
+  email?: string | null;
+  phone?: string | null;
+  language: "he" | "en";
+  notes?: string | null;
+}
+
 export interface HouseholdGoals {
   retirementTargetMonthlyIncome?: number | null;
   retirementTargetCurrency?: Currency | null;

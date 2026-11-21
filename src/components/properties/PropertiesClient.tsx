@@ -1,27 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Building2,
-  Home,
-  Plus,
-  MapPin,
-  X,
-  Loader2,
-  Archive,
-  ArchiveRestore,
   ChevronDown,
-  ArrowUp,
-  ArrowDown,
   CircleAlert,
+  KeyRound,
+  LayoutGrid,
+  Loader2,
+  Percent,
+  Plus,
+  Scale,
+  Table2,
+  TrendingUp,
+  Wallet,
+  X,
 } from "lucide-react";
-import { cn, formatCurrency, signedClass } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Field, SummaryTile, inputCls } from "@/components/properties/shared";
-import { REALTOR_PCT, CLOSING_PCT } from "@/lib/property";
+import { PageHeader } from "@/components/ui/page-header";
+import { Kpi } from "@/components/ui/stat-tile";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useDisplayCurrency } from "@/components/ui/currency";
+import { Field, inputCls } from "@/components/properties/shared";
 import YearPicker from "@/components/layout/YearPicker";
+import { notifyPropertiesChanged } from "@/components/layout/use-property-nav";
+import { isResidence, portfolioKpis, type PropertyRow } from "@/lib/property-portfolio";
+import type { AttentionItem } from "@/lib/property-attention";
+import { PropertyCard, ResidenceCard, fmtPct } from "./PropertyCard";
+import { PropertiesTable } from "./PropertiesTable";
+import { AttentionPanel } from "./AttentionPanel";
+import { EquityChart, MonthlyNetChart } from "./PropertiesCharts";
 
 const EMPTY_FORM = {
   street: "",
@@ -36,104 +46,106 @@ const EMPTY_FORM = {
   mortgageBalance: "",
 };
 
-interface Row {
-  id: string;
-  title: string;
-  address: string;
-  archived: boolean;
-  txCount: number;
-  income: number;
-  expenses: number;
-  net: number;
-  monthlyNet: number[];
-  hasTenants: boolean;
-  occupiedMonths: number;
-  occupancyMonths: number;
-  occupancyPct: number | null;
-  currentTenantName: string | null;
-  monthlyRent: number | null;
-  purchasePrice: number | null;
-  downPayment: number | null;
-  purchaseDate: string | null;
-  currentValue: number | null;
-  valueAsOf: string | null;
-  mortgageBalance: number | null;
-  /** "rental" or "residence" (the family's own home — net worth only). */
-  usage: string;
-  yieldPct: number | null;
-  /** Return on cash invested, summed across the units of this building. */
-  cashOnCashPct: number | null;
-  /** Down payment(s) behind that return — the building's, not just this unit's. */
-  cashInvested: number;
-  /** Units sharing this building; > 1 means the figure spans siblings. */
-  unitCount: number;
-  /** Entries kept for tax but left out of the figures on this card. */
-  taxOnlyCount: number;
-  /** Active building with no down payment recorded — cash-on-cash can't be computed. */
-  needsDownPayment: boolean;
+/* ── Cards | Table, remembered per browser ───────────────────────────── */
+
+type View = "table" | "cards";
+const VIEW_KEY = "properties-view-v1";
+const VIEW_EVENT = "properties-view-change";
+
+function readView(): View {
+  try {
+    return localStorage.getItem(VIEW_KEY) === "cards" ? "cards" : "table";
+  } catch {
+    return "table";
+  }
+}
+
+function subscribeView(cb: () => void) {
+  window.addEventListener("storage", cb);
+  window.addEventListener(VIEW_EVENT, cb);
+  return () => {
+    window.removeEventListener("storage", cb);
+    window.removeEventListener(VIEW_EVENT, cb);
+  };
+}
+
+function useView(): [View, (v: View) => void] {
+  const view = React.useSyncExternalStore(subscribeView, readView, () => "table" as View);
+  const set = React.useCallback((v: View) => {
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      /* private mode: the choice just isn't remembered */
+    }
+    window.dispatchEvent(new Event(VIEW_EVENT));
+  }, []);
+  return [view, set];
+}
+
+function ViewToggle({ view, onChange }: { view: View; onChange: (v: View) => void }) {
+  const options: { value: View; label: string; icon: React.ElementType }[] = [
+    { value: "cards", label: "Cards", icon: LayoutGrid },
+    { value: "table", label: "Table", icon: Table2 },
+  ];
+  return (
+    <div
+      role="group"
+      aria-label="Layout"
+      className="inline-flex h-9 items-center gap-0.5 rounded-lg border border-border bg-subtle p-0.5 max-md:hidden"
+    >
+      {options.map((o) => {
+        const active = view === o.value;
+        const Icon = o.icon;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            aria-pressed={active}
+            onClick={() => onChange(o.value)}
+            className={cn(
+              "inline-flex h-full items-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              active ? "bg-surface text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className="size-4" aria-hidden />
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function PropertiesClient({
   rows,
+  attention,
   year,
   availableYears,
   elapsed,
 }: {
-  rows: Row[];
+  rows: PropertyRow[];
+  attention: AttentionItem[];
   year: number;
   availableYears: number[];
   elapsed: number;
 }) {
   const router = useRouter();
-  const [adding, setAdding] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-
-  const [showArchived, setShowArchived] = useState(false);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const { money } = useDisplayCurrency();
+  const [view, setView] = useView();
+  const [adding, setAdding] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [form, setForm] = React.useState(EMPTY_FORM);
+  const [showArchived, setShowArchived] = React.useState(false);
+  const [busyId, setBusyId] = React.useState<string | null>(null);
 
   // The family's own home counts in net worth but not in rental returns, so it
-  // is listed on its own and left out of every rental figure below.
-  const homes = rows.filter((r) => !r.archived && r.usage === "residence");
-  const activeRows = rows.filter((r) => !r.archived && r.usage !== "residence");
+  // is listed on its own and left out of every rental figure and chart.
+  const homes = rows.filter((r) => !r.archived && isResidence(r));
+  const rentals = rows.filter((r) => !r.archived && !isResidence(r));
   const archivedRows = rows.filter((r) => r.archived);
-
-  const grandIncome = activeRows.reduce((sum, r) => sum + r.income, 0);
-  const grandExpenses = activeRows.reduce((sum, r) => sum + r.expenses, 0);
-  const grandNet = activeRows.reduce((sum, r) => sum + r.net, 0);
-
-  // Portfolio occupancy = Σ occupied months / Σ tracked months across active props.
-  const occupiedSum = activeRows.reduce((s, r) => s + r.occupiedMonths, 0);
-  const monthsSum = activeRows.reduce((s, r) => s + r.occupancyMonths, 0);
-  const occupancyPct = monthsSum > 0 ? Math.round((occupiedSum / monthsSum) * 100) : null;
-
-  // Portfolio avg yield = annualized Σ net (of priced props) / Σ purchase price.
-  const priceSum = activeRows.reduce((s, r) => s + (r.purchasePrice ?? 0), 0);
-  const netWithPrice = activeRows.reduce(
-    (s, r) => s + (r.purchasePrice ? r.net : 0),
-    0
-  );
-  const avgYield =
-    priceSum > 0 && elapsed > 0
-      ? ((netWithPrice / elapsed) * 12 / priceSum) * 100
-      : null;
-
-  // Portfolio appreciation across properties that have a current value.
-  const valued = activeRows.filter((r) => r.currentValue != null && r.purchasePrice);
-  const portValue = valued.reduce((s, r) => s + (r.currentValue ?? 0), 0);
-  const portCost = valued.reduce((s, r) => s + (r.purchasePrice ?? 0), 0);
-  const portDown = valued.reduce((s, r) => s + (r.downPayment ?? 0), 0);
-  const portGain = portValue - portCost;
-  const portApprPct = portCost > 0 ? portGain / portCost : 0;
-  // Net if the whole portfolio sold today (6% realtor + 2% closing).
-  const portNetProceeds = valued.reduce((s, r) => {
-    const cv = r.currentValue ?? 0;
-    return s + cv - cv * (REALTOR_PCT + CLOSING_PCT);
-  }, 0);
-  const portSaleProfit = portNetProceeds - portCost;
-  const portCoC = portDown > 0 ? portSaleProfit / portDown : null;
-  const hasAppr = valued.length > 0;
+  const k = portfolioKpis(rows, elapsed);
+  const partialYear = elapsed > 0 && elapsed < 12;
 
   async function setArchived(id: string, archived: boolean) {
     setBusyId(id);
@@ -143,7 +155,10 @@ export default function PropertiesClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ archived }),
       });
-      if (res.ok) router.refresh();
+      if (res.ok) {
+        notifyPropertiesChanged();
+        router.refresh();
+      }
     } finally {
       setBusyId(null);
     }
@@ -178,6 +193,7 @@ export default function PropertiesClient({
       }
       setForm(EMPTY_FORM);
       setAdding(false);
+      notifyPropertiesChanged();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add property");
@@ -186,38 +202,46 @@ export default function PropertiesClient({
     }
   }
 
-  return (
-    <div className="p-4 md:p-8 space-y-6 max-w-5xl mx-auto w-full">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-accent-amber/10 ring-1 ring-inset ring-accent-amber/20 shadow-sm">
-            <Building2 className="w-5 h-5 text-accent-amber" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Properties</h1>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              Rental income & expenses · tax-ready · {year}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <YearPicker years={availableYears} selected={year} />
-          <Button onClick={() => setAdding((a) => !a)}>
-            <Plus className="w-4 h-4" />
-            Add property
-          </Button>
-        </div>
-      </div>
+  const cardGrid = (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {rentals.map((r) => (
+        <PropertyCard
+          key={r.id}
+          row={r}
+          elapsed={elapsed}
+          busy={busyId === r.id}
+          onArchive={() => setArchived(r.id, true)}
+        />
+      ))}
+    </div>
+  );
 
-      {/* Add form */}
+  const nothingYet = rentals.length === 0 && homes.length === 0 && archivedRows.length === 0;
+
+  return (
+    <div className="mx-auto w-full max-w-7xl space-y-6 p-4 md:p-8">
+      <PageHeader
+        title="Properties"
+        description={`Rental income, expenses and equity · tax-ready · ${year}`}
+        actions={
+          <>
+            <YearPicker years={availableYears} selected={year} />
+            {rentals.length > 0 ? <ViewToggle view={view} onChange={setView} /> : null}
+            <Button onClick={() => setAdding((a) => !a)} aria-expanded={adding}>
+              <Plus className="size-4" aria-hidden />
+              Add property
+            </Button>
+          </>
+        }
+      />
+
       {adding && (
         <form
           onSubmit={handleCreate}
-          className="bg-[var(--card)] border border-[var(--border)] border-t-2 border-t-accent-amber/40 rounded-xl p-5 shadow-sm space-y-4"
+          className="space-y-4 rounded-xl border border-border bg-surface p-5"
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">New property</h3>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">New property</h2>
             <Button
               type="button"
               variant="ghost"
@@ -225,7 +249,7 @@ export default function PropertiesClient({
               onClick={() => setAdding(false)}
               aria-label="Close"
             >
-              <X className="w-4 h-4" />
+              <X className="size-4" aria-hidden />
             </Button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
@@ -303,7 +327,7 @@ export default function PropertiesClient({
                 />
               </Field>
             </div>
-            <label className="sm:col-span-6 flex items-center gap-2 text-sm text-[var(--foreground)]">
+            <label className="sm:col-span-6 flex items-center gap-2 text-sm text-foreground">
               <input
                 type="checkbox"
                 checked={form.residence}
@@ -340,7 +364,7 @@ export default function PropertiesClient({
             </div>
           </div>
           {error && (
-            <div className="flex items-center gap-2 rounded-lg border border-loss/30 bg-loss/10 px-3 py-2 text-sm text-loss">
+            <div className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger-subtle px-3 py-2 text-sm text-danger">
               <CircleAlert className="w-4 h-4 shrink-0" /> {error}
             </div>
           )}
@@ -356,117 +380,153 @@ export default function PropertiesClient({
         </form>
       )}
 
-      {/* Primary residence(s) — equity only, no rental metrics */}
-      {homes.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {homes.map((h) => (
-            <HomeCard key={h.id} row={h} />
-          ))}
-        </div>
-      )}
-
-      {/* Portfolio KPI strip */}
-      {activeRows.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <SummaryTile label="Properties" value={activeRows.length} variant="count" />
-          <SummaryTile
-            label="Occupied"
-            value={`${occupiedSum}/${monthsSum}`}
-            variant="count"
-            caption={occupancyPct !== null ? `${occupancyPct}% of months` : "—"}
-          />
-          <SummaryTile
-            label="Avg yield"
-            value={avgYield !== null ? `${avgYield.toFixed(1)}%` : "—"}
-            variant="percent"
-          />
-          <SummaryTile label={`Income · ${year}`} value={grandIncome} tone="pos" />
-          <SummaryTile label={`Expenses · ${year}`} value={grandExpenses} tone="neg" />
-          <SummaryTile label={`Net · ${year}`} value={grandNet} tone="net" />
-        </div>
-      )}
-
-      {/* Appreciation strip */}
-      {hasAppr && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <SummaryTile
-            label="Portfolio value"
-            value={portValue}
-            tone="pos"
-            caption={valued.length < activeRows.length ? `${valued.length} of ${activeRows.length} valued` : "current estimates"}
-          />
-          <SummaryTile
-            label="Appreciation"
-            variant="percent"
-            value={`${portApprPct >= 0 ? "+" : ""}${(portApprPct * 100).toFixed(1)}%`}
-            caption={`${portGain >= 0 ? "+" : ""}${formatCurrency(portGain)} vs cost`}
-            captionTone={portGain >= 0 ? "text-profit" : "text-loss"}
-          />
-          <SummaryTile
-            label="Net if sold"
-            value={portSaleProfit}
-            tone="net"
-            caption="after 6% realtor + 2% closing"
-          />
-          <SummaryTile
-            label="If sold, on cash"
-            variant="percent"
-            value={portCoC != null ? `${portCoC >= 0 ? "+" : ""}${(portCoC * 100).toFixed(0)}%` : "—"}
-            caption="sale profit vs down payments"
-          />
-        </div>
-      )}
-
-      {/* Active property list */}
-      {activeRows.length === 0 ? (
-        archivedRows.length === 0 && homes.length === 0 && (
-          <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-sm px-6 py-14 text-center">
-            <div className="mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-amber/10 ring-1 ring-inset ring-accent-amber/20">
-              <Building2 className="w-8 h-8 text-accent-amber" />
-            </div>
-            <h2 className="text-base font-semibold tracking-tight text-[var(--foreground)] mb-1.5">
-              No properties yet
-            </h2>
-            <p className="text-sm text-[var(--muted-foreground)] mb-6 max-w-sm mx-auto">
-              Add a property, then log its rental income and expenses for the year.
-            </p>
+      {nothingYet ? (
+        <EmptyState
+          icon={<Building2 />}
+          title="No properties yet"
+          titleAs="h2"
+          description="Add a property, then log its rental income and expenses for the year."
+          action={
             <Button onClick={() => setAdding(true)}>
-              <Plus className="w-4 h-4" />
+              <Plus className="size-4" aria-hidden />
               Add your first property
             </Button>
-          </div>
-        )
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {activeRows.map((r) => (
-            <PropertyCard
-              key={r.id}
-              row={r}
-              elapsed={elapsed}
-              busy={busyId === r.id}
-              onArchive={() => setArchived(r.id, true)}
-            />
-          ))}
+          }
+        />
+      ) : null}
+
+      {/* Headline figures: rentals only */}
+      {rentals.length > 0 ? (
+        <section aria-label="Rental portfolio summary" className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          <Kpi
+            label="Portfolio value"
+            icon={<Building2 />}
+            value={k.valuedCount ? money(k.value, "USD", { compact: true }) : "—"}
+            hint={
+              k.valuedCount < k.rentals
+                ? `${k.valuedCount} of ${k.rentals} valued`
+                : `${k.rentals} rental${k.rentals === 1 ? "" : "s"}`
+            }
+          />
+          <Kpi
+            label="Equity"
+            icon={<Scale />}
+            value={k.valuedCount ? money(k.equity, "USD", { compact: true }) : "—"}
+            hint={
+              [
+                k.missingMortgage > 0 ? `${k.missingMortgage} missing mortgage` : "value − mortgage",
+                k.homeEquity != null ? `+ home ${money(k.homeEquity, "USD", { compact: true })}` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")
+            }
+          />
+          <Kpi
+            label={`Net cash flow${partialYear ? " YTD" : ` ${year}`}`}
+            icon={<Wallet />}
+            value={money(k.net, "USD", { compact: true, signed: true })}
+            valueTone={k.net > 0 ? "positive" : k.net < 0 ? "negative" : "default"}
+            hint={k.avgNetPerMonth != null ? `${money(k.avgNetPerMonth, "USD", { signed: true })}/mo avg` : undefined}
+          />
+          <Kpi
+            label="Cash-on-cash"
+            icon={<Percent />}
+            value={fmtPct(k.cashOnCashPct)}
+            valueTone={k.cashOnCashPct == null ? "muted" : k.cashOnCashPct >= 0 ? "positive" : "negative"}
+            hint={k.cashInvested > 0 ? `on ${money(k.cashInvested, "USD", { compact: true })} invested` : "add down payments"}
+          />
+          <Kpi
+            label="Units leased now"
+            icon={<KeyRound />}
+            value={`${k.leased}/${k.rentals}`}
+            hint={k.leased === k.rentals ? "fully leased" : `${k.rentals - k.leased} vacant`}
+          />
+          <Kpi
+            label="Appreciation vs cost"
+            icon={<TrendingUp />}
+            value={k.appreciationPct != null ? fmtPct(k.appreciationPct * 100) : "—"}
+            valueTone={k.appreciationPct == null ? "muted" : k.appreciationPct >= 0 ? "positive" : "negative"}
+            hint={
+              k.netIfSold != null ? (
+                <span title="After 6% realtor + 2% closing costs">
+                  {money(k.appreciationGain, "USD", { compact: true, signed: true })} · net if sold{" "}
+                  {money(k.netIfSold, "USD", { compact: true, signed: true })}
+                  <span className="sr-only"> after 6% realtor and 2% closing costs</span>
+                </span>
+              ) : undefined
+            }
+          />
+        </section>
+      ) : null}
+
+      {/* Attention + primary residence */}
+      {rentals.length > 0 || homes.length > 0 ? (
+        <div className={cn("grid grid-cols-1 gap-4", homes.length > 0 && "lg:grid-cols-3")}>
+          <AttentionPanel items={attention} className={homes.length > 0 ? "lg:col-span-2" : undefined} />
+          {homes.length > 0 ? (
+            <section aria-labelledby="residence-heading" className="flex flex-col gap-3">
+              <h2 id="residence-heading" className="sr-only">
+                Primary residence
+              </h2>
+              {homes.map((h) => (
+                <ResidenceCard key={h.id} row={h} />
+              ))}
+            </section>
+          ) : null}
         </div>
-      )}
+      ) : null}
+
+      {/* The list */}
+      {rentals.length > 0 ? (
+        <section aria-labelledby="rentals-heading" className="space-y-3">
+          <h2 id="rentals-heading" className="text-lg font-semibold tracking-tight text-foreground">
+            Rentals <span className="num text-sm font-normal text-muted-foreground">({rentals.length})</span>
+          </h2>
+          {view === "table" ? (
+            <>
+              <div className="max-md:hidden">
+                <PropertiesTable
+                  rows={rentals}
+                  elapsed={elapsed}
+                  busyId={busyId}
+                  onArchive={(id) => setArchived(id, true)}
+                />
+              </div>
+              {/* Phones: the table falls back to cards. */}
+              <div className="md:hidden">{cardGrid}</div>
+            </>
+          ) : (
+            cardGrid
+          )}
+        </section>
+      ) : null}
+
+      {/* Charts */}
+      {rentals.length > 0 ? (
+        <section aria-label="Charts" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <MonthlyNetChart rows={rentals} year={year} elapsed={elapsed} />
+          <EquityChart rows={rentals} />
+        </section>
+      ) : null}
 
       {/* Archived */}
-      {archivedRows.length > 0 && (
-        <div>
+      {archivedRows.length > 0 ? (
+        <section aria-label="Archived properties">
           <button
+            type="button"
             onClick={() => setShowArchived((s) => !s)}
-            className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+            aria-expanded={showArchived}
+            aria-controls="archived-properties"
+            className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ChevronDown
-              className={cn(
-                "w-4 h-4 transition-transform",
-                showArchived ? "rotate-0" : "-rotate-90"
-              )}
+              className={cn("size-4 transition-transform", showArchived ? "rotate-0" : "-rotate-90")}
+              aria-hidden
             />
             Archived ({archivedRows.length})
           </button>
-          {showArchived && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+          {showArchived ? (
+            <div id="archived-properties" className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {archivedRows.map((r) => (
                 <PropertyCard
                   key={r.id}
@@ -478,246 +538,9 @@ export default function PropertiesClient({
                 />
               ))}
             </div>
-          )}
-        </div>
-      )}
+          ) : null}
+        </section>
+      ) : null}
     </div>
-  );
-}
-
-function PropertyCard({
-  row: r,
-  elapsed,
-  busy,
-  compact,
-  onArchive,
-  onUnarchive,
-}: {
-  row: Row;
-  elapsed: number;
-  busy: boolean;
-  compact?: boolean;
-  onArchive?: () => void;
-  onUnarchive?: () => void;
-}) {
-  const bars = r.monthlyNet.slice(0, Math.max(1, elapsed));
-  // Mid-year: the cash figure is what came back so far, not a full-year result.
-  const partialYear = elapsed > 0 && elapsed < 12;
-  const maxAbs = Math.max(1, ...bars.map((v) => Math.abs(v)));
-  const apprPct =
-    r.currentValue != null && r.purchasePrice
-      ? (r.currentValue - r.purchasePrice) / r.purchasePrice
-      : null;
-
-  return (
-    <div
-      className={cn(
-        "relative bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-sm transition-all duration-200",
-        r.archived
-          ? "opacity-70"
-          : "hover:border-accent-amber/50 hover:shadow-md hover:-translate-y-0.5"
-      )}
-    >
-      <Link
-        href={`/properties/${r.id}`}
-        className="pressable block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
-      >
-        {/* Zone A — identity */}
-        <div className="mb-3 pr-9">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-[var(--foreground)] truncate">
-              {r.title}
-            </h3>
-            {r.archived && (
-              <span className="text-[10px] font-medium uppercase tracking-wider rounded px-1.5 py-0.5 bg-[var(--muted)] text-[var(--muted-foreground)]">
-                Archived
-              </span>
-            )}
-          </div>
-          <p className="flex items-center gap-1 text-xs text-[var(--muted-foreground)] truncate mt-0.5">
-            <MapPin className="w-3 h-3 shrink-0" />
-            {r.address}
-          </p>
-        </div>
-
-        {/* Zone B — occupancy */}
-        {!compact && r.hasTenants && (
-          <div className="flex items-center gap-1.5 text-xs mt-2">
-            {r.currentTenantName ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-profit shrink-0" />
-                <span className="truncate text-[var(--foreground)]">
-                  {r.currentTenantName}
-                </span>
-                {r.monthlyRent != null && (
-                  <span className="font-data text-[var(--muted-foreground)] shrink-0">
-                    · {formatCurrency(r.monthlyRent)}/mo
-                  </span>
-                )}
-              </>
-            ) : (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-loss shrink-0" />
-                <span className="text-[var(--muted-foreground)]">Vacant</span>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Zone C — net + split */}
-        <p className={cn("text-2xl font-bold font-data tracking-tight tabular-nums mt-2", signedClass(r.net))}>
-          {r.net >= 0 ? "+" : ""}
-          {formatCurrency(r.net)}
-        </p>
-        <div className="flex items-center gap-3 text-xs mt-2">
-          <span className="inline-flex items-center gap-1 text-profit font-data">
-            <ArrowUp className="w-3 h-3" />
-            {formatCurrency(r.income)}
-          </span>
-          <span className="inline-flex items-center gap-1 text-loss font-data">
-            <ArrowDown className="w-3 h-3" />
-            {formatCurrency(r.expenses)}
-          </span>
-        </div>
-
-        {/* Zone D — sparkline */}
-        {!compact && r.txCount > 0 && (
-          <div className="flex items-end gap-0.5 h-5 mt-3">
-            {bars.map((v, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "flex-1 rounded-sm min-h-[2px]",
-                  v >= 0 ? "bg-profit/70" : "bg-loss/70"
-                )}
-                style={{
-                  height: `${Math.max(8, Math.min(100, (Math.abs(v) / maxAbs) * 100))}%`,
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Zone D2 — value & appreciation */}
-        {apprPct != null && (
-          <div className="flex items-center justify-between text-xs mt-2">
-            <span className="text-[var(--muted-foreground)] font-data">
-              Value {formatCurrency(r.currentValue ?? 0)}
-            </span>
-            <span className={cn("font-data font-semibold", apprPct >= 0 ? "text-profit" : "text-loss")}>
-              {apprPct >= 0 ? "+" : ""}{(apprPct * 100).toFixed(1)}%
-            </span>
-          </div>
-        )}
-
-        {/* Zone D3 — return on the cash invested */}
-        {r.cashOnCashPct != null && (
-          <div className="flex items-center justify-between gap-2 text-xs mt-2 pt-2 border-t border-[var(--border)]">
-            <span className="flex items-center gap-1.5 min-w-0 text-[var(--muted-foreground)]">
-              <span className="truncate">Cash-on-cash{partialYear ? " · YTD" : ""}</span>
-              {r.unitCount > 1 && (
-                <span className="shrink-0 text-[10px] font-medium uppercase tracking-wider rounded px-1.5 py-0.5 bg-[var(--muted)] text-[var(--muted-foreground)]">
-                  {r.unitCount} units
-                </span>
-              )}
-            </span>
-            <span
-              className={cn(
-                "font-data font-semibold shrink-0",
-                signedClass(r.cashOnCashPct)
-              )}
-            >
-              {r.cashOnCashPct >= 0 ? "+" : ""}
-              {r.cashOnCashPct.toFixed(1)}% on {formatCurrency(r.cashInvested)}
-            </span>
-          </div>
-        )}
-
-        {/* Zone D3b — no basis on file, so invite one instead of guessing */}
-        {r.cashOnCashPct == null && r.needsDownPayment && r.txCount > 0 && (
-          <div className="flex items-center justify-between gap-2 text-xs mt-2 pt-2 border-t border-[var(--border)]">
-            <span className="truncate text-[var(--muted-foreground)]">Cash-on-cash</span>
-            <span className="shrink-0 text-[var(--muted-foreground)]">
-              Add a down payment
-            </span>
-          </div>
-        )}
-
-        {/* Zone E — footer */}
-        <div className="flex items-center justify-between text-xs text-[var(--muted-foreground)] mt-2 pt-2 border-t border-[var(--border)]">
-          <span>
-            {r.txCount} entr{r.txCount !== 1 ? "ies" : "y"}
-            {r.taxOnlyCount > 0 && ` · ${r.taxOnlyCount} tax only`}
-          </span>
-          {r.yieldPct != null && (
-            <span className="font-data">{r.yieldPct.toFixed(1)}% yield</span>
-          )}
-        </div>
-      </Link>
-
-      {/* Archive / unarchive control (outside the Link so it doesn't navigate) */}
-      {(onArchive || onUnarchive) && (
-        <div className="absolute top-4 right-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onArchive ?? onUnarchive}
-            disabled={busy}
-            title={onArchive ? "Archive property" : "Restore property"}
-            className="focus-visible:ring-offset-[var(--card)]"
-          >
-            {busy ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : onArchive ? (
-              <Archive className="w-4 h-4" />
-            ) : (
-              <ArchiveRestore className="w-4 h-4" />
-            )}
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function HomeCard({ row: r }: { row: Row }) {
-  const equity = r.currentValue != null ? r.currentValue - (r.mortgageBalance ?? 0) : null;
-  return (
-    <Link
-      href={`/properties/${r.id}`}
-      className="pressable block rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-    >
-      <div className="flex items-center gap-2">
-        <Home className="size-4 text-accent-blue" aria-hidden />
-        <h3 className="truncate text-sm font-semibold text-[var(--foreground)]">{r.title}</h3>
-        <span className="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-accent-blue/10 text-accent-blue">
-          Primary residence
-        </span>
-      </div>
-      <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-[var(--muted-foreground)]">
-        <MapPin className="size-3 shrink-0" />
-        {r.address}
-      </p>
-      <div className="mt-3 grid grid-cols-3 gap-3 text-xs">
-        <div>
-          <p className="text-[var(--muted-foreground)]">Value</p>
-          <p className="font-data text-sm font-semibold text-[var(--foreground)]">
-            {r.currentValue != null ? formatCurrency(r.currentValue) : "Add"}
-          </p>
-        </div>
-        <div>
-          <p className="text-[var(--muted-foreground)]">Mortgage</p>
-          <p className="font-data text-sm font-semibold text-[var(--foreground)]">
-            {r.mortgageBalance != null ? formatCurrency(r.mortgageBalance) : "Add"}
-          </p>
-        </div>
-        <div>
-          <p className="text-[var(--muted-foreground)]">Equity</p>
-          <p className={cn("font-data text-sm font-semibold", equity != null ? signedClass(equity) : "text-[var(--muted-foreground)]")}>
-            {equity != null ? formatCurrency(equity) : "—"}
-          </p>
-        </div>
-      </div>
-    </Link>
   );
 }

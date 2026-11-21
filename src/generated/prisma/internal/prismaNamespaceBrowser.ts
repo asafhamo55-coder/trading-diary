@@ -54,6 +54,11 @@ export const ModelName = {
   Account: 'Account',
   Property: 'Property',
   Tenant: 'Tenant',
+  PropertyLoan: 'PropertyLoan',
+  PropertyImprovement: 'PropertyImprovement',
+  PropertyMaintenance: 'PropertyMaintenance',
+  PropertyDocument: 'PropertyDocument',
+  PropertyUtility: 'PropertyUtility',
   PropertyTransaction: 'PropertyTransaction',
   FundTransaction: 'FundTransaction',
   Trade: 'Trade',
@@ -71,8 +76,10 @@ export const ModelName = {
   SavingsSnapshot: 'SavingsSnapshot',
   HouseholdProfile: 'HouseholdProfile',
   AdvisorReport: 'AdvisorReport',
+  AdvisorActionStatus: 'AdvisorActionStatus',
   Benefit: 'Benefit',
-  TradingGuideline: 'TradingGuideline'
+  TradingGuideline: 'TradingGuideline',
+  AssistantQuestion: 'AssistantQuestion'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -126,6 +133,7 @@ export const PropertyScalarFieldEnum = {
   usage: 'usage',
   notes: 'notes',
   archivedAt: 'archivedAt',
+  profile: 'profile',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -149,6 +157,95 @@ export const TenantScalarFieldEnum = {
 } as const
 
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const PropertyLoanScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  kind: 'kind',
+  lender: 'lender',
+  servicer: 'servicer',
+  loanNumber: 'loanNumber',
+  portalUrl: 'portalUrl',
+  servicerPhone: 'servicerPhone',
+  originalAmount: 'originalAmount',
+  startDate: 'startDate',
+  termMonths: 'termMonths',
+  interestRate: 'interestRate',
+  rateType: 'rateType',
+  armResetDate: 'armResetDate',
+  armIndex: 'armIndex',
+  armMargin: 'armMargin',
+  monthlyPI: 'monthlyPI',
+  escrowMonthly: 'escrowMonthly',
+  pmiMonthly: 'pmiMonthly',
+  pmiRemovalDate: 'pmiRemovalDate',
+  maturityDate: 'maturityDate',
+  balance: 'balance',
+  balanceAsOf: 'balanceAsOf',
+  active: 'active',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PropertyLoanScalarFieldEnum = (typeof PropertyLoanScalarFieldEnum)[keyof typeof PropertyLoanScalarFieldEnum]
+
+
+export const PropertyImprovementScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  date: 'date',
+  description: 'description',
+  amount: 'amount',
+  category: 'category',
+  notes: 'notes',
+  createdAt: 'createdAt'
+} as const
+
+export type PropertyImprovementScalarFieldEnum = (typeof PropertyImprovementScalarFieldEnum)[keyof typeof PropertyImprovementScalarFieldEnum]
+
+
+export const PropertyMaintenanceScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  date: 'date',
+  vendor: 'vendor',
+  system: 'system',
+  cost: 'cost',
+  notes: 'notes',
+  transactionId: 'transactionId',
+  createdAt: 'createdAt'
+} as const
+
+export type PropertyMaintenanceScalarFieldEnum = (typeof PropertyMaintenanceScalarFieldEnum)[keyof typeof PropertyMaintenanceScalarFieldEnum]
+
+
+export const PropertyDocumentScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  type: 'type',
+  title: 'title',
+  url: 'url',
+  date: 'date',
+  createdAt: 'createdAt'
+} as const
+
+export type PropertyDocumentScalarFieldEnum = (typeof PropertyDocumentScalarFieldEnum)[keyof typeof PropertyDocumentScalarFieldEnum]
+
+
+export const PropertyUtilityScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  kind: 'kind',
+  provider: 'provider',
+  accountNumber: 'accountNumber',
+  paidBy: 'paidBy',
+  portalUrl: 'portalUrl',
+  createdAt: 'createdAt'
+} as const
+
+export type PropertyUtilityScalarFieldEnum = (typeof PropertyUtilityScalarFieldEnum)[keyof typeof PropertyUtilityScalarFieldEnum]
 
 
 export const PropertyTransactionScalarFieldEnum = {
@@ -426,6 +523,7 @@ export const HouseholdProfileScalarFieldEnum = {
   goalsText: 'goalsText',
   riskTolerance: 'riskTolerance',
   usdIlsRate: 'usdIlsRate',
+  contacts: 'contacts',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -445,6 +543,22 @@ export const AdvisorReportScalarFieldEnum = {
 } as const
 
 export type AdvisorReportScalarFieldEnum = (typeof AdvisorReportScalarFieldEnum)[keyof typeof AdvisorReportScalarFieldEnum]
+
+
+export const AdvisorActionStatusScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  key: 'key',
+  recId: 'recId',
+  task: 'task',
+  done: 'done',
+  doneAt: 'doneAt',
+  reportId: 'reportId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdvisorActionStatusScalarFieldEnum = (typeof AdvisorActionStatusScalarFieldEnum)[keyof typeof AdvisorActionStatusScalarFieldEnum]
 
 
 export const BenefitScalarFieldEnum = {
@@ -484,6 +598,25 @@ export const TradingGuidelineScalarFieldEnum = {
 export type TradingGuidelineScalarFieldEnum = (typeof TradingGuidelineScalarFieldEnum)[keyof typeof TradingGuidelineScalarFieldEnum]
 
 
+export const AssistantQuestionScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  question: 'question',
+  language: 'language',
+  pagePath: 'pagePath',
+  pageTitle: 'pageTitle',
+  contextKeys: 'contextKeys',
+  status: 'status',
+  answer: 'answer',
+  answeredAt: 'answeredAt',
+  answeredBy: 'answeredBy',
+  createdAt: 'createdAt',
+  readAt: 'readAt'
+} as const
+
+export type AssistantQuestionScalarFieldEnum = (typeof AssistantQuestionScalarFieldEnum)[keyof typeof AssistantQuestionScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -515,14 +648,6 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -530,4 +655,12 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

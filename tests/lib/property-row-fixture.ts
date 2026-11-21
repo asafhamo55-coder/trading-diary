@@ -1,0 +1,41 @@
+// Synthetic list row for the property-portfolio and property-attention tests.
+import type { PropertyRow } from "../../src/lib/property-portfolio";
+
+export function row(over: Partial<PropertyRow> & Pick<PropertyRow, "id">): PropertyRow {
+  return {
+    title: `${over.id} Example St`,
+    address: `${over.id} Example St, Springfield, ZZ 00000`,
+    unit: null,
+    buildingKey: `bk-${over.id}`,
+    archived: false,
+    usage: "rental",
+    txCount: 12,
+    income: 0,
+    expenses: 0,
+    net: 0,
+    monthlyNet: Array(12).fill(0),
+    taxOnlyCount: 0,
+    hasTenants: true,
+    occupiedMonths: 12,
+    occupancyMonths: 12,
+    occupancyPct: 100,
+    currentTenantName: "Tenant A",
+    monthlyRent: 1000,
+    leaseStart: "2026-01-01",
+    leaseEnd: "2027-06-30",
+    lastLeaseEnd: null,
+    purchasePrice: null,
+    downPayment: null,
+    purchaseDate: null,
+    currentValue: null,
+    valueAsOf: null,
+    mortgageBalance: null,
+    mortgageAsOf: null,
+    yieldPct: null,
+    cashOnCashPct: null,
+    cashInvested: 0,
+    unitCount: 1,
+    needsDownPayment: false,
+    ...over,
+  };
+}

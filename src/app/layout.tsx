@@ -4,6 +4,7 @@ import "./globals.css";
 import { THEME_INIT_SCRIPT } from "@/lib/theme-script";
 import InstallBanner from "@/components/layout/InstallBanner";
 import BiometricGate from "@/components/auth/BiometricGate";
+import AssistantLauncher from "@/components/assistant/AssistantLauncher";
 
 // Same faces and weights as HomeownerHub (apps/hoa/src/app/layout.tsx).
 const beVietnam = Be_Vietnam_Pro({
@@ -59,6 +60,8 @@ export default function RootLayout({
         <BiometricGate>
           {children}
           <InstallBanner />
+          {/* Floating "Ask" assistant on every page except /login (docs/assistant.md). */}
+          <AssistantLauncher />
         </BiometricGate>
       </body>
     </html>

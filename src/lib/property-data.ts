@@ -8,6 +8,16 @@ import type {
 } from "./property";
 import { signedAmount, propertyTitle } from "./property";
 import { ensurePropertySchema } from "./property-schema";
+import {
+  EMPTY_RECORD,
+  RECORD_DATE_FIELDS,
+  parseProfile,
+  summarizeRecord,
+  type PropertyRecord,
+  type PropertyRecordSummary,
+  type RecordList,
+} from "./property-profile";
+import { todayInEastern } from "./utils";
 
 // Run a Prisma read; if it fails because the schema isn't present yet (fresh
 // deploy, pre-migration), ensure the schema idempotently and retry once.
@@ -279,5 +289,106 @@ export async function getPropertyYears(): Promise<number[]> {
       orderBy: { year: "desc" },
     });
     return rows.map((r) => r.year);
+  }, []);
+}
+
+/* ── The property record (loans, insurance, tax, …) ─────────────────── */
+
+const RECORD_META = new Set(["propertyId", "createdAt", "updatedAt"]);
+
+/** A list row from Prisma → its DTO: dates as YYYY-MM-DD, bookkeeping columns dropped. */
+export function serializeRecordRow<T>(list: RecordList, row: Record<string, unknown>): T {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(row)) {
+    if (RECORD_META.has(k)) continue;
+    out[k] = RECORD_DATE_FIELDS[list].includes(k) ? (v ? toDateStr(v as Date) : null) : v;
+  }
+  return out as T;
+}
+
+async function recordsFor(propertyIds: string[]): Promise<Map<string, PropertyRecord>> {
+  const out = new Map<string, PropertyRecord>();
+  if (propertyIds.length === 0) return out;
+  const where = { propertyId: { in: propertyIds } };
+  const [props, loans, improvements, maintenance, documents, utilities] = await Promise.all([
+    prisma.property.findMany({ where: { id: { in: propertyIds } }, select: { id: true, profile: true } }),
+    prisma.propertyLoan.findMany({ where, orderBy: [{ active: "desc" }, { createdAt: "asc" }] }),
+    prisma.propertyImprovement.findMany({ where, orderBy: { date: "desc" } }),
+    prisma.propertyMaintenance.findMany({ where, orderBy: { date: "desc" } }),
+    prisma.propertyDocument.findMany({ where, orderBy: { createdAt: "asc" } }),
+    prisma.propertyUtility.findMany({ where, orderBy: { createdAt: "asc" } }),
+  ]);
+  for (const p of props) {
+    out.set(p.id, { ...EMPTY_RECORD, profile: parseProfile(p.profile), loans: [], improvements: [], maintenance: [], documents: [], utilities: [] });
+  }
+  const add = (list: RecordList, rows: { propertyId: string }[]) => {
+    for (const r of rows) {
+      const rec = out.get(r.propertyId);
+      if (rec) (rec[list] as unknown[]).push(serializeRecordRow(list, r as unknown as Record<string, unknown>));
+    }
+  };
+  add("loans", loans);
+  add("improvements", improvements);
+  add("maintenance", maintenance);
+  add("documents", documents);
+  add("utilities", utilities);
+  return out;
+}
+
+/**
+ * One property's full record: profile sections (facts, HOA, insurance,
+ * property tax, management, tax basis, systems) and the lists (loans,
+ * improvements, maintenance, documents, utilities). Never throws: a missing
+ * table heals the schema, and failing that an empty record comes back.
+ */
+export async function getPropertyRecord(id: string): Promise<PropertyRecord> {
+  return withSchemaHeal(async () => {
+    const accountId = await firstAccountId();
+    if (!accountId) return EMPTY_RECORD;
+    const owned = await prisma.property.findFirst({ where: { id, accountId }, select: { id: true } });
+    if (!owned) return EMPTY_RECORD;
+    return (await recordsFor([id])).get(id) ?? EMPTY_RECORD;
+  }, EMPTY_RECORD);
+}
+
+/** Every property's record, keyed by property id (archived ones included). */
+export async function getPropertyRecords(): Promise<Map<string, PropertyRecord>> {
+  return withSchemaHeal(async () => {
+    const accountId = await firstAccountId();
+    if (!accountId) return new Map<string, PropertyRecord>();
+    const props = await prisma.property.findMany({ where: { accountId }, select: { id: true } });
+    return recordsFor(props.map((p) => p.id));
+  }, new Map<string, PropertyRecord>());
+}
+
+export interface PropertyRecordListItem extends PropertyRecordSummary {
+  id: string;
+  title: string;
+  usage: string;
+  archived: boolean;
+}
+
+/**
+ * List-level record summary for the advisor: per property, loan totals and
+ * rates, insurance, property tax, management, HOA, depreciation basis and the
+ * key dates. Active and archived properties alike (filter on `archived`).
+ */
+export async function getPropertyRecordSummaries(today: string = todayInEastern()): Promise<PropertyRecordListItem[]> {
+  return withSchemaHeal(async () => {
+    const accountId = await firstAccountId();
+    if (!accountId) return [];
+    const props = await prisma.property.findMany({
+      where: { accountId },
+      select: { id: true, nickname: true, address: true, street: true, usage: true, archivedAt: true },
+      orderBy: { createdAt: "asc" },
+    });
+    const records = await recordsFor(props.map((p) => p.id));
+    return props.map((p) => ({
+      id: p.id,
+      title: propertyTitle(p),
+      usage: p.usage,
+      archived: p.archivedAt !== null,
+      ...summarizeRecord(records.get(p.id) ?? EMPTY_RECORD, today),
+    }));
   }, []);
 }

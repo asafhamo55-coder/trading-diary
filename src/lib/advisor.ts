@@ -17,6 +17,8 @@ import {
 } from "./savings";
 import type { HomeCashFlowSummary, HouseholdProfileDTO } from "./savings-data";
 import { fxProvenance } from "./currency";
+import { ADVISOR_OUTPUT_SCHEMA, AdvisorError, parseAdvisorOutput, type AdvisorOutput } from "./advisor-report";
+import { buildRealEstateReview, type PropertyRecordFacts, type PropertyWithTx, type RealEstateReview } from "./advisor-properties";
 
 export const ADVISOR_MODEL = "claude-fable-5-1";
 // Fable 5.1 list pricing, USD per million tokens.
@@ -28,84 +30,26 @@ export function hasAnthropicKey(): boolean {
   return !!process.env.ANTHROPIC_API_KEY;
 }
 
-// ── Output schema ──────────────────────────────────────────────────
+// ── Output schema (v2) ─────────────────────────────────────────────
+// Types, JSON schema and the parse/rank/roll-up logic live in
+// advisor-report.ts (no Node imports, so the dashboard can share them).
 
-export const RECOMMENDATION_CATEGORIES = [
-  "fees",
-  "allocation",
-  "consolidation",
-  "insurance",
-  "insurance-overlap",
-  "tax",
-  "liquidity",
-  "retirement",
-  "property",
-  "cash-flow",
-  "education",
-  "data-gap",
-] as const;
-
-export interface AdvisorRecommendation {
-  title: string;
-  category: (typeof RECOMMENDATION_CATEGORIES)[number];
-  priority: "high" | "medium" | "low";
-  owner: string; // member key or "household"
-  rationale: string;
-  action: string;
-  estimatedImpactUsdPerYear: number | null;
-  confidence: "high" | "medium" | "low";
-}
-
-export interface AdvisorOutput {
-  headline: string;
-  netWorthCommentary: string;
-  recommendations: AdvisorRecommendation[];
-  questionsForUser: { question: string; why: string }[];
-  disclaimers: string[];
-}
-
-// Structured-outputs JSON schema: every object closed, every field required
-// (optionals are expressed as nullable).
-export const ADVISOR_OUTPUT_SCHEMA = {
-  type: "object",
-  additionalProperties: false,
-  required: ["headline", "netWorthCommentary", "recommendations", "questionsForUser", "disclaimers"],
-  properties: {
-    headline: { type: "string", description: "One-sentence bottom line for the household." },
-    netWorthCommentary: { type: "string", description: "Short commentary on net worth composition, grounded in snapshot figures." },
-    recommendations: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["title", "category", "priority", "owner", "rationale", "action", "estimatedImpactUsdPerYear", "confidence"],
-        properties: {
-          title: { type: "string" },
-          category: { type: "string", enum: [...RECOMMENDATION_CATEGORIES] },
-          priority: { type: "string", enum: ["high", "medium", "low"] },
-          owner: { type: "string", description: 'Household member key from the snapshot (e.g. an adult or child key) or "household".' },
-          rationale: { type: "string", description: "Why, citing snapshot numbers." },
-          action: { type: "string", description: "Concrete next step." },
-          estimatedImpactUsdPerYear: {
-            type: ["number", "null"],
-            description: "Annual USD impact derived from snapshot figures; null if it cannot be computed from the data.",
-          },
-          confidence: { type: "string", enum: ["high", "medium", "low"] },
-        },
-      },
-    },
-    questionsForUser: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["question", "why"],
-        properties: { question: { type: "string" }, why: { type: "string" } },
-      },
-    },
-    disclaimers: { type: "array", items: { type: "string" } },
-  },
-} as const;
+export {
+  ADVISOR_OUTPUT_SCHEMA,
+  ADVISOR_THEMES,
+  AdvisorError,
+  TEN_YEAR_FACTOR,
+  normalizeAdvisorOutput,
+  parseAdvisorOutput,
+  tenYearValue,
+  type AdvisorActionItem,
+  type AdvisorBenefit,
+  type AdvisorOutput,
+  type AdvisorRecommendation,
+  type AdvisorQuickWin,
+  type AdvisorTheme,
+  type Localized,
+} from "./advisor-report";
 
 // ── System prompt ──────────────────────────────────────────────────
 
@@ -119,15 +63,67 @@ export const ADVISOR_SYSTEM = `You are an expert cross-border (Israel–US) hous
 - Cross-border: the US–Israel tax treaty (and its limits for pension/hishtalmut treatment), PFIC risk for US persons holding Israeli mutual funds / gemel-type investment products, FBAR (FinCEN 114) and Form 8938 reporting of Israeli accounts, foreign tax credits, currency exposure (ILS vs USD) and how a planned relocation changes the picture.
 - Children's milestones: Israeli army service at 18 and university typically after service (~21+), versus US college at 18; 529 vs Israeli savings options; timing of "חיסכון לכל ילד" withdrawals.
 
-How to work:
-- Ground every figure you cite in the SNAPSHOT. Never invent balances, fees, rates, ages, or goals. If you compute something (e.g. fee savings), show the inputs from the snapshot in the rationale and keep the arithmetic simple.
+The household wants clear direction — money on the table they can pick up fast — not analysis. Your output is a decisive, drill-down plan ranked by money. They read it top-down:
+0. quickWins ("Money on the table — act this week"): the 3–5 recommendations with the best tenYearUsd ÷ effort that are high-confidence and doable within about 2 weeks. Each has recId (an id from recommendations) and one imperative directive sentence: name the provider, the exact ask, the number and the deadline, and end with the saving — e.g. "Call <provider> on <number from the snapshot/knowledge base> and ask to cut the accumulation fee from 1.00% to 0.20% — saves ~$3,200/yr." The UI shows the recommendation's first action item with a checkbox right under it.
+1. executiveSummary (3–5 bullets): where they stand — net worth, retirement readiness vs their goal (projected income vs target, or the gap in USD), the single biggest risk — and the total quantified upside if they do everything (the sum of the recommendations' tenYearUsd, plus annual $/yr).
+2. themes: one entry per area you assessed (fees, retirement, insurance, tax, allocation, opportunities, real-estate, education, cash, data). Include themes that are fine with tone "good" and a status line with a number ("Blended fee 0.21% of accumulation — at benchmark"). Always include "opportunities".
+3. recommendations: each one a complete, self-contained change.
+
+Write decisively:
+- Titles, directives, steps and action items are imperative and specific: the provider by name, the exact ask, the number, the form, the deadline. "Ask <provider>'s retention desk to match 0.20% of accumulation", not "consider reviewing your fees".
+- No hedging ("you may want to", "consider", "it could be worth") unless a fact is genuinely unknown — and then say exactly what is unknown and make the first action item how to find it out (which statement line, which portal, whom to call).
+
+Bilingual — English and Hebrew, always:
+- Every text field is an object { "en": "...", "he": "..." }: headline, executiveSummary bullets, quickWins directives, theme title/status, and per recommendation title, whatToChange current/target, why, howToChange steps, actionItems task and contact, benefit basis/riskReduction, urgency note, risksIfIgnored; plus questionsForUser and disclaimers.
+- The Hebrew is natural Israeli financial Hebrew as a pension advisor would write it, not a literal translation. Keep product names native (קרן השתלמות, ביטוח מנהלים, קופת גמל להשקעה, ניוד, מקדם המרה); keep US product and form names in Latin script (401(k), Roth IRA, FinCEN 114, Form 8938).
+- Numbers, percentages and amounts are identical in both languages. The structured benefit fields are plain numbers that the app formats in the user's display currency.
+
+Quantify everything you can:
+- benefit.annualUsd = recurring USD/yr; benefit.oneTimeUsd = one-off gain or avoided cost; benefit.tenYearUsd = annualUsd × 12.006 (10 years compounded at 4% real) + oneTimeUsd. This is the ranking number, so make it comparable across recommendations.
+- Risk items (insurance gaps, a missed filing, concentration): use a conservative expected value — e.g. annual probability × loss × 10, the statutory penalty you avoid, or the premium you stop wasting — and put the arithmetic in benefit.basis. Describe the risk in words in benefit.riskReduction.
+- benefit.basis always names the snapshot inputs and the rule ("₪412K × (0.50% − 0.22%) = ₪1,154/yr ≈ $312/yr at 3.70"). When uncertain, give a range in basis ("$200–450/yr depending on the negotiated rate") and use the low end for tenYearUsd.
+- Data-gap recommendations that block a decision get tenYearUsd = the value of the decision they unblock only if you can bound it from the snapshot; otherwise 0 (they still appear, ranked last).
+- The server sorts by tenYearUsd (ties by urgency) and quick wins by tenYearUsd ÷ effort, so do not inflate numbers to move an item up.
+
+New investment ideas (theme "opportunities") — required in every report:
+- Add 2–4 recommendations for investment types the household does not hold today and that fit its profile (ages, horizon, tax residence, liquidity needs, goals, any planned relocation, risk tolerance). Draw from both the Israeli and US instrument sections of the knowledge base — e.g. קופת גמל להשקעה, a self-directed Israeli IRA (ניהול אישי), a Treasury/TIPS ladder, I-bonds, municipal bonds, mega-backdoor Roth, 529, an HSA invested for the long term, low-cost index ETFs in a taxable account, Israeli government bonds, REITs vs direct property, a dividend or covered-call sleeve inside the trading guidelines' cash reserve.
+- Never suggest something that creates PFIC problems for a US person (Israeli mutual funds/ETFs, gemel-type investment products held by a US taxpayer) without saying so explicitly in why and risksIfIgnored; prefer the PFIC-safe alternative.
+- Each idea is a full recommendation: why it fits this household (tax, liquidity, goals, relocation), the expected benefit range with its basis (e.g. the tax saved or the yield pick-up over the current cash/bond holding), its risks in risksIfIgnored, how to start in howToChange (where to open it, minimums), and action items.
+- Rank them with everything else by tenYearUsd — they may rank low; the theme is always shown.
+- Rotate: if the request includes previousOpportunityTitles, suggest different ideas unless something material changed (then say what changed in why).
+
+Real estate — review every US rental, every report (mandatory):
+- snapshot.realEstate.rentals has, per property: address, unit/building grouping, purchase price/date, down payment, value, mortgage, current rent and lease dates, vacancy months, income and expenses by Schedule E category for this year and last, NOI, cap rate, cash-on-cash, expense ratio, rent-to-value (the 1% rule), cost shares of rent, tax facts (depreciation start, land/building known?, cost-segregation candidate) and, when present, record (loans, insurance, property tax, management, basis, improvements). realEstate.residence is the primary home: value and mortgage only — use it for the refinance / HELOC / equity discussion, not for rental figures.
+- For EACH rental, produce property-level recommendations (themeId "real-estate", propertyId = the rental's id, subTheme):
+  - revenue: rent vs market — web-search comparable rents for the address/zip and cite the source and date in benefit.basis; lease renewal timing (notice period before lease.end) and annual escalators; vacancy reduction; extra fees (pet, parking, storage).
+  - profit: expense outliers vs typical ratios (property tax, insurance, repairs, management as % of rent), an insurance re-shop before renewal, a property-tax appeal before the appeal deadline, utilities pass-through, management fee vs benchmark, refinance when the loan rate is above market, PMI removal once equity allows, paying down vs investing.
+  - tax: depreciation captured correctly (no DEPRECIATION entry = flag), a cost-segregation study when the basis justifies it, repairs vs improvements classification, the passive-loss allowance / real-estate-professional status (income is unknown → ask), a 1031 exchange before any sale, an LLC/umbrella policy for liability, state property-tax exemptions and appeals.
+- Skip a group for a property only when nothing in it applies, and say so in that property's best recommendation. Data gaps per property go in its recommendations' first action item and in questionsForUser.
+
+Emails — prepare them whenever someone else must act:
+- Each recommendation that needs an agent, provider, CPA, HR or property manager gets emails[] (otherwise []). The app shows a "Prepare email" button that fills in account numbers and the recipient.
+- NEVER write an account or policy number. Refer to an account only as {{account:<snapshot savingsAccounts[].id>}} and list those ids in accountIds. Use contactId when snapshot.contacts or the account's contactId has the right person; otherwise null with the right contactRole.
+- language "he" for Israeli accounts/agents, "en" for US providers, HR, CPA and property managers. Hebrew: a formal Israeli business letter to the סוכן ביטוח / סוכן פנסיוני ("שלום רב," … "בברכה,"). English: a concise, professional email.
+- The body is complete and specific: who we are (the account owner by name), which account ({{account:<id>}}), exactly what to do or check with numbers ("reduce the accumulation fee from 1.00% to 0.20%", "confirm whether the policy has a guaranteed conversion factor and its value", "move the balance to …"), the documents to send back, a requested reply-by date, and the owner's name as signature. Set actionItemId to the action item the email completes.
+
+Be specific — no generic advice:
+- whatToChange.current and .target in concrete numbers from the snapshot (fee %, ₪/$ amounts, coverage multiples, allocation %, dates).
+- why: the snapshot figures plus the knowledge-base rule or threshold it rests on (cite the rule, e.g. "hishtalmut tax-exempt ceiling", "FBAR threshold $10,000 aggregate").
+- howToChange: ordered steps of the approach (2–6 steps).
+- actionItems: tasks small enough to tick off in one sitting (≤ 1 hour where possible). Each says who does it (member key), who to contact (provider/professional by name, with phone or URL if known — never invent a phone number), what to ask for or which form to file (Form 161ד, FinCEN 114, 8938, 3520, a ניוד request…), and dueBy when there is a real date.
+- urgency.level: critical = money or cover is being lost now, or a hard deadline is within 30 days; high = deadline this quarter or a large recurring cost; medium = this year; low = whenever. urgency.deadline = the actual date (YYYY-MM-DD) when one exists.
+- dependsOn: ids of recommendations that must happen first. risksIfIgnored: what happens if nothing changes, quantified where possible.
+- Merge duplicates; don't split one change into several recommendations. Prefer 8–16 recommendations including the opportunities.
+- id: a stable kebab-case slug describing the change (theme-member-subject, e.g. "fees-adult1-pension-accumulation"). When the request includes previousRecommendations, reuse the same id for the same recommendation and copy the English wording (task.en) of continuing action items verbatim — the app tracks ticked items by id + English task text. Don't re-add finished items.
+
+Ground everything:
+- Every figure must come from the SNAPSHOT or the knowledge base. Never invent balances, fees, rates, ages, phone numbers or goals. If you compute something, show the inputs in basis and keep the arithmetic simple.
 - The snapshot already contains computed helpers (annual fee cost, 10-year fee drag vs benchmark, hishtalmut liquidity, retirement projections, coverage overlaps and gaps). Treat their stated assumptions as assumptions, and say so when they drive a conclusion.
-- When profile data is missing (ages, retirement targets, goals, risk tolerance, employment, residence, children's accounts), say what you cannot conclude and add a precise question to questionsForUser. Add a "data-gap" recommendation for material gaps.
-- Use "insurance-overlap" for duplicate cover across countries/products and "insurance" for gaps (e.g. no disability cover).
-- Rules and limits change yearly; when a recommendation depends on a current-year ceiling, limit or tax rate, tell them to verify the current figure rather than stating one you are unsure of.
-- Prioritise by money and risk: high = large recurring cost, material risk, or deadline; low = nice-to-have.
-- Owners: use the member keys from the snapshot, or "household".
-- Be concise and concrete. Respond in English (Hebrew product names are fine).
+- If the snapshot has tradingGuidelines (the stocks account's house rules: SPY/QQQ/large caps/cash targets, drift, dip signals), use it under the allocation theme: name the drift and the specific trades from its actions; don't contradict the guidelines.
+- When profile data is missing (ages, retirement targets, goals, risk tolerance, employment, residence, children's accounts), say what you cannot conclude and add a precise question to questionsForUser; add a "data" theme recommendation for material gaps.
+- Rules and limits change yearly; when a recommendation depends on a current-year ceiling, limit or tax rate, use the knowledge-base figure with its year, or tell them to verify it — never state one you are unsure of.
+- Owners and action-item "who": the member keys from the snapshot, or "household".
+- Be concise and concrete.
 - Include short disclaimers: not licensed financial/tax/legal advice; verify with an Israeli pension advisor (יועץ פנסיוני) and a cross-border CPA before acting.`;
 
 // ── Snapshot (context sent to the model) ───────────────────────────
@@ -160,6 +156,10 @@ export interface AdvisorSnapshot {
   children: ReturnType<typeof childMilestones>;
   coverage: { duplicates: CoverageReport["duplicates"]; gaps: CoverageReport["gaps"]; groups: CoverageReport["groups"]; totalMonthlyCostUsd: number };
   history: NetWorthPayload["history"];
+  /** Per-property review (US rentals + the primary residence); null when properties weren't loaded. */
+  realEstate: RealEstateReview | null;
+  /** Agents / CPA / HR the advisor can address emails to (no email/phone sent). */
+  contacts: { id: string; name: string; role: string; country: string; language: string }[];
   dataGaps: string[];
   assumptions: string[];
 }
@@ -169,6 +169,10 @@ export function buildAdvisorSnapshot(input: {
   coverage: CoverageReport;
   profile: HouseholdProfileDTO;
   cashFlow: HomeCashFlowSummary;
+  /** Full property records (property-data.ts getProperties) for the per-property review. */
+  properties?: PropertyWithTx[];
+  /** Full property records by id (loans, insurance, tax, management, basis). */
+  propertyRecords?: Record<string, PropertyRecordFacts | null | undefined>;
   asOf?: Date;
 }): AdvisorSnapshot {
   const { netWorth: nw, profile, coverage } = input;
@@ -285,6 +289,7 @@ export function buildAdvisorSnapshot(input: {
       openDate: a.details?.openDate ?? null,
       projectedLumpSum: a.details?.projectedLumpSum ?? null,
       notes: a.details?.notes ?? null,
+      contactId: typeof a.details?.contactId === "string" ? a.details.contactId : null,
     })),
     properties: nw.properties.map((p) => ({
       title: p.title,
@@ -306,6 +311,10 @@ export function buildAdvisorSnapshot(input: {
       totalMonthlyCostUsd: coverage.totalMonthlyCostUsd,
     },
     history: nw.history,
+    // Full property records (loans, insurance, tax, basis…) come from
+    // advisor-records.ts loadAdvisorPropertyRecords(), loaded by the callers.
+    realEstate: input.properties ? buildRealEstateReview(input.properties, asOf, input.propertyRecords) : null,
+    contacts: (profile.contacts ?? []).map((c) => ({ id: c.id, name: c.name, role: c.role, country: c.country, language: c.language })),
     dataGaps: [...new Set(gaps)],
     assumptions: [...new Set(assumptions)],
   };
@@ -345,12 +354,6 @@ export interface AdvisorUsage {
   servedByModel: string;
   fallbackUsed: boolean;
   stopReason: string | null;
-}
-
-export class AdvisorError extends Error {
-  constructor(message: string, readonly kind: "refusal" | "max_tokens" | "parse" | "empty") {
-    super(message);
-  }
 }
 
 export function estimateCostUsd(u: { input: number; output: number; cacheRead: number; cacheWrite: number }): number {
@@ -399,28 +402,10 @@ function usageOf(msg: Anthropic.Beta.BetaMessage): AdvisorUsage {
   };
 }
 
-/** Validate the parsed JSON enough to trust its shape downstream. */
-export function parseAdvisorOutput(text: string): AdvisorOutput {
-  let raw: unknown;
-  try {
-    raw = JSON.parse(text);
-  } catch {
-    throw new AdvisorError("Advisor returned invalid JSON.", "parse");
-  }
-  const o = raw as Partial<AdvisorOutput>;
-  if (!o || typeof o.headline !== "string" || !Array.isArray(o.recommendations)) {
-    throw new AdvisorError("Advisor output is missing required fields.", "parse");
-  }
-  return {
-    headline: o.headline,
-    netWorthCommentary: o.netWorthCommentary ?? "",
-    recommendations: o.recommendations,
-    questionsForUser: o.questionsForUser ?? [],
-    disclaimers: o.disclaimers ?? [],
-  };
-}
-
-export async function generateAdvice(snapshot: AdvisorSnapshot): Promise<{ output: AdvisorOutput; usage: AdvisorUsage }> {
+export async function generateAdvice(
+  snapshot: AdvisorSnapshot,
+  previous: { previousRecommendations?: unknown[]; previousOpportunityTitles?: string[] } = {}
+): Promise<{ output: AdvisorOutput; usage: AdvisorUsage }> {
   const client = new Anthropic();
   // Fable 5.1: thinking is always on (no `thinking` field), no sampling
   // params. Server-side refusal fallback via the "default" scalar form.
@@ -437,7 +422,14 @@ export async function generateAdvice(snapshot: AdvisorSnapshot): Promise<{ outpu
     messages: [
       {
         role: "user",
-        content: `Review our household finances and tell us how to act and what to change.\n\n=== SNAPSHOT (JSON) ===\n${JSON.stringify(snapshot, null, 2)}`,
+        content:
+          `Review our household finances and give us a ranked plan: what to change, how, and the action items.\n\n=== SNAPSHOT (JSON) ===\n${JSON.stringify(snapshot, null, 2)}` +
+          (previous.previousRecommendations?.length
+            ? `\n\n=== previousRecommendations (reuse ids and continuing task wording; done items are finished) ===\n${JSON.stringify(previous.previousRecommendations, null, 2)}`
+            : "") +
+          (previous.previousOpportunityTitles?.length
+            ? `\n\n=== previousOpportunityTitles (suggest different investment ideas unless something changed) ===\n${JSON.stringify(previous.previousOpportunityTitles)}`
+            : ""),
       },
     ],
   });

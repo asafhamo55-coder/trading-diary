@@ -52,8 +52,18 @@ model Property {
   notes         String?
   archivedAt    DateTime?  // null = active; set = archived (hidden from active list)
 
+  // Single-value record sections (facts, HOA, insurance, property tax,
+  // management, tax basis, major systems), validated by propertyProfileSchema
+  // in src/lib/property-profile.ts.
+  profile       Json?
+
   transactions  PropertyTransaction[]
   tenants       Tenant[]
+  loans         PropertyLoan[]
+  improvements  PropertyImprovement[]
+  maintenance   PropertyMaintenance[]
+  documents     PropertyDocument[]
+  utilities     PropertyUtility[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -79,6 +89,109 @@ model Tenant {
   updatedAt       DateTime @updatedAt
 
   @@index([propertyId, leaseStart])
+}
+
+// Mortgages, HELOCs and other loans secured by a property. The sum of the
+// active loans' balances is mirrored onto Property.mortgageBalance.
+model PropertyLoan {
+  id             String    @id @default(cuid())
+  propertyId     String
+  property       Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  kind           String    @default("first") // "first" | "second" | "heloc" | "other"
+  lender         String?
+  servicer       String?
+  loanNumber     String?
+  portalUrl      String?
+  servicerPhone  String?
+  originalAmount Float?
+  startDate      DateTime?
+  termMonths     Int?
+  interestRate   Float?    // annual, percent (6.25 = 6.25%)
+  rateType       String    @default("fixed") // "fixed" | "arm"
+  armResetDate   DateTime?
+  armIndex       String?
+  armMargin      Float?    // percent
+  monthlyPI      Float?
+  escrowMonthly  Float?    // tax + insurance held by the servicer
+  pmiMonthly     Float?
+  pmiRemovalDate DateTime?
+  maturityDate   DateTime?
+  balance        Float?
+  balanceAsOf    DateTime?
+  active         Boolean   @default(true)
+  notes          String?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([propertyId])
+}
+
+// Capital improvements (depreciable) and repairs (expensed).
+model PropertyImprovement {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  date        DateTime
+  description String
+  amount      Float
+  category    String   @default("improvement") // "improvement" | "repair"
+  notes       String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([propertyId, date])
+}
+
+model PropertyMaintenance {
+  id            String   @id @default(cuid())
+  propertyId    String
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  date          DateTime
+  vendor        String?
+  system        String?  // "roof" | "hvac" | "water_heater" | "appliances" | "plumbing" | "electrical" | "other"
+  cost          Float?
+  notes         String?
+  transactionId String?  // optional link to the matching expense entry
+
+  createdAt     DateTime @default(now())
+
+  @@index([propertyId, date])
+}
+
+// Links only (e.g. Google Drive URLs); no file storage.
+model PropertyDocument {
+  id          String    @id @default(cuid())
+  propertyId  String
+  property    Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  type        String    // "deed" | "closing" | "lease" | "insurance" | "appraisal" | "tax_bill" | "hoa" | "other"
+  title       String
+  url         String
+  date        DateTime?
+
+  createdAt   DateTime  @default(now())
+
+  @@index([propertyId])
+}
+
+model PropertyUtility {
+  id            String   @id @default(cuid())
+  propertyId    String
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  kind          String   // "electric" | "gas" | "water" | "sewer" | "trash" | "internet"
+  provider      String?
+  accountNumber String?
+  paidBy        String   @default("tenant") // "tenant" | "owner"
+  portalUrl     String?
+
+  createdAt     DateTime @default(now())
+
+  @@index([propertyId])
 }
 
 model PropertyTransaction {
@@ -446,6 +559,7 @@ model HouseholdProfile {
   goalsText     String?  // free-text goals
   riskTolerance String?  // "conservative" | "moderate" | "aggressive" | free text
   usdIlsRate    Float?   // FX override (ILS per 1 USD)
+  contacts      Json?    // HouseholdContact[] — agents/CPA/HR, see savings.ts
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -462,6 +576,24 @@ model AdvisorReport {
 
   @@index([accountId, createdAt])
   @@index([inputHash])
+}
+
+// Ticked advisor action items. Keyed by actionKey(recId, task) — a hash of the
+// recommendation's stable slug + the normalized task text — so a tick survives
+// the daily report regeneration (see src/lib/advisor-report.ts).
+model AdvisorActionStatus {
+  id        String    @id @default(cuid())
+  accountId String
+  key       String
+  recId     String
+  task      String
+  done      Boolean   @default(false)
+  doneAt    DateTime?
+  reportId  String?   // report the item was last toggled on (audit only)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([accountId, key])
 }
 
 // Insurance & employer benefits across both countries — used to spot coverage
@@ -505,4 +637,27 @@ model TradingGuideline {
   config    Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// In-app "Ask" assistant (see docs/assistant.md). The app never calls an LLM:
+// a Claude Code routine on the user's subscription fetches pending questions
+// from /api/assistant/pending and posts answers to /api/assistant/answer.
+// Self-healed by src/lib/assistant-schema.ts.
+model AssistantQuestion {
+  id          String    @id @default(cuid())
+  accountId   String
+  question    String
+  language    String    @default("en") // "he" | "en", detected from the question text
+  pagePath    String
+  pageTitle   String?
+  contextKeys Json?     // string[]: glossary keys + entity refs ("property:<id>", "savings:<id>", "guidelines")
+  status      String    @default("pending") // "pending" | "answered" | "failed"
+  answer      String?   // markdown (or the failure reason when status = "failed")
+  answeredAt  DateTime?
+  answeredBy  String?
+  createdAt   DateTime  @default(now())
+  readAt      DateTime?
+
+  @@index([accountId, createdAt])
+  @@index([status, createdAt])
 }

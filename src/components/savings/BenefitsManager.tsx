@@ -18,6 +18,7 @@ import { Field, inputCls } from "@/components/properties/shared";
 import { PageHeader } from "@/components/ui/page-header";
 import { Kpi } from "@/components/ui/stat-tile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable, TableScroll, type DataTableColumn } from "@/components/ui/data-table";
@@ -250,10 +251,11 @@ export default function BenefitsManager({ initial }: { initial?: BenefitsData })
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Kpi label="Monthly premiums" icon={<Wallet />} value={dm(coverage.totalMonthlyCostUsd, "USD")} hint={`all coverage, in ${display === "USD" ? "USD" : "ILS"}`} />
-            <Kpi label="Coverages" icon={<ShieldCheck />} value={benefits.length} hint={`${new Set(benefits.map((b) => b.owner)).size} people covered`} />
+            <Kpi label="Monthly premiums" tip="benefits.premiums" icon={<Wallet />} value={dm(coverage.totalMonthlyCostUsd, "USD")} hint={`all coverage, in ${display === "USD" ? "USD" : "ILS"}`} />
+            <Kpi label="Coverages" tip="benefits.count" icon={<ShieldCheck />} value={benefits.length} hint={`${new Set(benefits.map((b) => b.owner)).size} people covered`} />
             <Kpi
               label="Possible duplicates"
+              tip="benefits.duplicates"
               icon={<Copy />}
               value={coverage.duplicates.length}
               valueTone={coverage.duplicates.length ? "negative" : "default"}
@@ -261,6 +263,7 @@ export default function BenefitsManager({ initial }: { initial?: BenefitsData })
             />
             <Kpi
               label="Gaps"
+              tip="benefits.gaps"
               icon={<CircleAlert />}
               value={coverage.gaps.length}
               valueTone={coverage.gaps.length ? "negative" : "positive"}
@@ -274,7 +277,9 @@ export default function BenefitsManager({ initial }: { initial?: BenefitsData })
       {benefits.length > 0 ? (
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold tracking-[-0.01em] text-foreground">All coverage</h2>
+            <h2 className="flex items-center gap-1.5 text-lg font-semibold tracking-[-0.01em] text-foreground">
+              All coverage <InfoTip tip="benefits.all" />
+            </h2>
             <TabGroup variant="segmented" value={owner} onValueChange={setOwner}>
               <div className="-mx-1 max-w-full overflow-x-auto px-1 scrollbar-none">
                 <TabList aria-label="Filter by person">
@@ -335,7 +340,9 @@ function CoverageReportView({ coverage, members }: { coverage: CoverageReport; m
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
       <Card className="xl:col-span-3">
         <CardHeader className="pb-3">
-          <CardTitle as="h2">Coverage map</CardTitle>
+          <CardTitle as="h2" className="flex items-center gap-1.5">
+            Coverage map <InfoTip tip="benefits.coverageMap" />
+          </CardTitle>
           <CardDescription>Each risk per person, across Israel and the US. Amounts in USD.</CardDescription>
         </CardHeader>
         <TableScroll>
@@ -402,7 +409,7 @@ function CoverageReportView({ coverage, members }: { coverage: CoverageReport; m
         <Card>
           <CardHeader className="pb-3">
             <CardTitle as="h2" className="flex items-center gap-2">
-              Gaps {coverage.gaps.length ? <Badge variant="danger">{coverage.gaps.length}</Badge> : null}
+              Gaps <InfoTip tip="benefits.gaps" /> {coverage.gaps.length ? <Badge variant="danger">{coverage.gaps.length}</Badge> : null}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -431,7 +438,7 @@ function CoverageReportView({ coverage, members }: { coverage: CoverageReport; m
         <Card>
           <CardHeader className="pb-3">
             <CardTitle as="h2" className="flex items-center gap-2">
-              Possible duplicates {coverage.duplicates.length ? <Badge variant="warning">{coverage.duplicates.length}</Badge> : null}
+              Possible duplicates <InfoTip tip="benefits.duplicates" /> {coverage.duplicates.length ? <Badge variant="warning">{coverage.duplicates.length}</Badge> : null}
             </CardTitle>
             <CardDescription>The same risk insured more than once — sometimes intended, often money to save.</CardDescription>
           </CardHeader>

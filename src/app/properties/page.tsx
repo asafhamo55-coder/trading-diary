@@ -1,17 +1,9 @@
-import { getProperties, getPropertyYears } from "@/lib/property-data";
+import { getProperties, getPropertyRecords, getPropertyYears } from "@/lib/property-data";
 import { parseYear, resolveSelectedYear } from "@/lib/year";
-import {
-  summarizeYear,
-  propertyTitle,
-  monthlyNet,
-  occupancyForYear,
-  currentTenantOf,
-  monthsElapsed,
-  yieldPct,
-  buildingCashForYear,
-  forReturns,
-  taxOnlyCount,
-} from "@/lib/property";
+import { monthsElapsed } from "@/lib/property";
+import { buildPropertyRows } from "@/lib/property-portfolio";
+import { attentionItems } from "@/lib/property-attention";
+import { keyDatesOf, type KeyDate } from "@/lib/property-profile";
 import { todayInEastern } from "@/lib/utils";
 import PropertiesClient from "@/components/properties/PropertiesClient";
 
@@ -23,9 +15,10 @@ export default async function PropertiesPage({
   searchParams: Promise<{ year?: string }>;
 }) {
   const sp = await searchParams;
-  const [properties, txYears] = await Promise.all([
+  const [properties, txYears, records] = await Promise.all([
     getProperties(),
     getPropertyYears(),
+    getPropertyRecords(),
   ]);
 
   const currentYear = new Date().getFullYear();
@@ -34,62 +27,19 @@ export default async function PropertiesPage({
   const today = todayInEastern();
   const elapsed = monthsElapsed(year, today);
 
-  const rows = properties.map((p) => {
-    const yearTx = p.transactions.filter((t) => t.year === year);
-    // Performance figures read the tax-only entries out; the entry count below
-    // still describes the full list, since that is what the detail page shows.
-    const summary = summarizeYear(forReturns(p.transactions), year);
-    const occ = occupancyForYear(p.tenants, year, today);
-    const current = currentTenantOf(p.tenants, today);
-    return {
-      id: p.id,
-      title: propertyTitle(p),
-      address: p.address,
-      archived: p.archivedAt !== null,
-      txCount: yearTx.length,
-      income: summary.income,
-      expenses: summary.expenses,
-      net: summary.net,
-      monthlyNet: monthlyNet(forReturns(yearTx)),
-      taxOnlyCount: taxOnlyCount(yearTx),
-      hasTenants: p.tenants.length > 0,
-      occupiedMonths: occ.occupiedMonths,
-      occupancyMonths: occ.totalMonths,
-      occupancyPct: occ.totalMonths > 0 ? occ.pct : null,
-      currentTenantName: current?.name ?? null,
-      monthlyRent: current?.monthlyRent ?? null,
-      purchasePrice: p.purchasePrice,
-      downPayment: p.downPayment,
-      purchaseDate: p.purchaseDate,
-      currentValue: p.currentValue,
-      valueAsOf: p.valueAsOf,
-      mortgageBalance: p.mortgageBalance,
-      usage: p.usage,
-      yieldPct: yieldPct(summary.net, p.purchasePrice, elapsed),
-    };
-  });
+  // Rows carry the building-level cash-on-cash (shared with the detail page
+  // through buildingCashForYear) and everything the list shows.
+  const rows = buildPropertyRows(properties, year, today);
 
-  // Return on the cash invested, rolled up to the building so a multi-unit
-  // address reports one figure across its units. Shared with the detail page so
-  // the two never disagree; archived properties and tax-only entries are
-  // excluded inside the helper.
-  const cashByProperty = buildingCashForYear(properties, year);
-  const rowsWithCash = rows.map((r) => {
-    const cash = cashByProperty.get(r.id);
-    return {
-      ...r,
-      cashOnCashPct: cash?.cashOnCashPct ?? null,
-      cashInvested: cash?.downPayment ?? 0,
-      unitCount: cash?.unitCount ?? 1,
-      // Active building with entries but no down payment on file anywhere —
-      // the card invites you to add one rather than guessing at a basis.
-      needsDownPayment: cash != null && cash.downPayment <= 0,
-    };
-  });
+  // Insurance renewals, tax due dates, ARM resets, … from each record.
+  const keyDates = new Map<string, KeyDate[]>();
+  for (const [id, rec] of records) keyDates.set(id, keyDatesOf(rec.profile, rec.loans, today));
+  const attention = attentionItems(rows, today, keyDates);
 
   return (
     <PropertiesClient
-      rows={rowsWithCash}
+      rows={rows}
+      attention={attention}
       year={year}
       availableYears={availableYears}
       elapsed={elapsed}

@@ -1,8 +1,10 @@
+import { loadAdvisorPropertyRecords } from "@/lib/advisor-records";
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { jsonResponse, errorResponse } from "@/lib/api-helpers";
 import { advisorRequestSchema } from "@/lib/savings-validators";
 import {
+  getAdvisorActionStatuses,
   getHomeCashFlowSummary,
   getLatestAdvisorReport,
   getNetWorth,
@@ -17,6 +19,9 @@ import {
   hasAnthropicKey,
   snapshotHash,
 } from "@/lib/advisor";
+import { getGuidelineSummary } from "@/lib/guidelines-data";
+import { getProperties } from "@/lib/property-data";
+import { previousOpportunityTitlesOf, previousRecommendationsOf, readAdvisorOutput } from "@/lib/advisor-report";
 
 // Fable at high effort over a large snapshot can take minutes.
 export const maxDuration = 300;
@@ -45,9 +50,14 @@ export async function POST(req: NextRequest) {
     const parsed = advisorRequestSchema.safeParse(body ?? {});
     if (!parsed.success) return errorResponse(parsed.error.message);
 
-    const [netWorth, profile, cashFlow] = await Promise.all([getNetWorth(), getProfile(), getHomeCashFlowSummary()]);
+    const [netWorth, profile, cashFlow, properties] = await Promise.all([getNetWorth(), getProfile(), getHomeCashFlowSummary(), getProperties()]);
     const { coverage, ...nw } = netWorth;
-    const snapshot = buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow });
+    // Same snapshot as the Claude Code routine's context endpoint, including the
+    // trading account's guideline status.
+    const snapshot = {
+      ...buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow, properties, propertyRecords: await loadAdvisorPropertyRecords() }),
+      tradingGuidelines: await getGuidelineSummary(),
+    };
     const inputHash = snapshotHash(snapshot);
 
     if (!parsed.data.force) {
@@ -55,7 +65,12 @@ export async function POST(req: NextRequest) {
       if (cached) return jsonResponse({ report: cached, cached: true });
     }
 
-    const { output, usage } = await generateAdvice(snapshot);
+    const [latest, statuses] = await Promise.all([getLatestAdvisorReport(), getAdvisorActionStatuses().catch(() => ({}))]);
+    const prevOutput = readAdvisorOutput(latest?.output);
+    const { output, usage } = await generateAdvice(snapshot, {
+      previousRecommendations: previousRecommendationsOf(prevOutput, statuses),
+      previousOpportunityTitles: previousOpportunityTitlesOf(prevOutput),
+    });
     const report = await saveAdvisorReport({ model: ADVISOR_MODEL, inputHash, snapshot, output, usage });
     return jsonResponse({ report, cached: false });
   } catch (error) {

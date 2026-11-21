@@ -88,6 +88,8 @@ export async function ensureSavingsSchema(): Promise<void> {
   await prisma.$executeRawUnsafe(
     `CREATE UNIQUE INDEX IF NOT EXISTS "HouseholdProfile_accountId_key" ON "HouseholdProfile"("accountId")`
   );
+  // Agents / CPA / HR contacts (HouseholdContact[]) — the advisor's email recipients.
+  await prisma.$executeRawUnsafe(`ALTER TABLE "HouseholdProfile" ADD COLUMN IF NOT EXISTS "contacts" JSONB`);
 
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "AdvisorReport" (
@@ -107,6 +109,27 @@ export async function ensureSavingsSchema(): Promise<void> {
   );
   await prisma.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS "AdvisorReport_inputHash_idx" ON "AdvisorReport"("inputHash")`
+  );
+
+  // Ticked advisor action items, keyed by actionKey(recId, task) so a tick
+  // survives the daily report regeneration (see advisor-report.ts).
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "AdvisorActionStatus" (
+      "id" TEXT NOT NULL,
+      "accountId" TEXT NOT NULL,
+      "key" TEXT NOT NULL,
+      "recId" TEXT NOT NULL,
+      "task" TEXT NOT NULL,
+      "done" BOOLEAN NOT NULL DEFAULT false,
+      "doneAt" TIMESTAMP(3),
+      "reportId" TEXT,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "AdvisorActionStatus_pkey" PRIMARY KEY ("id")
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE UNIQUE INDEX IF NOT EXISTS "AdvisorActionStatus_accountId_key_key" ON "AdvisorActionStatus"("accountId", "key")`
   );
 
   await prisma.$executeRawUnsafe(`

@@ -5,7 +5,7 @@ import { Archive, ArchiveRestore, Save, Trash2 } from "lucide-react";
 import { Field, inputCls } from "@/components/properties/shared";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { JOINT_OWNER, type HouseholdMember, type SavingsAccountLite } from "@/lib/savings";
+import { JOINT_OWNER, type HouseholdContact, type HouseholdMember, type SavingsAccountLite } from "@/lib/savings";
 import { cn } from "@/lib/utils";
 import { defaultLoginUrl } from "@/lib/provider-links";
 import { api, errMsg } from "./api";
@@ -47,6 +47,7 @@ interface FormState {
   liquidityDate: string;
   projectedMonthlyPension: string;
   // details.*
+  contactId: string;
   openDate: string;
   conversionFactor: string;
   notes: string;
@@ -101,6 +102,7 @@ function toForm(a: SavingsAccountLite | null, defaults: { owner: string; type?: 
     insuredSalary: numToField(a?.insuredSalary),
     liquidityDate: a?.liquidityDate ?? "",
     projectedMonthlyPension: numToField(a?.projectedMonthlyPension),
+    contactId: str(d.contactId),
     openDate: str(d.openDate),
     conversionFactor: str(d.conversionFactor),
     notes: str(d.notes),
@@ -124,6 +126,7 @@ function buildDetails(f: FormState, base: Record<string, unknown> | null | undef
     if (n != null && Number.isFinite(n)) out[k] = n;
     else delete out[k];
   };
+  setStr("contactId", f.contactId);
   setStr("openDate", f.openDate);
   setNum("conversionFactor", f.conversionFactor);
   setStr("notes", f.notes);
@@ -155,10 +158,13 @@ export function AccountDrawer({
   account,
   snapshots,
   members,
+  contacts = [],
   defaultOwner,
   onChanged,
   readOnly,
 }: {
+  /** Profile contacts; picking one names the account's agent for advisor emails. */
+  contacts?: HouseholdContact[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** null → add a new account. */
@@ -429,6 +435,18 @@ export function AccountDrawer({
                   onChange={(e) => set("policyNumber", e.target.value)}
                 />
               </Field>
+              {contacts.length > 0 ? (
+                <Field label="Agent / contact">
+                  <select className={selectCls} value={form.contactId} onChange={(e) => set("contactId", e.target.value)}>
+                    <option value="">— None —</option>
+                    {contacts.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} ({c.role.replace(/_/g, " ")})
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              ) : null}
               <Field label="Login page">
                 <input
                   className={inputCls}
@@ -457,6 +475,7 @@ export function AccountDrawer({
 
           <FormSection
             title="Balance"
+            tip="dashboard.savingsTable.balance"
             description={!isNew ? "Changing the balance or its date also adds a point to the balance history." : undefined}
           >
             <div className="grid grid-cols-2 gap-3">
@@ -490,7 +509,7 @@ export function AccountDrawer({
           </FormSection>
 
           {t === "rsu" ? (
-            <FormSection title="Equity grant" description="Unvested shares are not counted in net worth.">
+            <FormSection title="Equity grant" tip="savings.rsuUnvested" description="Unvested shares are not counted in net worth.">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <Field label="Ticker">
                   <input className={inputCls} value={form.rsuTicker} placeholder="NICE" onChange={(e) => set("rsuTicker", e.target.value)} />
@@ -512,7 +531,7 @@ export function AccountDrawer({
           ) : null}
 
           {t !== "cash" && t !== "rsu" ? (
-            <FormSection title="Fees" description="Deposit fee is charged on each deposit; accumulation fee on the balance each year.">
+            <FormSection title="Fees" tip="savings.feeRates" description="Deposit fee is charged on each deposit; accumulation fee on the balance each year.">
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Deposit fee %">
                   <input className={cn(inputCls, "num")} inputMode="decimal" placeholder="e.g. 1.5" value={form.feeDepositPct} onChange={(e) => set("feeDepositPct", e.target.value)} />
@@ -525,7 +544,7 @@ export function AccountDrawer({
           ) : null}
 
           {hasDeposits ? (
-            <FormSection title="Monthly deposits" description={`Per month, in ${form.currency}. Leave the split empty if you only know the total.`}>
+            <FormSection title="Monthly deposits" tip="savings.depositsSplit" description={`Per month, in ${form.currency}. Leave the split empty if you only know the total.`}>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <Field label="Employee">
                   <input className={cn(inputCls, "num")} inputMode="decimal" value={form.monthlyDepositEmployee} onChange={(e) => set("monthlyDepositEmployee", e.target.value)} />
@@ -546,7 +565,10 @@ export function AccountDrawer({
           ) : null}
 
           {isPensionLike || t === "hishtalmut" || t === "gemel_investment" || t === "savings_policy" ? (
-            <FormSection title="Plan details">
+            <FormSection
+              title="Plan details"
+              tip={t === "hishtalmut" ? "savings.hishtalmutLiquidity" : isPensionLike ? "savings.conversionFactor" : undefined}
+            >
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Open date">
                   <input type="date" className={inputCls} value={form.openDate} onChange={(e) => set("openDate", e.target.value)} />
@@ -588,7 +610,7 @@ export function AccountDrawer({
           </FormSection>
 
           {!isNew && snapshots && snapshots.length > 0 ? (
-            <FormSection title="Balance history">
+            <FormSection title="Balance history" tip="savings.balanceHistory">
               <ul className="divide-y divide-border rounded-lg border border-border">
                 {[...snapshots]
                   .reverse()

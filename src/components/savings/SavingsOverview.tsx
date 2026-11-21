@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { InfoTip } from "@/components/ui/info-tip";
 import { Tab, TabGroup, TabList, TabPanel } from "@/components/ui/tabs";
 import {
   JOINT_OWNER,
@@ -179,6 +180,7 @@ export default function SavingsOverview({ initial }: { initial?: OverviewData })
             <Badge variant="neutral" title={`Rate source: ${fxProvenance(fx)}`}>
               1 USD = {money(fx.usdIls, "ILS", { digits: 2 })}
               <span className="font-normal text-muted-foreground"> · {fxProvenance(fx)}</span>
+              <InfoTip tip="fx.usdIls" className="ms-1" />
             </Badge>
           )
         }
@@ -285,6 +287,7 @@ export default function SavingsOverview({ initial }: { initial?: OverviewData })
           account={editing}
           snapshots={editing ? history[editing.id] : undefined}
           members={members}
+          contacts={profile.contacts ?? []}
           defaultOwner={defaultOwner}
           onChanged={onChanged}
           readOnly={preview}
@@ -368,13 +371,15 @@ function PersonPanel({
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi
           label="Savings"
+          tip="savings.total"
           icon={<Wallet />}
           value={currency === "ILS" ? money(totalIls, "ILS") : money(totalUsd, "USD")}
           hint={`≈ ${currency === "ILS" ? money(totalUsd, "USD") : money(totalIls, "ILS")} · ${accounts.length} account${accounts.length === 1 ? "" : "s"}`}
         />
-        <Kpi label="Monthly deposits" icon={<Landmark />} value={dm(depositsUsd, "USD")} hint="all sources, per month" />
+        <Kpi label="Monthly deposits" tip="savings.monthlyDeposits" icon={<Landmark />} value={dm(depositsUsd, "USD")} hint="all sources, per month" />
         <Kpi
           label="Annual fees"
+          tip="savings.annualFees"
           icon={<Receipt />}
           value={dm(feesUsd, "USD")}
           hint={
@@ -387,6 +392,7 @@ function PersonPanel({
         />
         <Kpi
           label="10-yr fee drag"
+          tip="savings.feeDrag10y"
           icon={<TrendingDown />}
           value={dm(dragUsd, "USD")}
           valueTone={dragUsd > 0 ? "negative" : "default"}
@@ -459,7 +465,9 @@ function HouseholdInsights({ netWorth, members }: { netWorth: NetWorthResponse; 
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>By person</CardTitle>
+          <CardTitle className="flex items-center gap-1.5">
+            By person <InfoTip tip="savings.byPerson" />
+          </CardTitle>
           <CardDescription>
             {countries.map(([c, v], i) => (
               <span key={c}>
@@ -488,7 +496,9 @@ function HouseholdInsights({ netWorth, members }: { netWorth: NetWorthResponse; 
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Savings over time</CardTitle>
+          <CardTitle className="flex items-center gap-1.5">
+            Savings over time <InfoTip tip="savings.history" />
+          </CardTitle>
           <CardDescription>
             {hist.length >= 2
               ? `${fmtMonth(hist[0].month)} – ${fmtMonth(hist[hist.length - 1].month)}, at today’s rate`
@@ -516,6 +526,7 @@ function HouseholdInsights({ netWorth, members }: { netWorth: NetWorthResponse; 
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             Needs attention
+            <InfoTip tip="savings.needsAttention" />
             {gaps.length > 0 ? <Badge variant="warning">{gaps.length}</Badge> : null}
           </CardTitle>
           <CardDescription>Missing data lowers the advisor’s confidence.</CardDescription>
@@ -568,22 +579,30 @@ function RetirementStrip({
     <Card variant="subtle">
       <dl className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4 sm:p-5">
         <div>
-          <dt className="text-xs text-muted-foreground">Age</dt>
+          <dt className="flex items-center gap-1 text-xs text-muted-foreground">
+            Age <InfoTip tip="savings.retirement.age" />
+          </dt>
           <dd className="num text-lg font-semibold text-foreground">{t.age ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-xs text-muted-foreground">Target retirement</dt>
+          <dt className="flex items-center gap-1 text-xs text-muted-foreground">
+            Target retirement <InfoTip tip="savings.retirement.targetAge" />
+          </dt>
           <dd className="num text-lg font-semibold text-foreground">
             {t.targetRetirementAge}
             {t.targetAgeAssumed ? <span className="ml-1 text-xs font-normal text-muted-foreground">(assumed)</span> : null}
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-muted-foreground">Years to go</dt>
+          <dt className="flex items-center gap-1 text-xs text-muted-foreground">
+            Years to go <InfoTip tip="savings.retirement.yearsToGo" />
+          </dt>
           <dd className="num text-lg font-semibold text-foreground">{t.yearsToRetirement ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-xs text-muted-foreground">Projected pension (IL)</dt>
+          <dt className="flex items-center gap-1 text-xs text-muted-foreground">
+            Projected pension (IL) <InfoTip tip="savings.projectedPension" />
+          </dt>
           <dd className="num text-lg font-semibold text-foreground">{pensionIls > 0 ? `${dm(pensionIls, "ILS")}/mo` : "—"}</dd>
         </div>
       </dl>
@@ -618,7 +637,9 @@ function KidsStrip({ members, netWorth, now }: { members: HouseholdMember[]; net
           </div>
           <dl className="mt-3 grid grid-cols-3 gap-2 text-sm">
             <div>
-              <dt className="text-2xs uppercase tracking-[0.06em] text-muted-foreground">Turns 18</dt>
+              <dt className="flex items-center gap-1 text-2xs uppercase tracking-[0.06em] text-muted-foreground">
+                Turns 18 <InfoTip tip="savings.kids.milestones" />
+              </dt>
               <dd className="num text-foreground">{c.turns18 ? fmtMonth(c.turns18) : "—"}</dd>
             </div>
             <div>
@@ -626,8 +647,11 @@ function KidsStrip({ members, netWorth, now }: { members: HouseholdMember[]; net
               <dd className="num text-foreground">{c.turns21 ? fmtMonth(c.turns21) : "—"}</dd>
             </div>
             <div>
-              <dt className="text-2xs uppercase tracking-[0.06em] text-muted-foreground" dir="rtl" lang="he">
-                חיסכון לכל ילד
+              <dt className="flex items-center gap-1 text-2xs uppercase tracking-[0.06em] text-muted-foreground">
+                <span dir="rtl" lang="he">
+                  חיסכון לכל ילד
+                </span>
+                <InfoTip tip="savings.kids.savingsForEveryChild" />
               </dt>
               <dd className="num text-foreground">
                 {c.hasSavingsForEveryChildAccount ? dm(c.savingsForEveryChildBalanceUsd, "USD") : (

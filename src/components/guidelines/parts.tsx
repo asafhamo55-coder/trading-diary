@@ -14,6 +14,15 @@ import { StatusPill } from "@/components/ui/badge";
 import type { ActionKind, BucketStatus, GuidelineAction } from "@/lib/guidelines";
 import { describeAction } from "@/lib/guidelines";
 import { cn } from "@/lib/utils";
+import { InfoTip } from "@/components/ui/info-tip";
+import type { ExplainKey } from "@/lib/explain";
+
+const BUCKET_TIP: Record<BucketStatus["id"], ExplainKey> = {
+  sp500: "guidelines.bucket.sp500",
+  nasdaq: "guidelines.bucket.nasdaq",
+  largeCap: "guidelines.bucket.largeCap",
+  cash: "guidelines.bucket.cash",
+};
 
 // Small presentational pieces shared by the Guidelines page and the
 // dashboard card. All colours are theme tokens.
@@ -63,8 +72,13 @@ export function BucketBar({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <p className="text-sm font-medium text-foreground">{bucket.label}</p>
-        <DriftChip bucket={bucket} />
+        <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+          {bucket.label} <InfoTip tip={BUCKET_TIP[bucket.id]} />
+        </p>
+        <span className="inline-flex items-center gap-1">
+          <DriftChip bucket={bucket} />
+          <InfoTip tip="guidelines.drift" />
+        </span>
       </div>
       <div
         className="relative h-3 w-full overflow-hidden rounded-full bg-subtle"

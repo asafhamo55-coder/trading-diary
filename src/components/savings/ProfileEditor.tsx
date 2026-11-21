@@ -5,6 +5,7 @@ import { Baby, Plus, RefreshCw, Save, Sparkles, Trash2, User, Users } from "luci
 import { Field, inputCls } from "@/components/properties/shared";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -13,6 +14,9 @@ import {
   DEFAULT_RETIREMENT_AGE,
   DEFAULT_USD_ILS_RATE,
   ageAt,
+  CONTACT_ROLES,
+  type ContactRole,
+  type HouseholdContact,
   type HouseholdGoals,
   type HouseholdMember,
   type SavingsAccountLite,
@@ -48,8 +52,31 @@ interface PurchaseRow {
   targetYear: string;
 }
 
+interface ContactRow {
+  uid: string;
+  id: string;
+  name: string;
+  role: ContactRole;
+  country: "IL" | "US";
+  email: string;
+  phone: string;
+  language: "he" | "en";
+  notes: string;
+}
+
+const CONTACT_ROLE_LABELS: Record<ContactRole, string> = {
+  insurance_agent: "Insurance agent (סוכן ביטוח)",
+  pension_agent: "Pension agent (סוכן פנסיוני)",
+  cpa: "CPA / accountant",
+  hr_benefits: "HR / benefits",
+  provider: "Provider (fund / plan)",
+  property_manager: "Property manager",
+  other: "Other",
+};
+
 interface ProfileForm {
   members: MemberRow[];
+  contacts: ContactRow[];
   retirementIncome: string;
   retirementCurrency: "ILS" | "USD";
   purchases: PurchaseRow[];
@@ -98,6 +125,17 @@ function toForm(p: HouseholdProfileDTO): ProfileForm {
       targetRetirementAge: numToField(m.targetRetirementAge),
       employment: m.employment ?? "",
       residence: m.residence ?? "",
+    })),
+    contacts: (p.contacts ?? []).map((c) => ({
+      uid: uid(),
+      id: c.id,
+      name: c.name,
+      role: c.role,
+      country: c.country,
+      email: c.email ?? "",
+      phone: c.phone ?? "",
+      language: c.language,
+      notes: c.notes ?? "",
     })),
     retirementIncome: numToField(g.retirementTargetMonthlyIncome),
     retirementCurrency: g.retirementTargetCurrency ?? "ILS",
@@ -199,6 +237,25 @@ function toPayload(f: ProfileForm): { body?: Record<string, unknown>; error?: st
     childrenEducation: t(f.childrenEducation),
     other: t(f.otherGoals),
   };
+  const contacts: HouseholdContact[] = [];
+  const contactIds = new Set<string>();
+  for (const c of f.contacts) {
+    if (!c.name.trim()) return { error: "Every contact needs a name." };
+    if (c.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email.trim())) return { error: `${c.name}: the email address doesn’t look right.` };
+    let id = c.id || slugKey(c.name, contactIds);
+    if (contactIds.has(id)) id = slugKey(`${id}-2`, contactIds);
+    contactIds.add(id);
+    contacts.push({
+      id,
+      name: c.name.trim(),
+      role: c.role,
+      country: c.country,
+      email: t(c.email),
+      phone: t(c.phone),
+      language: c.language,
+      notes: t(c.notes),
+    });
+  }
   const risk = f.riskPreset
     ? `${f.riskPreset}${f.riskNotes.trim() ? ` — ${f.riskNotes.trim()}` : ""}`
     : t(f.riskNotes);
@@ -209,6 +266,7 @@ function toPayload(f: ProfileForm): { body?: Record<string, unknown>; error?: st
       goalsText: t(f.goalsText),
       riskTolerance: risk ? risk.slice(0, 200) : null,
       usdIlsRate: rate.v,
+      contacts,
     },
   };
 }
@@ -319,6 +377,15 @@ export default function ProfileEditor({
       return { ...f, members: [...f.members, row] };
     });
   const removeMember = (u: string) => setForm((f) => (f ? { ...f, members: f.members.filter((m) => m.uid !== u) } : f));
+  const updateContact = (u: string, patch: Partial<ContactRow>) =>
+    setForm((f) => (f ? { ...f, contacts: f.contacts.map((c) => (c.uid === u ? { ...c, ...patch } : c)) } : f));
+  const addContact = () =>
+    update({
+      contacts: [
+        ...form.contacts,
+        { uid: uid(), id: "", name: "", role: "insurance_agent", country: "IL", email: "", phone: "", language: "he", notes: "" },
+      ],
+    });
   const updatePurchase = (u: string, patch: Partial<PurchaseRow>) =>
     setForm((f) => (f ? { ...f, purchases: f.purchases.map((p) => (p.uid === u ? { ...p, ...patch } : p)) } : f));
 
@@ -385,7 +452,9 @@ export default function ProfileEditor({
             </div>
           }
         >
-          <CardTitle as="h2">Household members</CardTitle>
+          <CardTitle as="h2" className="flex items-center gap-1.5">
+            Household members <InfoTip tip="profile.members" />
+          </CardTitle>
           <CardDescription>The ID links each person to their accounts and coverages; it can’t change after saving.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -430,7 +499,9 @@ export default function ProfileEditor({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle as="h2">Retirement</CardTitle>
+            <CardTitle as="h2" className="flex items-center gap-1.5">
+            Retirement <InfoTip tip="profile.retirement" />
+          </CardTitle>
             <CardDescription>The monthly income you want in retirement, in today’s money.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -460,7 +531,9 @@ export default function ProfileEditor({
 
         <Card>
           <CardHeader>
-            <CardTitle as="h2">Risk tolerance</CardTitle>
+            <CardTitle as="h2" className="flex items-center gap-1.5">
+            Risk tolerance <InfoTip tip="profile.risk" />
+          </CardTitle>
             <CardDescription>How much short-term loss you can live with for long-term growth.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -512,7 +585,9 @@ export default function ProfileEditor({
             </Button>
           }
         >
-          <CardTitle as="h2">Planned purchases</CardTitle>
+          <CardTitle as="h2" className="flex items-center gap-1.5">
+            Planned purchases <InfoTip tip="profile.purchases" />
+          </CardTitle>
           <CardDescription>Big-ticket items the plan has to fund — a home, a car, a wedding, a sabbatical.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -559,10 +634,98 @@ export default function ProfileEditor({
         </CardContent>
       </Card>
 
+      <Card id="contacts" className="scroll-mt-20">
+        <CardHeader
+          actions={
+            <Button size="sm" variant="secondary" icon={<Plus />} onClick={addContact}>
+              Add contact
+            </Button>
+          }
+        >
+          <CardTitle as="h2">Agents & contacts</CardTitle>
+          <CardDescription>
+            Who acts for you — insurance and pension agents, the CPA, HR, the property manager. The advisor addresses its
+            ready-to-send emails to them (Hebrew for Israeli contacts, English for US ones).
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {form.contacts.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-border-strong px-4 py-6 text-center text-sm text-muted-foreground">
+              No contacts yet.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {form.contacts.map((c) => (
+                <li key={c.uid} className="grid grid-cols-2 items-end gap-3 rounded-lg border border-border p-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.3fr)_5rem_5.5rem_minmax(0,1.6fr)_minmax(0,1fr)_auto]">
+                  <div className="col-span-2 lg:col-span-1">
+                    <Field label="Name">
+                      <input className={inputCls} value={c.name} onChange={(e) => updateContact(c.uid, { name: e.target.value })} />
+                    </Field>
+                  </div>
+                  <div className="col-span-2 lg:col-span-1">
+                    <Field label="Role">
+                      <select className={selectCls} value={c.role} onChange={(e) => updateContact(c.uid, { role: e.target.value as ContactRole })}>
+                        {CONTACT_ROLES.map((r) => (
+                          <option key={r} value={r}>
+                            {CONTACT_ROLE_LABELS[r]}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                  </div>
+                  <Field label="Country">
+                    <select
+                      className={selectCls}
+                      value={c.country}
+                      onChange={(e) => {
+                        const country = e.target.value as "IL" | "US";
+                        updateContact(c.uid, { country, language: country === "IL" ? "he" : "en" });
+                      }}
+                    >
+                      <option value="IL">IL</option>
+                      <option value="US">US</option>
+                    </select>
+                  </Field>
+                  <Field label="Language">
+                    <select className={selectCls} value={c.language} onChange={(e) => updateContact(c.uid, { language: e.target.value as "he" | "en" })}>
+                      <option value="he">עברית</option>
+                      <option value="en">English</option>
+                    </select>
+                  </Field>
+                  <div className="col-span-2 lg:col-span-1">
+                    <Field label="Email">
+                      <input className={inputCls} type="email" dir="ltr" value={c.email} onChange={(e) => updateContact(c.uid, { email: e.target.value })} />
+                    </Field>
+                  </div>
+                  <Field label="Phone">
+                    <input className={inputCls} type="tel" dir="ltr" value={c.phone} onChange={(e) => updateContact(c.uid, { phone: e.target.value })} />
+                  </Field>
+                  <Button
+                    variant="danger-ghost"
+                    size="icon"
+                    aria-label={`Remove ${c.name || "contact"}`}
+                    onClick={() => update({ contacts: form.contacts.filter((x) => x.uid !== c.uid) })}
+                  >
+                    <Trash2 />
+                  </Button>
+                  <div className="col-span-2 lg:col-span-7">
+                    <Field label="Notes">
+                      <input className={inputCls} value={c.notes} placeholder="e.g. handles the manager's-insurance policies" onChange={(e) => updateContact(c.uid, { notes: e.target.value })} />
+                    </Field>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle as="h2">Relocation</CardTitle>
+            <CardTitle as="h2" className="flex items-center gap-1.5">
+            Relocation <InfoTip tip="profile.relocation" />
+          </CardTitle>
             <CardDescription>A planned move changes which accounts are tax-efficient and which currency to hold.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -587,7 +750,9 @@ export default function ProfileEditor({
 
         <Card>
           <CardHeader>
-            <CardTitle as="h2">Children’s education</CardTitle>
+            <CardTitle as="h2" className="flex items-center gap-1.5">
+            Children’s education <InfoTip tip="profile.education" />
+          </CardTitle>
             <CardDescription>Army service, university in Israel or the US, who pays for what.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -603,7 +768,9 @@ export default function ProfileEditor({
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2">Anything else</CardTitle>
+          <CardTitle as="h2" className="flex items-center gap-1.5">
+            Anything else <InfoTip tip="profile.other" />
+          </CardTitle>
           <CardDescription>Other goals, constraints and context — in your own words.</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -628,7 +795,9 @@ export default function ProfileEditor({
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2">Exchange rate</CardTitle>
+          <CardTitle as="h2" className="flex items-center gap-1.5">
+            Exchange rate <InfoTip tip="profile.fx" />
+          </CardTitle>
           <CardDescription>
             Used to add ILS and USD balances together and for the $ / ₪ switch. Leave blank to use the live
             Bank of Israel representative rate

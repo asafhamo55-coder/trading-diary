@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusPill } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InfoTip } from "@/components/ui/info-tip";
 import { useDisplayCurrency } from "@/components/ui/currency";
 import { api, errMsg } from "@/components/savings/api";
 import { fractionLabel, sharesLabel, type GuidelineConfig } from "@/lib/guidelines";
@@ -116,12 +117,16 @@ export default function GuidelinesClient({
         <CardHeader
           actions={
             <div className="text-right">
-              <p className="text-xs text-muted-foreground">Account value</p>
+              <p className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
+                Account value <InfoTip tip="guidelines.accountValue" />
+              </p>
               <p className="num text-lg font-semibold text-foreground">{money(result.totalValue)}</p>
             </div>
           }
         >
-          <CardTitle as="h2">Target vs actual</CardTitle>
+          <CardTitle as="h2" className="flex items-center gap-1.5">
+            Target vs actual <InfoTip tip="guidelines.targetVsActual" />
+          </CardTitle>
           <CardDescription>
             Shaded zone = target ± {config.bandPct} pts. Trades are suggested only outside it.
           </CardDescription>
@@ -136,7 +141,9 @@ export default function GuidelinesClient({
       {/* Actions */}
       <Card>
         <CardHeader>
-          <CardTitle as="h2">What to do now</CardTitle>
+          <CardTitle as="h2" className="flex items-center gap-1.5">
+            What to do now <InfoTip tip="guidelines.actions" />
+          </CardTitle>
           <CardDescription>
             {result.onTarget
               ? "Nothing — the account is within its guidelines."
@@ -164,7 +171,7 @@ export default function GuidelinesClient({
         <Card>
           <CardHeader>
             <CardTitle as="h2" className="flex items-center gap-2">
-              <TrendingDown className="size-4 text-muted-foreground" aria-hidden /> Dip signals
+              <TrendingDown className="size-4 text-muted-foreground" aria-hidden /> Dip signals <InfoTip tip="guidelines.dipSignal" />
             </CardTitle>
             <CardDescription>
               Large caps {config.dipPct}%+ below their 3-month high. Each deploys {fractionLabel(config.deployFraction)} of the remaining cash reserve.
@@ -207,7 +214,7 @@ export default function GuidelinesClient({
         <Card>
           <CardHeader>
             <CardTitle as="h2" className="flex items-center gap-2">
-              <Scale className="size-4 text-muted-foreground" aria-hidden /> Outside the rules
+              <Scale className="size-4 text-muted-foreground" aria-hidden /> Outside the rules <InfoTip tip="guidelines.outside" />
             </CardTitle>
             <CardDescription>Positions that don&apos;t fit any bucket. The plan sells them over time.</CardDescription>
           </CardHeader>
@@ -243,10 +250,12 @@ export default function GuidelinesClient({
               Prices from {freshness.sources.length ? freshness.sources.join(" and ") : "no source"}, fetched {when(freshness.oldestFetchedAt)}
               {freshness.latestPriceAsOf ? ` (last trade ${day(freshness.latestPriceAsOf)})` : ""}. Delayed quotes, refreshed about every 15 minutes in market hours.
               {freshness.staleSymbols.length ? ` Stale: ${freshness.staleSymbols.join(", ")}.` : ""}
-              {freshness.missingSymbols.length ? ` No price: ${freshness.missingSymbols.join(", ")}.` : ""}
+              {freshness.missingSymbols.length ? ` No price: ${freshness.missingSymbols.join(", ")}.` : ""}{" "}
+              <InfoTip tip="guidelines.freshness" className="size-3.5" />
             </span>
           </p>
           <p>
+            <InfoTip tip="guidelines.cash" className="me-1 size-3.5" />
             Cash {money(cash.amount)} —{" "}
             {cash.source === "override"
               ? `manual figure as of ${day(cash.asOf ? `${cash.asOf}T00:00:00Z` : null)}.`

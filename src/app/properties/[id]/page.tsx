@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
-import { getProperties, getPropertyById } from "@/lib/property-data";
+import { getProperties, getPropertyById, getPropertyRecord } from "@/lib/property-data";
+import { buildPropertyRows, titleWithUnit } from "@/lib/property-portfolio";
+import { attentionItems } from "@/lib/property-attention";
+import { keyDatesOf } from "@/lib/property-profile";
 import { parseYear, resolveSelectedYear } from "@/lib/year";
 import {
   summarizeYear,
-  propertyTitle,
   monthsElapsed,
   occupancyForYear,
   yieldPct,
@@ -49,15 +51,24 @@ export default async function PropertyDetailPage({
 
   // Cash-on-cash is a building-level figure, so it needs this property's
   // siblings — the same helper the properties list uses, so the two agree.
-  const cash = buildingCashForYear(await getProperties(), year).get(property.id) ?? null;
+  const [allProperties, record] = await Promise.all([getProperties(), getPropertyRecord(property.id)]);
+  const cash = buildingCashForYear(allProperties, year).get(property.id) ?? null;
+
+  // The same "needs attention" rules as the list, for this property only:
+  // its row is built alongside its building's siblings so the building-level
+  // figures (down payment) match.
+  const row = buildPropertyRows(allProperties, year, today).find((r) => r.id === property.id);
+  const attention = row
+    ? attentionItems([row], today, new Map([[property.id, keyDatesOf(record.profile, record.loans, today)]]))
+    : [];
 
   return (
     <>
-      <PageCrumbs items={[{ label: propertyTitle(property) }]} />
+      <PageCrumbs items={[{ label: titleWithUnit(property) }]} />
       <PropertyDetailClient
         property={{
           id: property.id,
-          title: propertyTitle(property),
+          title: titleWithUnit(property),
           address: property.address,
           street: property.street,
           unit: property.unit,
@@ -87,6 +98,8 @@ export default async function PropertyDetailPage({
         occupancy={occ}
         yieldPct={yieldValue}
         cash={cash}
+        record={record}
+        attention={attention}
       />
     </>
   );

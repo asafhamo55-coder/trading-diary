@@ -7,6 +7,7 @@ import { StatusPill } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDisplayCurrency } from "@/components/ui/currency";
 import type { GuidelineStatusPayload } from "@/lib/guidelines-data";
+import { InfoTip } from "@/components/ui/info-tip";
 import { ActionRow, pct } from "./parts";
 
 /**
@@ -33,16 +34,23 @@ export default function GuidelinesDashboardCard({ initial }: { initial?: Guideli
 
   const r = status?.result;
   return (
-    <Link
-      href="/trade/guidelines"
-      className="group block rounded-xl border border-border bg-surface p-4 text-foreground transition-[border-color,box-shadow] duration-200 hover:border-border-strong hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-5"
-    >
+    // The whole card is clickable through a stretched link on the title, so
+    // the ⓘ (a button) isn't nested inside the link.
+    <div className="group relative rounded-xl border border-border bg-surface p-4 text-foreground transition-[border-color,box-shadow] duration-200 hover:border-border-strong hover:shadow-md has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-subtle text-primary" aria-hidden>
             <Compass className="size-4" />
           </span>
-          <h2 className="text-sm font-semibold">Account vs guidelines</h2>
+          <h2 className="text-sm font-semibold">
+            <Link
+              href="/trade/guidelines"
+              className="text-inherit no-underline after:absolute after:inset-0 after:rounded-xl after:content-[''] focus-visible:outline-none"
+            >
+              Account vs guidelines
+            </Link>
+          </h2>
+          <InfoTip tip="guidelines.dashboardCard" className="relative z-10" />
         </div>
         {r ? (
           r.onTarget ? (
@@ -92,6 +100,6 @@ export default function GuidelinesDashboardCard({ initial }: { initial?: Guideli
       <p className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
         Open guidelines <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
       </p>
-    </Link>
+    </div>
   );
 }

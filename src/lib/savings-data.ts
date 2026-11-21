@@ -16,6 +16,7 @@ import {
   type BenefitLite,
   type CoverageReport,
   type FxRate,
+  type HouseholdContact,
   type HouseholdGoals,
   type HouseholdMember,
   type NetWorthPayload,
@@ -26,6 +27,7 @@ import {
 } from "./savings";
 import { mapSavingsImport } from "./savings-import";
 import { getLiveUsdIls } from "./fx-server";
+import { actionKey, type ActionStatusMap } from "./advisor-report";
 import type {
   CreateSavingsAccountInput,
   HouseholdBundle,
@@ -244,6 +246,7 @@ export interface HouseholdProfileDTO {
   goalsText: string | null;
   riskTolerance: string | null;
   usdIlsRate: number | null;
+  contacts: HouseholdContact[];
   updatedAt: string | null;
 }
 
@@ -253,6 +256,7 @@ const EMPTY_PROFILE: HouseholdProfileDTO = {
   goalsText: null,
   riskTolerance: null,
   usdIlsRate: null,
+  contacts: [],
   updatedAt: null,
 };
 
@@ -267,6 +271,7 @@ export async function getProfile(): Promise<HouseholdProfileDTO> {
       goalsText: row.goalsText,
       riskTolerance: row.riskTolerance,
       usdIlsRate: row.usdIlsRate,
+      contacts: (row.contacts as HouseholdContact[] | null) ?? [],
       updatedAt: row.updatedAt.toISOString(),
     };
   });
@@ -281,6 +286,7 @@ export async function updateProfile(data: z.infer<typeof updateProfileSchema>): 
     if (data.goalsText !== undefined) patch.goalsText = data.goalsText;
     if (data.riskTolerance !== undefined) patch.riskTolerance = data.riskTolerance;
     if (data.usdIlsRate !== undefined) patch.usdIlsRate = data.usdIlsRate;
+    if (data.contacts !== undefined) patch.contacts = json(data.contacts);
     await prisma.householdProfile.upsert({
       where: { accountId: acct },
       create: {
@@ -290,6 +296,7 @@ export async function updateProfile(data: z.infer<typeof updateProfileSchema>): 
         goalsText: data.goalsText ?? null,
         riskTolerance: data.riskTolerance ?? null,
         usdIlsRate: data.usdIlsRate ?? null,
+        contacts: json(data.contacts),
       },
       update: patch,
     });
@@ -787,5 +794,38 @@ export async function saveAdvisorReport(r: {
       },
     });
     return serializeReport(row);
+  });
+}
+
+// ── Advisor action items (persisted checkboxes) ────────────────────
+
+/** All ticked/unticked action items for the account, keyed by actionKey. */
+export async function getAdvisorActionStatuses(): Promise<ActionStatusMap> {
+  return withHeal(async () => {
+    const acct = await accountId();
+    const rows = await prisma.advisorActionStatus.findMany({ where: { accountId: acct } });
+    const out: ActionStatusMap = {};
+    for (const r of rows) out[r.key] = { done: r.done, doneAt: r.doneAt?.toISOString() ?? null };
+    return out;
+  });
+}
+
+/** Tick or untick one action item. The key is derived server-side from recId + task. */
+export async function setAdvisorActionStatus(input: {
+  recId: string;
+  task: string;
+  done: boolean;
+  reportId?: string | null;
+}): Promise<{ key: string; done: boolean; doneAt: string | null }> {
+  const key = actionKey(input.recId, input.task);
+  return withHeal(async () => {
+    const acct = await accountId();
+    const doneAt = input.done ? new Date() : null;
+    const row = await prisma.advisorActionStatus.upsert({
+      where: { accountId_key: { accountId: acct, key } },
+      create: { accountId: acct, key, recId: input.recId, task: input.task, done: input.done, doneAt, reportId: input.reportId ?? null },
+      update: { done: input.done, doneAt, task: input.task, reportId: input.reportId ?? null },
+    });
+    return { key, done: row.done, doneAt: row.doneAt?.toISOString() ?? null };
   });
 }

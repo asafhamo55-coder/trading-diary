@@ -6,6 +6,7 @@ import { ArrowRight, FileJson, FileUp, Upload, X } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Kpi } from "@/components/ui/stat-tile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ImportResult } from "@/lib/savings-data";
@@ -168,7 +169,9 @@ export default function ImportPanel({ initialText, initialResult }: { initialTex
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-5">
           <Card className="lg:col-span-3">
             <CardHeader>
-              <CardTitle as="h2">Extractor JSON</CardTitle>
+              <CardTitle as="h2" className="flex items-center gap-1.5">
+                Extractor JSON <InfoTip tip="import.extractor" />
+              </CardTitle>
               <CardDescription>Drop the file, choose it, or paste its contents.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -254,7 +257,9 @@ export default function ImportPanel({ initialText, initialResult }: { initialTex
 
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle as="h2">What will be imported</CardTitle>
+              <CardTitle as="h2" className="flex items-center gap-1.5">
+                What will be imported <InfoTip tip="import.preview" />
+              </CardTitle>
               <CardDescription>
                 {parsed.preview
                   ? [
@@ -348,16 +353,23 @@ export default function ImportPanel({ initialText, initialResult }: { initialTex
 function ResultView({ result, onAgain }: { result: ImportResult; onAgain: () => void }) {
   return (
     <div className="space-y-6">
-      <Notice tone={result.warnings.length ? "warning" : "success"} title="Import complete">
+      <Notice
+        tone={result.warnings.length ? "warning" : "success"}
+        title={
+          <span className="inline-flex items-center gap-1.5">
+            Import complete <InfoTip tip="import.result" />
+          </span>
+        }
+      >
         {result.warnings.length
           ? `Imported with ${result.warnings.length} warning${result.warnings.length === 1 ? "" : "s"} — review them below.`
           : "Everything was imported cleanly."}
       </Notice>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi label="Accounts created" value={result.accountsCreated} />
-        <Kpi label="Accounts updated" value={result.accountsUpdated} />
-        <Kpi label="History points" value={result.snapshotsWritten} hint="balance snapshots written" />
-        <Kpi label="Coverages" value={result.benefitsCreated + result.benefitsUpdated} hint={`${result.benefitsCreated} new · ${result.benefitsUpdated} updated`} />
+        <Kpi label="Accounts created" tip="import.created" value={result.accountsCreated} />
+        <Kpi label="Accounts updated" tip="import.updated" value={result.accountsUpdated} />
+        <Kpi label="History points" tip="import.snapshots" value={result.snapshotsWritten} hint="balance snapshots written" />
+        <Kpi label="Coverages" tip="import.coverages" value={result.benefitsCreated + result.benefitsUpdated} hint={`${result.benefitsCreated} new · ${result.benefitsUpdated} updated`} />
       </div>
       {result.membersAdded.length > 0 ? (
         <Card variant="subtle" className="flex flex-wrap items-center gap-2 p-4 text-sm">

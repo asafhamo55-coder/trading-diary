@@ -15,10 +15,12 @@ import {
   Upload,
 } from "lucide-react";
 import type { AdvisorReportDTO } from "@/lib/savings-data";
+import type { ActionStatusMap } from "@/lib/advisor-report";
 import { Card } from "@/components/ui/card";
 import { Kpi } from "@/components/ui/stat-tile";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InfoTip } from "@/components/ui/info-tip";
 import { cn } from "@/lib/utils";
 import AdvisorPanel from "./AdvisorPanel";
 import {
@@ -46,10 +48,14 @@ import {
   type Profile,
 } from "./model";
 
+const EMPTY_CONTACTS: never[] = [];
+
 export interface HouseholdDashboardProps {
   netWorth: NetWorth | null;
   profile: Profile | null;
   advisorReport: AdvisorReportDTO | null;
+  /** Ticked advisor action items; null → the panel fetches them. */
+  advisorActions?: ActionStatusMap | null;
   hasAnthropicKey: boolean;
   /** Set when the net-worth query itself failed. */
   loadError?: string | null;
@@ -59,12 +65,15 @@ export default function HouseholdDashboard({
   netWorth: nw,
   profile,
   advisorReport,
+  advisorActions = null,
   hasAnthropicKey,
   loadError,
 }: HouseholdDashboardProps) {
   const people = useMemo(() => peopleDirectory(profile, nw), [profile, nw]);
   const gaps = useMemo(() => dataGaps(nw, profile, people), [nw, profile, people]);
   const ownerName = (k: string) => personName(people, k);
+  const advisorAccounts = useMemo(() => nw?.savings.accounts ?? [], [nw]);
+  const propertyTitles = useMemo(() => Object.fromEntries((nw?.properties ?? []).map((p) => [p.id, p.title])), [nw]);
   const { money, currency } = useDisplayCurrency();
   const compact = (usd: number) => money(usd, "USD", { compact: true });
 
@@ -118,6 +127,7 @@ export default function HouseholdDashboard({
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 2xl:grid-cols-6">
             <Kpi
               label="Retirement savings (IL)"
+              tip="kpi.ilRetirement"
               icon={<Landmark />}
               href="/savings"
               value={
@@ -137,6 +147,7 @@ export default function HouseholdDashboard({
             />
             <Kpi
               label="US retirement (401k)"
+              tip="kpi.usRetirement"
               icon={<Flag />}
               href="/savings"
               value={k.usRetirementCount ? compact(k.usRetirementUsd) : "—"}
@@ -144,13 +155,15 @@ export default function HouseholdDashboard({
             />
             <Kpi
               label="Equity comp (RSU)"
+              tip="kpi.rsu"
               icon={<Briefcase />}
               href="/savings"
               value={k.rsuCount ? compact(k.rsuUsd) : "—"}
-              hint={k.rsuCount ? "vested + unvested" : "Not added yet"}
+              hint={k.rsuCount ? "vested shares held" : "Not added yet"}
             />
             <Kpi
               label="Real estate equity"
+              tip="kpi.realEstateEquity"
               icon={<Building2 />}
               href="/properties"
               value={k.propertyCount ? compact(k.realEstateEquityUsd) : "—"}
@@ -163,6 +176,7 @@ export default function HouseholdDashboard({
             />
             <Kpi
               label="Trading account"
+              tip="kpi.tradingAccount"
               icon={<CandlestickChart />}
               href="/trade/dashboard"
               value={k.tradeUsd != null ? compact(k.tradeUsd) : "—"}
@@ -171,6 +185,7 @@ export default function HouseholdDashboard({
             />
             <Kpi
               label="Annual fees paid"
+              tip="kpi.annualFees"
               icon={<Receipt />}
               href="/savings"
               value={k.accountsWithFees ? money(k.annualFeesUsd) : "—"}
@@ -187,7 +202,16 @@ export default function HouseholdDashboard({
         </>
       )}
 
-      <AdvisorPanel initialReport={advisorReport} hasKey={hasAnthropicKey} ownerName={ownerName} hasData={hasData} />
+      <AdvisorPanel
+        initialReport={advisorReport}
+        hasKey={hasAnthropicKey}
+        ownerName={ownerName}
+        hasData={hasData}
+        initialStatuses={advisorActions}
+        accounts={advisorAccounts}
+        contacts={profile?.contacts ?? EMPTY_CONTACTS}
+        propertyTitles={propertyTitles}
+      />
 
       {hasData ? (
         <>
@@ -259,7 +283,9 @@ function Hero({
       />
       <div className="relative grid gap-6 p-5 md:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Net worth</p>
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            Net worth <InfoTip tip="networth.total" />
+          </p>
           <p
             className={cn(
               "num mt-2 text-4xl font-semibold leading-none tracking-[-0.02em] sm:text-5xl md:text-6xl",
@@ -283,26 +309,38 @@ function Hero({
                 {change.pct != null ? ` (${fmtPct(Math.abs(change.pct))})` : ""}
               </span>
             ) : null}
-            {change ? <span className="text-xs text-muted-foreground">savings since {fmtMonthShort(change.fromMonth)}</span> : null}
+            {change ? (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                savings since {fmtMonthShort(change.fromMonth)} <InfoTip tip="networth.savingsChange" />
+              </span>
+            ) : null}
           </div>
         </div>
         <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm lg:text-right">
           <div>
-            <dt className="text-xs text-muted-foreground">Assets</dt>
+            <dt className="flex items-center gap-1 text-xs text-muted-foreground lg:justify-end">
+              Assets <InfoTip tip="networth.assets" />
+            </dt>
             <dd className="num text-base font-semibold text-foreground">{compact(nw.totals.assetsUsd)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Liabilities</dt>
+            <dt className="flex items-center gap-1 text-xs text-muted-foreground lg:justify-end">
+              Liabilities <InfoTip tip="networth.liabilities" />
+            </dt>
             <dd className="num text-base font-semibold text-foreground">
               {nw.totals.liabilitiesUsd > 0 ? `−${compact(nw.totals.liabilitiesUsd)}` : compact(0)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Monthly deposits</dt>
+            <dt className="flex items-center gap-1 text-xs text-muted-foreground lg:justify-end">
+              Monthly deposits <InfoTip tip="networth.monthlyDeposits" />
+            </dt>
             <dd className="num text-base font-semibold text-foreground">{compact(nw.savings.monthlyDepositsUsd)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Accounts</dt>
+            <dt className="flex items-center gap-1 text-xs text-muted-foreground lg:justify-end">
+              Accounts <InfoTip tip="networth.accounts" />
+            </dt>
             <dd className="num text-base font-semibold text-foreground">
               {nw.savings.accounts.length + nw.properties.length + (nw.trade ? 1 : 0)}
             </dd>
@@ -322,7 +360,11 @@ function Hero({
               />
             ))}
           </div>
-          <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
+          <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+            <li className="flex items-center">
+              <span className="sr-only">Asset mix</span>
+              <InfoTip tip="networth.assetMix" />
+            </li>
             {positive.map((g) => (
               <li key={g.key} className="flex items-center gap-1.5 text-muted-foreground">
                 <span aria-hidden className="size-2 rounded-[2px]" style={{ background: g.color }} />
@@ -335,7 +377,7 @@ function Hero({
             {info.oldestBalanceAsOf
               ? `Balances from ${fmtDate(info.oldestBalanceAsOf)}${info.newestBalanceAsOf !== info.oldestBalanceAsOf ? ` to ${fmtDate(info.newestBalanceAsOf)}` : ""} · `
               : ""}
-            ₪{nw.fx.usdIls.toFixed(2)} = $1 ({fxProvenance(nw.fx)}) ·{" "}
+            ₪{nw.fx.usdIls.toFixed(2)} = $1 ({fxProvenance(nw.fx)}) <InfoTip tip="fx.usdIls" className="size-3.5" /> ·{" "}
             <He className="text-2xs">שווי נקי משפחתי</He>
           </p>
         </div>

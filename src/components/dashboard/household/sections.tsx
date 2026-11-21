@@ -20,6 +20,7 @@ import { Badge, StatusPill } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InfoTip } from "@/components/ui/info-tip";
 import { cn } from "@/lib/utils";
 import type { SavingsAccountView, CoverageGroup } from "@/lib/savings";
 import { AllocationDonut, HistoryChart } from "./charts";
@@ -67,7 +68,9 @@ export function AllocationCard({ groups }: { groups: AssetGroup[] }) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle as="h2">Allocation by asset type</CardTitle>
+        <CardTitle as="h2" className="flex items-center gap-1.5">
+          Allocation by asset type <InfoTip tip="dashboard.allocation" />
+        </CardTitle>
         <CardDescription>Share of net assets — real estate shown as equity after mortgages.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -136,7 +139,9 @@ export function PeopleCountryCard({ people, countries }: { people: BarRow[]; cou
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle as="h2">By person &amp; country</CardTitle>
+        <CardTitle as="h2" className="flex items-center gap-1.5">
+          By person &amp; country <InfoTip tip="dashboard.byPersonCountry" />
+        </CardTitle>
         <CardDescription>Real estate and the trading account count as joint, US-held assets.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -179,7 +184,9 @@ export function HistoryCard({ history }: { history: NetWorth["history"] }) {
           ) : null
         }
       >
-        <CardTitle as="h2">Savings over time</CardTitle>
+        <CardTitle as="h2" className="flex items-center gap-1.5">
+          Savings over time <InfoTip tip="savings.history" />
+        </CardTitle>
         <CardDescription>Month-end retirement &amp; savings balances at today’s FX rate.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col">
@@ -231,7 +238,9 @@ export function DataGapsCard({ gaps }: { gaps: GapItem[] }) {
       <CardHeader
         actions={gaps.length > 0 ? <Badge variant="warning">{gaps.length} open</Badge> : <StatusPill tone="success" label="Complete" />}
       >
-        <CardTitle as="h2">Data gaps</CardTitle>
+        <CardTitle as="h2" className="flex items-center gap-1.5">
+          Data gaps <InfoTip tip="dashboard.dataGaps" />
+        </CardTitle>
         <CardDescription>Fill these to sharpen the numbers and the advice.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -350,6 +359,7 @@ export function SavingsTableCard({ nw, people }: { nw: NetWorth; people: Map<str
     {
       key: "status",
       header: "Status",
+      tip: "dashboard.savingsTable.status",
       cell: (a) => (
         <div className="flex flex-wrap gap-1.5">
           {statusPill(a.status)}
@@ -357,10 +367,11 @@ export function SavingsTableCard({ nw, people }: { nw: NetWorth; people: Map<str
         </div>
       ),
     },
-    { key: "fees", header: "Fees", numeric: true, hideBelowLg: true, cell: (a) => <FeeCell a={a} /> },
+    { key: "fees", header: "Fees", tip: "dashboard.savingsTable.fees", numeric: true, hideBelowLg: true, cell: (a) => <FeeCell a={a} /> },
     {
       key: "balance",
       header: "Balance",
+      tip: "dashboard.savingsTable.balance",
       numeric: true,
       mobileAside: true,
       cell: (a) => (
@@ -378,8 +389,8 @@ export function SavingsTableCard({ nw, people }: { nw: NetWorth; people: Map<str
     <section aria-labelledby="savings-table-title" className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 id="savings-table-title" className="text-lg font-semibold tracking-[-0.01em] text-foreground">
-            Savings at a glance
+          <h2 id="savings-table-title" className="flex items-center gap-1.5 text-lg font-semibold tracking-[-0.01em] text-foreground">
+            Savings at a glance <InfoTip tip="dashboard.savingsTable" />
           </h2>
           <p className="text-sm text-muted-foreground">
             {rows.length} account{rows.length === 1 ? "" : "s"} · {full(nw.savings.totalUsd)} · deposits{" "}
@@ -429,7 +440,9 @@ export function CoverageCard({ nw, people }: { nw: NetWorth; people: Map<string,
           </div>
         }
       >
-        <CardTitle as="h2">Insurance &amp; benefits coverage</CardTitle>
+        <CardTitle as="h2" className="flex items-center gap-1.5">
+          Insurance &amp; benefits coverage <InfoTip tip="dashboard.coverage" />
+        </CardTitle>
         <CardDescription>
           {cov.groups.length > 0 ? (
             <>

@@ -551,10 +551,6 @@ export type EnumPropertyTxTypeFieldUpdateOperationsInput = {
   set?: $Enums.PropertyTxType
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type PropertyTransactionCreateWithoutPropertyInput = {
   id?: string
   date: Date | string

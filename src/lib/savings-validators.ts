@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BENEFIT_CATEGORIES, BENEFIT_PAYERS, COUNTRIES, CURRENCIES, SAVINGS_TYPES } from "./savings";
+import { BENEFIT_CATEGORIES, BENEFIT_PAYERS, CONTACT_ROLES, COUNTRIES, CURRENCIES, SAVINGS_TYPES } from "./savings";
 
 // Numbers from the extractor may arrive as strings ("1,234.5", "0.22%").
 function looseNumber(v: unknown): unknown {
@@ -93,6 +93,17 @@ export const householdGoalsSchema = z.object({
   other: z.string().max(2000).nullable().optional(),
 });
 
+export const householdContactSchema = z.object({
+  id: z.string().min(1).max(40).regex(/^[a-z0-9_-]+$/i, "Contact id must be letters, digits, - or _"),
+  name: z.string().trim().min(1).max(120),
+  role: z.enum(CONTACT_ROLES),
+  country: z.enum(["IL", "US"]),
+  email: z.string().trim().email().max(200).nullable().optional().or(z.literal("").transform(() => null)),
+  phone: z.string().trim().max(40).nullable().optional(),
+  language: z.enum(["he", "en"]),
+  notes: z.string().max(1000).nullable().optional(),
+});
+
 export const updateProfileSchema = z.object({
   members: z
     .array(householdMemberSchema)
@@ -104,6 +115,12 @@ export const updateProfileSchema = z.object({
   goalsText: z.string().max(5000).nullable().optional(),
   riskTolerance: z.string().max(200).nullable().optional(),
   usdIlsRate: z.number().min(1).max(10).nullable().optional(),
+  contacts: z
+    .array(householdContactSchema)
+    .max(50)
+    .refine((cs) => new Set(cs.map((c) => c.id)).size === cs.length, "Contact ids must be unique")
+    .nullable()
+    .optional(),
 });
 
 // ── Benefits ───────────────────────────────────────────────────────

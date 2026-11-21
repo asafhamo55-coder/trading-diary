@@ -4,6 +4,8 @@ import * as React from "react";
 import { RotateCcw, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/info-tip";
+import type { ExplainKey } from "@/lib/explain";
 import {
   BUCKET_IDS,
   DEFAULT_GUIDELINE_CONFIG,
@@ -80,12 +82,14 @@ function fromDraft(d: Draft, base: GuidelineConfig): unknown {
 function Field({
   label,
   hint,
+  tip,
   suffix,
   children,
   className,
 }: {
   label: string;
   hint?: React.ReactNode;
+  tip?: ExplainKey;
   suffix?: string;
   children: React.ReactElement<{ id?: string }>;
   className?: string;
@@ -93,9 +97,12 @@ function Field({
   const id = React.useId();
   return (
     <div className={cn("space-y-1.5", className)}>
-      <label htmlFor={id} className="block text-xs font-medium text-foreground-secondary">
-        {label}
-      </label>
+      <div className="flex items-center gap-1">
+        <label htmlFor={id} className="block text-xs font-medium text-foreground-secondary">
+          {label}
+        </label>
+        {tip ? <InfoTip tip={tip} /> : null}
+      </div>
       <div className="relative">
         {React.cloneElement(children, { id })}
         {suffix ? (
@@ -151,7 +158,9 @@ export function GuidelineConfigPanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle as="h2">Rules</CardTitle>
+        <CardTitle as="h2" className="flex items-center gap-1.5">
+          Rules <InfoTip tip="guidelines.rules" />
+        </CardTitle>
         <CardDescription>
           These are the account&apos;s standing guidelines. Change them here; the plan is recalculated on save.
           {updatedAt ? ` Last saved ${new Date(updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}.` : " Using the default rules (not saved yet)."}
@@ -159,7 +168,9 @@ export function GuidelineConfigPanel({
       </CardHeader>
       <CardContent className="space-y-6">
         <fieldset className="space-y-3" disabled={disabled}>
-          <legend className="text-sm font-semibold text-foreground">Target mix</legend>
+          <legend className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            Target mix <InfoTip tip="guidelines.targetMix" />
+          </legend>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {BUCKET_IDS.map((b) => (
               <Field key={b} label={bucketLabel(b, config)} suffix="%">
@@ -182,19 +193,19 @@ export function GuidelineConfigPanel({
 
         <fieldset className="grid grid-cols-2 gap-3 lg:grid-cols-4" disabled={disabled}>
           <legend className="col-span-full mb-3 text-sm font-semibold text-foreground">Rebalancing &amp; dips</legend>
-          <Field label="Rebalance band" suffix="pts" hint="Act only beyond this drift">
+          <Field label="Rebalance band" tip="guidelines.band" suffix="pts" hint="Act only beyond this drift">
             <input inputMode="decimal" className={cn(inputCls, "pr-10")} value={draft.bandPct} onChange={(e) => set("bandPct", e.target.value)} />
           </Field>
-          <Field label="Dip trigger" suffix="%" hint="Below the 3-month high">
+          <Field label="Dip trigger" tip="guidelines.dipTrigger" suffix="%" hint="Below the 3-month high">
             <input inputMode="decimal" className={cn(inputCls, "pr-8")} value={draft.dipPct} onChange={(e) => set("dipPct", e.target.value)} />
           </Field>
-          <Field label="Deploy per dip" suffix="%" hint="Of the cash reserve (33.3 = ⅓)">
+          <Field label="Deploy per dip" tip="guidelines.deployFraction" suffix="%" hint="Of the cash reserve (33.3 = ⅓)">
             <input inputMode="decimal" className={cn(inputCls, "pr-8")} value={draft.deployPct} onChange={(e) => set("deployPct", e.target.value)} />
           </Field>
-          <Field label="Large cap from" suffix="$B" hint="Market cap; smaller is outside the rules">
+          <Field label="Large cap from" tip="guidelines.largeCapMin" suffix="$B" hint="Market cap; smaller is outside the rules">
             <input inputMode="decimal" className={cn(inputCls, "pr-10")} value={draft.largeCapB} onChange={(e) => set("largeCapB", e.target.value)} />
           </Field>
-          <Field label="Dip watchlist" hint="Large caps to watch even if you don't hold them, e.g. GOOGL, AMZN" className="col-span-full">
+          <Field label="Dip watchlist" tip="guidelines.watchlist" hint="Large caps to watch even if you don't hold them, e.g. GOOGL, AMZN" className="col-span-full">
             <input
               className={cn(inputCls, "font-normal uppercase")}
               placeholder="GOOGL, AMZN"
@@ -207,7 +218,9 @@ export function GuidelineConfigPanel({
         </fieldset>
 
         <fieldset className="space-y-3" disabled={disabled}>
-          <legend className="text-sm font-semibold text-foreground">Cash balance</legend>
+          <legend className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            Cash balance <InfoTip tip="guidelines.cashOverride" />
+          </legend>
           <label className="flex items-start gap-2 text-sm text-foreground">
             <input
               type="checkbox"

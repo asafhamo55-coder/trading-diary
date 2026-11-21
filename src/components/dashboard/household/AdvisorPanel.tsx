@@ -1,44 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  ArrowRight,
-  ChevronDown,
-  HelpCircle,
-  CalendarClock,
-  RefreshCw,
-  Sparkles,
-  User,
-  Users,
-} from "lucide-react";
-import type { AdvisorOutput, AdvisorRecommendation, AdvisorUsage } from "@/lib/advisor";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AlertTriangle, CalendarClock, RefreshCw, Sparkles } from "lucide-react";
+import type { AdvisorUsage } from "@/lib/advisor";
+import { readAdvisorOutput, type ActionStatusMap, type AdvisorLang } from "@/lib/advisor-report";
+import type { EmailAccount, EmailContact } from "@/lib/advisor-email";
 import type { AdvisorReportDTO } from "@/lib/savings-data";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { fmtRelative } from "./format";
-import { useDisplayCurrency } from "@/components/ui/currency";
-
-const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 } as const;
-const PRIORITY_VARIANT = { high: "danger", medium: "warning", low: "neutral" } as const;
-
-const CATEGORY_LABELS: Record<string, string> = {
-  fees: "Fees",
-  allocation: "Allocation",
-  consolidation: "Consolidation",
-  insurance: "Insurance",
-  "insurance-overlap": "Insurance overlap",
-  tax: "Tax",
-  liquidity: "Liquidity",
-  retirement: "Retirement",
-  property: "Property",
-  "cash-flow": "Cash flow",
-  education: "Education",
-  "data-gap": "Data gap",
-};
+import AdvisorReport from "./AdvisorReport";
+import { ADVISOR_STRINGS, readStoredLang, storeLang } from "./advisor-i18n";
 
 /** Progress copy, keyed by elapsed seconds. Generation usually takes 1–4 min. */
 const STAGES: { at: number; text: string }[] = [
@@ -51,19 +26,6 @@ const STAGES: { at: number; text: string }[] = [
 ];
 const EXPECTED_SECONDS = 180;
 
-function asOutput(v: unknown): AdvisorOutput | null {
-  if (!v || typeof v !== "object") return null;
-  const o = v as Partial<AdvisorOutput>;
-  if (typeof o.headline !== "string" || !Array.isArray(o.recommendations)) return null;
-  return {
-    headline: o.headline,
-    netWorthCommentary: o.netWorthCommentary ?? "",
-    recommendations: o.recommendations,
-    questionsForUser: Array.isArray(o.questionsForUser) ? o.questionsForUser : [],
-    disclaimers: Array.isArray(o.disclaimers) ? o.disclaimers : [],
-  };
-}
-
 function asUsage(v: unknown): Partial<AdvisorUsage> | null {
   return v && typeof v === "object" ? (v as Partial<AdvisorUsage>) : null;
 }
@@ -74,22 +36,89 @@ type RunState =
   | { kind: "error"; message: string }
   | { kind: "needsKey"; message?: string };
 
+const LANG_OPTIONS: { value: AdvisorLang; label: string; name: string }[] = [
+  { value: "en", label: "EN", name: "English" },
+  { value: "he", label: "עב", name: "עברית" },
+];
+
+/** EN | עב segmented switch (radiogroup; ←/→ switch). Persisted in localStorage. */
+function LangToggle({ lang, onChange, label }: { lang: AdvisorLang; onChange: (l: AdvisorLang) => void; label: string }) {
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const onKeyDown = (e: React.KeyboardEvent, i: number) => {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+    e.preventDefault();
+    const next = (i + 1) % LANG_OPTIONS.length;
+    onChange(LANG_OPTIONS[next].value);
+    refs.current[next]?.focus();
+  };
+  return (
+    <div role="radiogroup" aria-label={label} dir="ltr" className="flex h-8 items-center rounded-lg border border-border bg-subtle p-0.5 coarse:h-11">
+      {LANG_OPTIONS.map((o, i) => {
+        const active = o.value === lang;
+        return (
+          <button
+            key={o.value}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            aria-label={o.name}
+            lang={o.value}
+            tabIndex={active ? 0 : -1}
+            onClick={() => onChange(o.value)}
+            onKeyDown={(e) => onKeyDown(e, i)}
+            className={cn(
+              "focus-ring inline-flex h-full min-w-9 items-center justify-center rounded-md px-2 text-xs font-semibold transition-colors",
+              active ? "bg-surface text-foreground shadow-xs ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AdvisorPanel({
   initialReport,
   hasKey,
   ownerName,
   hasData,
+  initialStatuses = null,
+  accounts = [],
+  contacts = [],
+  propertyTitles = {},
 }: {
   initialReport: AdvisorReportDTO | null;
   hasKey: boolean;
   ownerName: (key: string) => string;
   hasData: boolean;
+  /** Ticked action items (server-loaded); fetched client-side when null. */
+  initialStatuses?: ActionStatusMap | null;
+  /** For the "Prepare email" dialog: the user's accounts (full policy numbers stay client-side). */
+  accounts?: EmailAccount[];
+  contacts?: EmailContact[];
+  propertyTitles?: Record<string, string>;
 }) {
   const [report, setReport] = useState<AdvisorReportDTO | null>(initialReport);
   const [run, setRun] = useState<RunState>(hasKey ? { kind: "idle" } : { kind: "needsKey" });
   const [lastCached, setLastCached] = useState(false);
-  const output = useMemo(() => asOutput(report?.output), [report]);
+  const [lang, setLang] = useState<AdvisorLang>("en");
+  useEffect(() => {
+    const stored = readStoredLang();
+    if (stored && stored !== "en") setLang(stored); // eslint-disable-line react-hooks/set-state-in-effect -- hydrate from localStorage after SSR
+  }, []);
+  const changeLang = (l: AdvisorLang) => {
+    setLang(l);
+    storeLang(l);
+  };
+  const s = ADVISOR_STRINGS[lang];
+  const output = useMemo(() => readAdvisorOutput(report?.output), [report]);
   const usage = useMemo(() => asUsage(report?.usage), [report]);
+  const emailContext = useMemo(() => ({ accounts, contacts }), [accounts, contacts]);
 
   async function start() {
     setRun({ kind: "running", startedAt: Date.now() });
@@ -128,21 +157,24 @@ export default function AdvisorPanel({
   const canRun = run.kind !== "needsKey" && hasData;
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden" lang={lang} dir={lang === "he" ? "rtl" : "ltr"}>
       <div className="relative border-b border-border bg-accent-subtle/60">
         <CardHeader
           actions={
-            canRun ? (
-              <Button
-                variant={report ? "secondary" : "primary"}
-                size="sm"
-                onClick={start}
-                loading={running}
-                icon={report ? <RefreshCw aria-hidden /> : <Sparkles aria-hidden />}
-              >
-                {running ? "Analyzing…" : report ? "Re-run" : "Run analysis"}
-              </Button>
-            ) : null
+            <>
+              {output ? <LangToggle lang={lang} onChange={changeLang} label={s.langGroup} /> : null}
+              {canRun ? (
+                <Button
+                  variant={report ? "secondary" : "primary"}
+                  size="sm"
+                  onClick={start}
+                  loading={running}
+                  icon={report ? <RefreshCw aria-hidden /> : <Sparkles aria-hidden />}
+                >
+                  {running ? "Analyzing…" : report ? "Re-run" : "Run analysis"}
+                </Button>
+              ) : null}
+            </>
           }
         >
           <div className="flex flex-wrap items-center gap-2">
@@ -150,16 +182,13 @@ export default function AdvisorPanel({
               <Sparkles />
             </span>
             <CardTitle as="h2" className="text-lg">
-              Household advisor
+              {s.panelTitle}
             </CardTitle>
             <Badge variant="ai">AI</Badge>
           </div>
-          <CardDescription>
-            Cross-border (Israel–US) review of your fees, insurance, allocation and liquidity — what to do next and
-            why.
-          </CardDescription>
+          <CardDescription>{s.panelDescription}</CardDescription>
           {report ? (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground" dir="ltr">
               Last run {fmtRelative(report.createdAt)}
               {usage?.estCostUsd ? ` · cost $${usage.estCostUsd.toFixed(2)}` : ""}
               {` · ${report.model === "claude-code" ? "Claude Code" : (usage?.servedByModel ?? report.model)}`}
@@ -176,10 +205,8 @@ export default function AdvisorPanel({
         <div className="mx-5 mt-4 flex gap-3 rounded-lg border border-border bg-subtle/60 px-4 py-3 text-sm">
           <CalendarClock className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
           <p className="text-foreground-secondary">
-            Refreshed every morning at 7:00 AM by Claude Code on your Claude subscription, using the latest
-            data and laws. For an update now, ask Claude Code to{" "}
-            <span className="font-medium text-foreground">“run the advisor”</span>.
-            {report ? "" : " Your first report arrives by tomorrow morning."}
+            {s.dailyNote} <span className="font-medium text-foreground">{s.dailyNoteAsk}</span>.
+            {report ? "" : s.firstReportSoon}
           </p>
         </div>
       ) : null}
@@ -196,7 +223,15 @@ export default function AdvisorPanel({
 
       <div className={cn(running && "pointer-events-none opacity-50 transition-opacity")}>
         {output ? (
-          <ReportBody output={output} ownerName={ownerName} />
+          <AdvisorReport
+            output={output}
+            reportId={report?.id ?? null}
+            ownerName={ownerName}
+            initialStatuses={initialStatuses}
+            lang={lang}
+            emailContext={emailContext}
+            propertyTitles={propertyTitles}
+          />
         ) : run.kind !== "needsKey" && !running ? (
           <EmptyState
             variant="compact"
@@ -264,151 +299,5 @@ function ProgressBlock({ startedAt }: { startedAt: number }) {
         Usually 1–4 minutes. Keep this tab open; the rest of the dashboard stays usable.
       </p>
     </div>
-  );
-}
-
-function ReportBody({ output, ownerName }: { output: AdvisorOutput; ownerName: (k: string) => string }) {
-  const recs = useMemo(
-    () => [...output.recommendations].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]),
-    [output.recommendations]
-  );
-  const [showAll, setShowAll] = useState(false);
-  const visible = showAll ? recs : recs.slice(0, 6);
-  const totalImpact = recs.reduce((s, r) => s + (r.estimatedImpactUsdPerYear ?? 0), 0);
-  const { money } = useDisplayCurrency();
-  const counts = { high: 0, medium: 0, low: 0 };
-  for (const r of recs) counts[r.priority]++;
-
-  return (
-    <CardContent className="space-y-6 pt-5">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-        <div className="space-y-2">
-          <p className="text-lg font-semibold leading-snug tracking-[-0.01em] text-foreground">{output.headline}</p>
-          {output.netWorthCommentary ? (
-            <p className="max-w-3xl text-sm leading-relaxed text-foreground-secondary">{output.netWorthCommentary}</p>
-          ) : null}
-        </div>
-        <dl className="grid grid-cols-3 gap-2 rounded-lg border border-border bg-subtle p-3 text-center lg:w-[300px]">
-          <div>
-            <dt className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">Actions</dt>
-            <dd className="num text-lg font-semibold text-foreground">{recs.length}</dd>
-          </div>
-          <div>
-            <dt className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">High</dt>
-            <dd className="num text-lg font-semibold text-danger">{counts.high}</dd>
-          </div>
-          <div>
-            <dt className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">Est. / yr</dt>
-            <dd className="num text-lg font-semibold text-success">{totalImpact > 0 ? money(totalImpact, "USD", { compact: true }) : "—"}</dd>
-          </div>
-        </dl>
-      </div>
-
-      {recs.length > 0 ? (
-        <div>
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-            Recommendations
-          </h3>
-          <ol className="grid gap-3 md:grid-cols-2">
-            {visible.map((r, i) => (
-              <RecommendationItem key={`${r.title}-${i}`} rec={r} index={i + 1} ownerName={ownerName} />
-            ))}
-          </ol>
-          {recs.length > 6 ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-3"
-              onClick={() => setShowAll((v) => !v)}
-              iconRight={<ChevronDown className={cn("transition-transform", showAll && "rotate-180")} aria-hidden />}
-            >
-              {showAll ? "Show fewer" : `Show all ${recs.length} recommendations`}
-            </Button>
-          ) : null}
-        </div>
-      ) : null}
-
-      {output.questionsForUser.length > 0 ? (
-        <div>
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-            The advisor needs to know
-          </h3>
-          <ul className="grid gap-2 md:grid-cols-2">
-            {output.questionsForUser.map((q, i) => (
-              <li key={i} className="flex gap-3 rounded-lg border border-info/20 bg-info-subtle p-3">
-                <HelpCircle className="mt-0.5 size-4 shrink-0 text-info" aria-hidden />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{q.question}</p>
-                  {q.why ? <p className="mt-0.5 text-xs text-foreground-secondary">{q.why}</p> : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {output.disclaimers.length > 0 ? (
-        <div className="border-t border-border pt-4">
-          <ul className="space-y-1 text-xs leading-relaxed text-muted-foreground">
-            {output.disclaimers.map((d, i) => (
-              <li key={i}>{d}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-    </CardContent>
-  );
-}
-
-function RecommendationItem({
-  rec,
-  index,
-  ownerName,
-}: {
-  rec: AdvisorRecommendation;
-  index: number;
-  ownerName: (k: string) => string;
-}) {
-  const household = rec.owner === "household" || rec.owner === "joint";
-  const { money } = useDisplayCurrency();
-  return (
-    <li className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-      <div className="flex items-start gap-3">
-        <span
-          className="num flex size-6 shrink-0 items-center justify-center rounded-full bg-subtle text-xs font-semibold text-foreground-secondary"
-          aria-hidden
-        >
-          {index}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold leading-snug text-foreground">{rec.title}</p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <Badge variant={PRIORITY_VARIANT[rec.priority] ?? "neutral"} className="capitalize">
-              {rec.priority}
-            </Badge>
-            <Badge variant="outline">{CATEGORY_LABELS[rec.category] ?? rec.category}</Badge>
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-              {household ? <Users className="size-3" aria-hidden /> : <User className="size-3" aria-hidden />}
-              {ownerName(rec.owner)}
-            </span>
-          </div>
-        </div>
-        {rec.estimatedImpactUsdPerYear ? (
-          <div className="shrink-0 text-right">
-            <p className="num text-sm font-semibold text-success">+{money(rec.estimatedImpactUsdPerYear)}</p>
-            <p className="text-2xs text-muted-foreground">per year</p>
-          </div>
-        ) : null}
-      </div>
-      <p className="text-sm leading-relaxed text-foreground-secondary">{rec.rationale}</p>
-      <div className="mt-auto flex gap-2 rounded-md bg-primary-subtle px-3 py-2 text-sm text-foreground">
-        <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-        <span>
-          <span className="font-medium">Do: </span>
-          {rec.action}
-        </span>
-      </div>
-      <p className="text-2xs text-muted-foreground">Confidence: {rec.confidence}</p>
-    </li>
   );
 }

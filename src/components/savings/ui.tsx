@@ -5,6 +5,8 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { AlertTriangle, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { InfoTip } from "@/components/ui/info-tip";
+import type { ExplainKey } from "@/lib/explain";
 
 /* ──────────────────────────────────────────────────────────────────────
  * Small building blocks shared by the /savings pages: a right-side drawer,
@@ -240,17 +242,21 @@ export function Notice({
 export function FormSection({
   title,
   description,
+  tip,
   children,
 }: {
   title: string;
   description?: React.ReactNode;
+  /** Glossary key: an ⓘ after the title. */
+  tip?: ExplainKey;
   children: React.ReactNode;
 }) {
   const id = React.useId();
   return (
     <section role="group" aria-labelledby={id} className="border-t border-border pt-5 first:border-t-0 first:pt-0">
-      <h3 id={id} className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+      <h3 id={id} className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
         {title}
+        {tip ? <InfoTip tip={tip} /> : null}
       </h3>
       {description ? <p className="mt-1 text-xs text-muted-foreground">{description}</p> : null}
       <div className="mt-3 space-y-3">{children}</div>
@@ -261,16 +267,22 @@ export function FormSection({
 /** Label/value line used in cards. */
 export function Stat({
   label,
+  tip,
   children,
   className,
 }: {
   label: React.ReactNode;
+  /** Glossary key: an ⓘ after the label. */
+  tip?: ExplainKey;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <dt className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">{label}</dt>
+      <dt className="flex items-center gap-1 text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+        {label}
+        {tip ? <InfoTip tip={tip} /> : null}
+      </dt>
       <dd className="num mt-0.5 truncate text-sm text-foreground">{children}</dd>
     </div>
   );
