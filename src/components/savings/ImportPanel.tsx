@@ -26,6 +26,10 @@ interface Preview {
   people: PreviewPerson[];
   currency: string;
   agentNotes: number;
+  // Household-bundle extras (accounts / benefits / profile alongside the Israeli doc).
+  accounts: { owner: string; type: string; provider: string; balance: number | null; currency: string }[];
+  benefitCount: number;
+  memberCount: number;
 }
 
 const toNum = (v: unknown): number | null => {
@@ -45,7 +49,28 @@ function previewDoc(text: string): { preview?: Preview; doc?: unknown; error?: s
     return { error: `Not valid JSON: ${e instanceof Error ? e.message : "parse error"}` };
   }
   if (!doc || typeof doc !== "object" || Array.isArray(doc)) return { error: "Expected a JSON object with “asOf” and “people”." };
-  const d = doc as Record<string, unknown>;
+  const root = doc as Record<string, unknown>;
+  // A household bundle wraps the Israeli doc in `israel` and adds accounts,
+  // benefits and profile members; a plain extractor doc has `people` at the top.
+  const isBundle = !("people" in root) && ["israel", "accounts", "benefits", "profile"].some((k) => k in root);
+  const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
+  const accounts = arr(root.accounts).map((x) => {
+    const q = (x ?? {}) as Record<string, unknown>;
+    return {
+      owner: typeof q.owner === "string" ? q.owner : "?",
+      type: typeof q.type === "string" ? q.type : "other",
+      provider: typeof q.provider === "string" ? q.provider : "—",
+      balance: toNum(q.balance),
+      currency: typeof q.currency === "string" ? q.currency : "USD",
+    };
+  });
+  const profile = (root.profile ?? {}) as Record<string, unknown>;
+  const extras = { accounts, benefitCount: arr(root.benefits).length, memberCount: arr(profile.members).length };
+  const d = (isBundle ? root.israel ?? {} : root) as Record<string, unknown>;
+  if (isBundle && !root.israel) {
+    if (accounts.length + extras.benefitCount + extras.memberCount === 0) return { error: "The bundle is empty." };
+    return { doc, preview: { people: [], currency: "ILS", agentNotes: 0, ...extras } };
+  }
   if (!Array.isArray(d.people) || d.people.length === 0) return { error: "No “people” array found." };
   if (!d.asOf || typeof d.asOf !== "object") return { error: "Missing “asOf” (statement date per person)." };
   const asOf = d.asOf as Record<string, unknown>;
@@ -76,6 +101,7 @@ function previewDoc(text: string): { preview?: Preview; doc?: unknown; error?: s
       people,
       currency: typeof d.currency === "string" ? d.currency : "ILS",
       agentNotes: Array.isArray(d.agentNotes) ? d.agentNotes.length : 0,
+      ...extras,
     },
   };
 }
@@ -119,13 +145,14 @@ export default function ImportPanel({ initialText, initialResult }: { initialTex
     }
   }
 
-  const productCount = parsed.preview?.people.reduce((s, p) => s + p.products.length, 0) ?? 0;
+  const productCount =
+    (parsed.preview?.people.reduce((s, p) => s + p.products.length, 0) ?? 0) + (parsed.preview?.accounts.length ?? 0);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Import statements"
-        description="Load the JSON produced by the statement extractor (Israeli pension, manager’s insurance, study-fund and provident-fund reports). Accounts are matched by person, provider, type and policy last-4, so re-importing updates rather than duplicates."
+        description="Load the statement-extractor JSON (Israeli pension, manager’s insurance, study-fund and provident-fund reports) or a household bundle that also carries US accounts, benefits and family members. Accounts are matched by person, provider, type and policy last-4, so re-importing updates rather than duplicates."
       />
 
       {result ? (
@@ -230,7 +257,12 @@ export default function ImportPanel({ initialText, initialResult }: { initialTex
               <CardTitle as="h2">What will be imported</CardTitle>
               <CardDescription>
                 {parsed.preview
-                  ? `${parsed.preview.people.length} ${parsed.preview.people.length === 1 ? "person" : "people"} · ${productCount} products · amounts in ${parsed.preview.currency}`
+                  ? [
+                      parsed.preview.people.length ? `${parsed.preview.people.length} ${parsed.preview.people.length === 1 ? "person" : "people"} (Israel)` : null,
+                      `${productCount} accounts`,
+                      parsed.preview.benefitCount ? `${parsed.preview.benefitCount} benefits` : null,
+                      parsed.preview.memberCount ? `${parsed.preview.memberCount} family members` : null,
+                    ].filter(Boolean).join(" · ")
                   : "A summary appears here once the JSON is loaded."}
               </CardDescription>
             </CardHeader>
@@ -264,6 +296,30 @@ export default function ImportPanel({ initialText, initialResult }: { initialTex
                       </ul>
                     </div>
                   ))}
+                  {parsed.preview.accounts.length > 0 ? (
+                    <div className="rounded-lg border border-border">
+                      <div className="border-b border-border px-3 py-2 font-medium text-foreground">Other accounts</div>
+                      <ul className="divide-y divide-border text-sm">
+                        {parsed.preview.accounts.map((x, i) => (
+                          <li key={i} className="flex items-center gap-2 px-3 py-1.5">
+                            <span className="min-w-0 flex-1 truncate">
+                              <span className="text-foreground">{x.provider}</span>{" "}
+                              <span className="text-xs text-muted-foreground">{typeLabel(x.type)} · {x.owner}</span>
+                            </span>
+                            <span className="num text-foreground-secondary">
+                              {x.balance != null ? money(x.balance, x.currency) : "—"}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {parsed.preview.benefitCount > 0 || parsed.preview.memberCount > 0 ? (
+                    <p className="text-xs text-muted-foreground">
+                      Also: {parsed.preview.benefitCount} benefit{parsed.preview.benefitCount === 1 ? "" : "s"} / insurance coverages
+                      {parsed.preview.memberCount ? ` and ${parsed.preview.memberCount} family members for the profile` : ""}.
+                    </p>
+                  ) : null}
                   {parsed.preview.agentNotes > 0 ? (
                     <p className="text-xs text-muted-foreground">
                       {parsed.preview.agentNotes} extractor note{parsed.preview.agentNotes === 1 ? "" : "s"} included.
