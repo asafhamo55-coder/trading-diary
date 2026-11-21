@@ -59,6 +59,8 @@ export type SavingsAccountMinAggregateOutputType = {
   provider: string | null
   planName: string | null
   policyLast4: string | null
+  policyNumber: string | null
+  loginUrl: string | null
   status: string | null
   currency: string | null
   balance: number | null
@@ -88,6 +90,8 @@ export type SavingsAccountMaxAggregateOutputType = {
   provider: string | null
   planName: string | null
   policyLast4: string | null
+  policyNumber: string | null
+  loginUrl: string | null
   status: string | null
   currency: string | null
   balance: number | null
@@ -117,6 +121,8 @@ export type SavingsAccountCountAggregateOutputType = {
   provider: number
   planName: number
   policyLast4: number
+  policyNumber: number
+  loginUrl: number
   status: number
   currency: number
   balance: number
@@ -173,6 +179,8 @@ export type SavingsAccountMinAggregateInputType = {
   provider?: true
   planName?: true
   policyLast4?: true
+  policyNumber?: true
+  loginUrl?: true
   status?: true
   currency?: true
   balance?: true
@@ -202,6 +210,8 @@ export type SavingsAccountMaxAggregateInputType = {
   provider?: true
   planName?: true
   policyLast4?: true
+  policyNumber?: true
+  loginUrl?: true
   status?: true
   currency?: true
   balance?: true
@@ -231,6 +241,8 @@ export type SavingsAccountCountAggregateInputType = {
   provider?: true
   planName?: true
   policyLast4?: true
+  policyNumber?: true
+  loginUrl?: true
   status?: true
   currency?: true
   balance?: true
@@ -348,6 +360,8 @@ export type SavingsAccountGroupByOutputType = {
   provider: string
   planName: string | null
   policyLast4: string | null
+  policyNumber: string | null
+  loginUrl: string | null
   status: string | null
   currency: string
   balance: number
@@ -401,6 +415,8 @@ export type SavingsAccountWhereInput = {
   provider?: Prisma.StringFilter<"SavingsAccount"> | string
   planName?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
   policyLast4?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
+  policyNumber?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
+  loginUrl?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
   status?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
   currency?: Prisma.StringFilter<"SavingsAccount"> | string
   balance?: Prisma.FloatFilter<"SavingsAccount"> | number
@@ -432,6 +448,8 @@ export type SavingsAccountOrderByWithRelationInput = {
   provider?: Prisma.SortOrder
   planName?: Prisma.SortOrderInput | Prisma.SortOrder
   policyLast4?: Prisma.SortOrderInput | Prisma.SortOrder
+  policyNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  loginUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
   balance?: Prisma.SortOrder
@@ -466,6 +484,8 @@ export type SavingsAccountWhereUniqueInput = Prisma.AtLeast<{
   provider?: Prisma.StringFilter<"SavingsAccount"> | string
   planName?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
   policyLast4?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
+  policyNumber?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
+  loginUrl?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
   status?: Prisma.StringNullableFilter<"SavingsAccount"> | string | null
   currency?: Prisma.StringFilter<"SavingsAccount"> | string
   balance?: Prisma.FloatFilter<"SavingsAccount"> | number
@@ -497,6 +517,8 @@ export type SavingsAccountOrderByWithAggregationInput = {
   provider?: Prisma.SortOrder
   planName?: Prisma.SortOrderInput | Prisma.SortOrder
   policyLast4?: Prisma.SortOrderInput | Prisma.SortOrder
+  policyNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  loginUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
   balance?: Prisma.SortOrder
@@ -535,6 +557,8 @@ export type SavingsAccountScalarWhereWithAggregatesInput = {
   provider?: Prisma.StringWithAggregatesFilter<"SavingsAccount"> | string
   planName?: Prisma.StringNullableWithAggregatesFilter<"SavingsAccount"> | string | null
   policyLast4?: Prisma.StringNullableWithAggregatesFilter<"SavingsAccount"> | string | null
+  policyNumber?: Prisma.StringNullableWithAggregatesFilter<"SavingsAccount"> | string | null
+  loginUrl?: Prisma.StringNullableWithAggregatesFilter<"SavingsAccount"> | string | null
   status?: Prisma.StringNullableWithAggregatesFilter<"SavingsAccount"> | string | null
   currency?: Prisma.StringWithAggregatesFilter<"SavingsAccount"> | string
   balance?: Prisma.FloatWithAggregatesFilter<"SavingsAccount"> | number
@@ -565,6 +589,8 @@ export type SavingsAccountCreateInput = {
   provider: string
   planName?: string | null
   policyLast4?: string | null
+  policyNumber?: string | null
+  loginUrl?: string | null
   status?: string | null
   currency?: string
   balance?: number
@@ -596,6 +622,8 @@ export type SavingsAccountUncheckedCreateInput = {
   provider: string
   planName?: string | null
   policyLast4?: string | null
+  policyNumber?: string | null
+  loginUrl?: string | null
   status?: string | null
   currency?: string
   balance?: number
@@ -627,6 +655,8 @@ export type SavingsAccountUpdateInput = {
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   planName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   policyLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  policyNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   balance?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -658,6 +688,8 @@ export type SavingsAccountUncheckedUpdateInput = {
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   planName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   policyLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  policyNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   balance?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -689,6 +721,8 @@ export type SavingsAccountCreateManyInput = {
   provider: string
   planName?: string | null
   policyLast4?: string | null
+  policyNumber?: string | null
+  loginUrl?: string | null
   status?: string | null
   currency?: string
   balance?: number
@@ -719,6 +753,8 @@ export type SavingsAccountUpdateManyMutationInput = {
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   planName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   policyLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  policyNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   balance?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -749,6 +785,8 @@ export type SavingsAccountUncheckedUpdateManyInput = {
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   planName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   policyLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  policyNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   balance?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -779,6 +817,8 @@ export type SavingsAccountCountOrderByAggregateInput = {
   provider?: Prisma.SortOrder
   planName?: Prisma.SortOrder
   policyLast4?: Prisma.SortOrder
+  policyNumber?: Prisma.SortOrder
+  loginUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   balance?: Prisma.SortOrder
@@ -821,6 +861,8 @@ export type SavingsAccountMaxOrderByAggregateInput = {
   provider?: Prisma.SortOrder
   planName?: Prisma.SortOrder
   policyLast4?: Prisma.SortOrder
+  policyNumber?: Prisma.SortOrder
+  loginUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   balance?: Prisma.SortOrder
@@ -850,6 +892,8 @@ export type SavingsAccountMinOrderByAggregateInput = {
   provider?: Prisma.SortOrder
   planName?: Prisma.SortOrder
   policyLast4?: Prisma.SortOrder
+  policyNumber?: Prisma.SortOrder
+  loginUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   balance?: Prisma.SortOrder
@@ -910,6 +954,8 @@ export type SavingsAccountCreateWithoutSnapshotsInput = {
   provider: string
   planName?: string | null
   policyLast4?: string | null
+  policyNumber?: string | null
+  loginUrl?: string | null
   status?: string | null
   currency?: string
   balance?: number
@@ -940,6 +986,8 @@ export type SavingsAccountUncheckedCreateWithoutSnapshotsInput = {
   provider: string
   planName?: string | null
   policyLast4?: string | null
+  policyNumber?: string | null
+  loginUrl?: string | null
   status?: string | null
   currency?: string
   balance?: number
@@ -986,6 +1034,8 @@ export type SavingsAccountUpdateWithoutSnapshotsInput = {
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   planName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   policyLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  policyNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   balance?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1016,6 +1066,8 @@ export type SavingsAccountUncheckedUpdateWithoutSnapshotsInput = {
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   planName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   policyLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  policyNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   balance?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1077,6 +1129,8 @@ export type SavingsAccountSelect<ExtArgs extends runtime.Types.Extensions.Intern
   provider?: boolean
   planName?: boolean
   policyLast4?: boolean
+  policyNumber?: boolean
+  loginUrl?: boolean
   status?: boolean
   currency?: boolean
   balance?: boolean
@@ -1109,6 +1163,8 @@ export type SavingsAccountSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   provider?: boolean
   planName?: boolean
   policyLast4?: boolean
+  policyNumber?: boolean
+  loginUrl?: boolean
   status?: boolean
   currency?: boolean
   balance?: boolean
@@ -1139,6 +1195,8 @@ export type SavingsAccountSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   provider?: boolean
   planName?: boolean
   policyLast4?: boolean
+  policyNumber?: boolean
+  loginUrl?: boolean
   status?: boolean
   currency?: boolean
   balance?: boolean
@@ -1169,6 +1227,8 @@ export type SavingsAccountSelectScalar = {
   provider?: boolean
   planName?: boolean
   policyLast4?: boolean
+  policyNumber?: boolean
+  loginUrl?: boolean
   status?: boolean
   currency?: boolean
   balance?: boolean
@@ -1190,7 +1250,7 @@ export type SavingsAccountSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SavingsAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "owner" | "country" | "type" | "provider" | "planName" | "policyLast4" | "status" | "currency" | "balance" | "balanceAsOf" | "track" | "feeDepositPct" | "feeAccumulationPct" | "monthlyDepositEmployee" | "monthlyDepositEmployer" | "monthlyDepositSeverance" | "monthlyDepositTotal" | "insuredSalary" | "liquidityDate" | "projectedMonthlyPension" | "details" | "source" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["savingsAccount"]>
+export type SavingsAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "owner" | "country" | "type" | "provider" | "planName" | "policyLast4" | "policyNumber" | "loginUrl" | "status" | "currency" | "balance" | "balanceAsOf" | "track" | "feeDepositPct" | "feeAccumulationPct" | "monthlyDepositEmployee" | "monthlyDepositEmployer" | "monthlyDepositSeverance" | "monthlyDepositTotal" | "insuredSalary" | "liquidityDate" | "projectedMonthlyPension" | "details" | "source" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["savingsAccount"]>
 export type SavingsAccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   snapshots?: boolean | Prisma.SavingsAccount$snapshotsArgs<ExtArgs>
   _count?: boolean | Prisma.SavingsAccountCountOutputTypeDefaultArgs<ExtArgs>
@@ -1212,6 +1272,8 @@ export type $SavingsAccountPayload<ExtArgs extends runtime.Types.Extensions.Inte
     provider: string
     planName: string | null
     policyLast4: string | null
+    policyNumber: string | null
+    loginUrl: string | null
     status: string | null
     currency: string
     balance: number
@@ -1663,6 +1725,8 @@ export interface SavingsAccountFieldRefs {
   readonly provider: Prisma.FieldRef<"SavingsAccount", 'String'>
   readonly planName: Prisma.FieldRef<"SavingsAccount", 'String'>
   readonly policyLast4: Prisma.FieldRef<"SavingsAccount", 'String'>
+  readonly policyNumber: Prisma.FieldRef<"SavingsAccount", 'String'>
+  readonly loginUrl: Prisma.FieldRef<"SavingsAccount", 'String'>
   readonly status: Prisma.FieldRef<"SavingsAccount", 'String'>
   readonly currency: Prisma.FieldRef<"SavingsAccount", 'String'>
   readonly balance: Prisma.FieldRef<"SavingsAccount", 'Float'>

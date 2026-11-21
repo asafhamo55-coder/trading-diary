@@ -216,12 +216,6 @@ export function headerInfo(nw: NetWorth): HeaderInfo {
   };
 }
 
-export function fxSourceLabel(source: string): string {
-  if (source === "profile") return "your saved rate";
-  if (source === "env") return "configured rate";
-  return "default rate";
-}
-
 // ── Data gaps ──────────────────────────────────────────────────────
 
 export interface GapItem {

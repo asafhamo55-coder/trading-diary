@@ -21,6 +21,7 @@ import type { HouseholdProfileDTO } from "@/lib/savings-data";
 import { cn } from "@/lib/utils";
 import { api, errMsg } from "./api";
 import { fmtDate, memberName, numToField, parseNum } from "./format";
+import { useDisplayCurrency } from "@/components/ui/currency";
 import { ConfirmDialog, Notice, selectCls } from "./ui";
 import { useFlash } from "./useFlash";
 
@@ -230,6 +231,7 @@ export default function ProfileEditor({
   const [saving, setSaving] = React.useState(false);
   const [removing, setRemoving] = React.useState<MemberRow | null>(null);
   const { flash, node: flashNode } = useFlash();
+  const liveFx = useDisplayCurrency();
 
   const load = React.useCallback(async () => {
     if (preview) return;
@@ -486,7 +488,7 @@ export default function ProfileEditor({
             <Field label="Notes">
               <input
                 className={inputCls}
-                placeholder="e.g. Asaf more aggressive than Einat; keep 1 year of expenses in cash"
+                placeholder="e.g. Alex more aggressive than Dana; keep 1 year of expenses in cash"
                 value={form.riskNotes}
                 onChange={(e) => update({ riskNotes: e.target.value })}
               />
@@ -527,7 +529,7 @@ export default function ProfileEditor({
                 >
                   <div className="col-span-2 sm:col-span-1">
                     <Field label="What">
-                      <input className={inputCls} value={p.label} placeholder="e.g. Apartment for Yoav" onChange={(e) => updatePurchase(p.uid, { label: e.target.value })} />
+                      <input className={inputCls} value={p.label} placeholder="e.g. Apartment for Noa" onChange={(e) => updatePurchase(p.uid, { label: e.target.value })} />
                     </Field>
                   </div>
                   <Field label="Amount">
@@ -567,7 +569,7 @@ export default function ProfileEditor({
             <Field label="Plan">
               <textarea
                 className={cn(inputCls, "min-h-20 resize-y")}
-                placeholder="e.g. Return to Israel when Roni finishes high school"
+                placeholder="e.g. Return to Israel when Maya finishes high school"
                 value={form.relocationPlan}
                 onChange={(e) => update({ relocationPlan: e.target.value })}
               />
@@ -591,7 +593,7 @@ export default function ProfileEditor({
           <CardContent>
             <textarea
               className={cn(inputCls, "min-h-[8.5rem] resize-y")}
-              placeholder="e.g. Yoav: army until 2028 then Technion; Nadav: maybe US college 2028; Roni: undecided"
+              placeholder="e.g. Noa: army until 2028 then Technion; Eli: maybe US college 2028; Maya: undecided"
               value={form.childrenEducation}
               onChange={(e) => update({ childrenEducation: e.target.value })}
             />
@@ -608,7 +610,7 @@ export default function ProfileEditor({
           <Field label="Other goals">
             <textarea
               className={cn(inputCls, "min-h-28 resize-y")}
-              placeholder="e.g. Help parents; retire Einat early; sabbatical in 2029"
+              placeholder="e.g. Help parents; retire Dana early; sabbatical in 2029"
               value={form.otherGoals}
               onChange={(e) => update({ otherGoals: e.target.value })}
             />
@@ -628,8 +630,10 @@ export default function ProfileEditor({
         <CardHeader>
           <CardTitle as="h2">Exchange rate</CardTitle>
           <CardDescription>
-            Used to add ILS and USD balances together. Leave blank to use the server default
-            {` (${DEFAULT_USD_ILS_RATE} unless USD_ILS_RATE is set)`}.
+            Used to add ILS and USD balances together and for the $ / ₪ switch. Leave blank to use the live
+            Bank of Israel representative rate
+            {liveFx.source === "live" ? ` (now ${liveFx.rate.toFixed(3)} · ${liveFx.provenance})` : ""}, refreshed every
+            few hours; if that&apos;s unreachable, USD_ILS_RATE or {DEFAULT_USD_ILS_RATE} is used.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -638,7 +642,7 @@ export default function ProfileEditor({
               <input
                 className={cn(inputCls, "num")}
                 inputMode="decimal"
-                placeholder={String(DEFAULT_USD_ILS_RATE)}
+                placeholder={liveFx.source === "live" ? liveFx.rate.toFixed(3) : String(DEFAULT_USD_ILS_RATE)}
                 value={form.usdIlsRate}
                 onChange={(e) => update({ usdIlsRate: e.target.value })}
               />

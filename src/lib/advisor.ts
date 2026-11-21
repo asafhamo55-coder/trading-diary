@@ -16,6 +16,7 @@ import {
   type NetWorthPayload,
 } from "./savings";
 import type { HomeCashFlowSummary, HouseholdProfileDTO } from "./savings-data";
+import { fxProvenance } from "./currency";
 
 export const ADVISOR_MODEL = "claude-fable-5-1";
 // Fable 5.1 list pricing, USD per million tokens.
@@ -175,7 +176,7 @@ export function buildAdvisorSnapshot(input: {
   const members: HouseholdMember[] = profile.members ?? [];
   const gaps = [...nw.dataGaps];
   const assumptions = [
-    `FX: 1 USD = ${nw.fx.usdIls} ILS (source: ${nw.fx.source}).`,
+    `FX: 1 USD = ${nw.fx.usdIls} ILS (source: ${fxProvenance(nw.fx)}).`,
     `Retirement projections use a ${DEFAULT_REAL_RETURN_PCT}% real annual return, current monthly deposits held flat in real terms, and a 4% withdrawal rate for the combined income estimate.`,
     "Fee drag compares each account's fees to planning benchmarks over 10 years at a 5% gross return.",
     "Property values are in USD; unknown mortgages are treated as 0.",

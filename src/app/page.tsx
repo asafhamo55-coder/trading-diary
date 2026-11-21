@@ -10,6 +10,7 @@ import { Suspense } from "react";
 import HubClient from "@/components/home/HubClient";
 import HouseholdSection from "@/components/dashboard/household/HouseholdSection";
 import HouseholdSkeleton from "@/components/dashboard/household/HouseholdSkeleton";
+import CurrencyBoundary from "@/components/ui/currency-boundary";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -134,6 +135,7 @@ export default async function HomeEquityPage({
   ];
 
   return (
+    <CurrencyBoundary>
     <HubClient
       monthly={monthly}
       sources={sources}
@@ -150,5 +152,6 @@ export default async function HomeEquityPage({
         <HouseholdSection />
       </Suspense>
     </HubClient>
+    </CurrencyBoundary>
   );
 }

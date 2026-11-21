@@ -1,18 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import { ArrowUpRight, TrendingUp, Lock, BarChart3, CalendarDays, CalendarClock } from "lucide-react";
 import EChart from "@/components/charts/EChart";
 import type { EChartsCoreOption } from "echarts/core";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useDisplayCurrency } from "@/components/ui/currency";
 import YearPicker from "@/components/layout/YearPicker";
 import RecommendationList from "@/components/home/RecommendationList";
 import CoPilotChat from "@/components/home/CoPilotChat";
 import { Sparkles, PiggyBank } from "lucide-react";
 import type { EquitySummary } from "@/lib/equity-coach";
 import type { Recommendation } from "@/lib/home-coach";
-import HubShell from "@/components/home/HubShell";
+import AppNavShell from "@/components/layout/AppNavShell";
 import { Kpi } from "@/components/ui/stat-tile";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useThemeTokens } from "@/lib/use-theme-tokens";
@@ -41,11 +42,15 @@ function net(r: RevExp): number {
 }
 
 // Compact currency for the dense monthly grid: no cents, sign-prefixed.
-function fmtCompact(value: number): string {
+function fmtCompact(value: number, symbol = "$"): string {
   const rounded = Math.round(value);
   if (rounded === 0) return "—";
   const sign = rounded > 0 ? "+" : "−";
-  return `${sign}$${Math.abs(rounded).toLocaleString("en-US")}`;
+  return `${sign}${symbol}${Math.abs(rounded).toLocaleString("en-US")}`;
+}
+
+function scaleRx(r: RevExp, k: number): RevExp {
+  return k === 1 ? r : { revenue: r.revenue * k, expense: r.expense * k };
 }
 
 interface SourceRow {
@@ -82,15 +87,15 @@ const EQUITY_SUGGESTIONS = [
 ];
 
 export default function HubClient({
-  monthly,
-  sources,
+  monthly: monthlyUsd,
+  sources: sourcesUsd,
   year,
   availableYears,
-  summary,
+  summary: summaryUsd,
   recommendations,
   aiConfigured,
   hasData,
-  mtd,
+  mtd: mtdUsd,
   children,
 }: {
   children?: React.ReactNode;
@@ -104,6 +109,35 @@ export default function HubClient({
   hasData: boolean;
   mtd: MtdData;
 }) {
+  // Cash-flow figures arrive in USD; scale them once into the display currency.
+  const { toDisplay, formatDisplay, symbol } = useDisplayCurrency();
+  const k = toDisplay(1, "USD");
+  const formatCurrency = useCallback((v: number) => formatDisplay(v, { digits: 2, fixed: true }), [formatDisplay]);
+  const monthly = useMemo(
+    () =>
+      monthlyUsd.map((m) => ({
+        ...m,
+        trade: scaleRx(m.trade, k),
+        properties: scaleRx(m.properties, k),
+        home: scaleRx(m.home, k),
+      })),
+    [monthlyUsd, k]
+  );
+  const sources = useMemo(() => sourcesUsd.map((s) => ({ ...s, total: s.total * k })), [sourcesUsd, k]);
+  const mtd = useMemo(
+    () => ({ ...mtdUsd, trade: scaleRx(mtdUsd.trade, k), properties: scaleRx(mtdUsd.properties, k), home: scaleRx(mtdUsd.home, k) }),
+    [mtdUsd, k]
+  );
+  const summary = useMemo(
+    () => ({
+      ...summaryUsd,
+      totalIncome: summaryUsd.totalIncome * k,
+      totalExpense: summaryUsd.totalExpense * k,
+      net: summaryUsd.net * k,
+      monthlyNet: summaryUsd.monthlyNet * k,
+    }),
+    [summaryUsd, k]
+  );
   const grandTotal = sources.reduce((sum, s) => sum + s.total, 0);
 
   const mtdNet = net(mtd.trade) + net(mtd.properties) + net(mtd.home);
@@ -198,7 +232,7 @@ export default function HubClient({
           color: t.muted,
           fontSize: 11,
           formatter: (val: number) =>
-            val === 0 ? "0" : `$${Math.round(val / 100) / 10}k`,
+            val === 0 ? "0" : `${symbol}${Math.round(val / 100) / 10}k`,
         },
       },
       series: [
@@ -216,10 +250,10 @@ export default function HubClient({
         },
       ],
     };
-  }, [monthly, cumulative, t]);
+  }, [monthly, cumulative, t, formatCurrency, symbol]);
 
   return (
-    <HubShell>
+    <AppNavShell>
     <div className="mx-auto w-full max-w-7xl space-y-6 md:space-y-8">
       {children}
 
@@ -509,7 +543,7 @@ export default function HubClient({
                           : "text-[var(--muted-foreground)]"
                     )}
                   >
-                    {fmtCompact(monthNet)}
+                    {fmtCompact(monthNet, symbol)}
                   </span>
                 </div>
                 <div className="space-y-2">
@@ -529,10 +563,10 @@ export default function HubClient({
                         </span>
                         <span className="flex items-center gap-2 font-data shrink-0 tabular-nums">
                           <span className="text-success">
-                            {rx.revenue ? `$${Math.round(rx.revenue).toLocaleString("en-US")}` : "—"}
+                            {rx.revenue ? `${symbol}${Math.round(rx.revenue).toLocaleString("en-US")}` : "—"}
                           </span>
                           <span className="text-danger">
-                            {rx.expense ? `−$${Math.round(rx.expense).toLocaleString("en-US")}` : "—"}
+                            {rx.expense ? `−${symbol}${Math.round(rx.expense).toLocaleString("en-US")}` : "—"}
                           </span>
                         </span>
                       </div>
@@ -621,7 +655,7 @@ export default function HubClient({
       )}
       </section>
     </div>
-    </HubShell>
+    </AppNavShell>
   );
 }
 
@@ -638,12 +672,13 @@ function EquityTile({
   icon: React.ReactNode;
   signed?: boolean;
 }) {
+  const { formatDisplay } = useDisplayCurrency();
   return (
     <Kpi
       label={label}
       icon={icon}
       valueTone={color === "text-danger" ? "negative" : "positive"}
-      value={`${signed && value >= 0 ? "+" : ""}${formatCurrency(value)}`}
+      value={`${signed && value >= 0 ? "+" : ""}${formatDisplay(value, { digits: 2, fixed: true })}`}
     />
   );
 }

@@ -25,6 +25,7 @@ import {
   type TradeEquityLite,
 } from "./savings";
 import { mapSavingsImport } from "./savings-import";
+import { getLiveUsdIls } from "./fx-server";
 import type {
   CreateSavingsAccountInput,
   HouseholdBundle,
@@ -85,6 +86,8 @@ export function serializeSavingsAccount(r: SavingsRow): SavingsAccountLite {
     provider: r.provider,
     planName: r.planName,
     policyLast4: r.policyLast4,
+    policyNumber: r.policyNumber,
+    loginUrl: r.loginUrl,
     status: r.status,
     currency: r.currency,
     balance: r.balance,
@@ -153,6 +156,8 @@ export async function createSavingsAccount(data: CreateSavingsAccountInput): Pro
         provider: data.provider.trim(),
         planName: data.planName ?? null,
         policyLast4: policyLast4(data.policyNumber ?? null),
+        policyNumber: data.policyNumber?.trim() || null,
+        loginUrl: data.loginUrl ?? null,
         status: data.status ?? null,
         currency: data.currency,
         balance: data.balance,
@@ -186,7 +191,7 @@ export async function updateSavingsAccount(
     if (!existing) return null;
     const patch: Prisma.SavingsAccountUpdateInput = {};
     const simple = [
-      "owner", "country", "type", "planName", "status", "currency", "balance", "track",
+      "owner", "country", "type", "planName", "loginUrl", "status", "currency", "balance", "track",
       "feeDepositPct", "feeAccumulationPct", "monthlyDepositEmployee", "monthlyDepositEmployer",
       "monthlyDepositSeverance", "monthlyDepositTotal", "insuredSalary", "projectedMonthlyPension",
     ] as const;
@@ -194,7 +199,10 @@ export async function updateSavingsAccount(
       if (data[k] !== undefined) (patch as Record<string, unknown>)[k] = data[k];
     }
     if (data.provider !== undefined) patch.provider = data.provider.trim();
-    if (data.policyNumber !== undefined) patch.policyLast4 = policyLast4(data.policyNumber);
+    if (data.policyNumber !== undefined) {
+      patch.policyLast4 = policyLast4(data.policyNumber);
+      patch.policyNumber = data.policyNumber?.trim() || null;
+    }
     if (data.balanceAsOf !== undefined) patch.balanceAsOf = dateOrNull(data.balanceAsOf);
     if (data.liquidityDate !== undefined) patch.liquidityDate = dateOrNull(data.liquidityDate);
     if (data.details !== undefined) patch.details = json(data.details);
@@ -289,9 +297,27 @@ export async function updateProfile(data: z.infer<typeof updateProfileSchema>): 
   return getProfile();
 }
 
+/**
+ * Profile override → live (Bank of Israel, then Frankfurter; cached ~6h) →
+ * USD_ILS_RATE env → default. The live quote is only fetched when there's no
+ * override, and a fetch failure just falls through.
+ */
 export async function getFxRate(profile?: HouseholdProfileDTO): Promise<FxRate> {
   const p = profile ?? (await getProfile());
-  return resolveUsdIlsRate({ profileOverride: p.usdIlsRate, envValue: process.env.USD_ILS_RATE ?? null });
+  const live = p.usdIlsRate && p.usdIlsRate > 0 ? null : await getLiveUsdIls();
+  return resolveUsdIlsRate({ profileOverride: p.usdIlsRate, live, envValue: process.env.USD_ILS_RATE ?? null });
+}
+
+/** Like getFxRate, but survives a DB outage (skips the profile override). */
+export async function getFxRateSafe(): Promise<FxRate> {
+  let profile: HouseholdProfileDTO | null = null;
+  try {
+    profile = await getProfile();
+  } catch (e) {
+    console.error("FX: profile unavailable, ignoring override", e instanceof Error ? e.message : e);
+  }
+  if (profile) return getFxRate(profile);
+  return resolveUsdIlsRate({ live: await getLiveUsdIls(), envValue: process.env.USD_ILS_RATE ?? null });
 }
 
 // ── Benefits ───────────────────────────────────────────────────────
@@ -543,6 +569,7 @@ export async function importSavingsDoc(doc: SavingsImportDoc): Promise<ImportRes
       provider: a.provider,
       planName: a.planName,
       policyLast4: a.policyLast4,
+      policyNumber: a.policyNumber,
       status: a.status,
       currency: a.currency,
       track: a.track,

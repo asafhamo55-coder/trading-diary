@@ -12,6 +12,7 @@ import {
 } from "@/lib/property";
 import { todayInEastern } from "@/lib/utils";
 import PropertyDetailClient from "@/components/properties/PropertyDetailClient";
+import { PageCrumbs } from "@/components/layout/AppNavShell";
 
 export const dynamic = "force-dynamic";
 
@@ -51,38 +52,41 @@ export default async function PropertyDetailPage({
   const cash = buildingCashForYear(await getProperties(), year).get(property.id) ?? null;
 
   return (
-    <PropertyDetailClient
-      property={{
-        id: property.id,
-        title: propertyTitle(property),
-        address: property.address,
-        street: property.street,
-        unit: property.unit,
-        city: property.city,
-        state: property.state,
-        zip: property.zip,
-        purchasePrice: property.purchasePrice,
-        downPayment: property.downPayment,
-        purchaseDate: property.purchaseDate,
-        currentValue: property.currentValue,
-        valueAsOf: property.valueAsOf,
-        mortgageBalance: property.mortgageBalance,
-        mortgageAsOf: property.mortgageAsOf,
-        notes: property.notes,
-        archivedAt: property.archivedAt,
-      }}
-      year={year}
-      availableYears={availableYears}
-      summary={summary}
-      taxSummary={taxSummary}
-      prevSummary={prevSummary}
-      transactions={yearTx}
-      tenants={property.tenants}
-      today={today}
-      elapsed={elapsed}
-      occupancy={occ}
-      yieldPct={yieldValue}
-      cash={cash}
-    />
+    <>
+      <PageCrumbs items={[{ label: propertyTitle(property) }]} />
+      <PropertyDetailClient
+        property={{
+          id: property.id,
+          title: propertyTitle(property),
+          address: property.address,
+          street: property.street,
+          unit: property.unit,
+          city: property.city,
+          state: property.state,
+          zip: property.zip,
+          purchasePrice: property.purchasePrice,
+          downPayment: property.downPayment,
+          purchaseDate: property.purchaseDate,
+          currentValue: property.currentValue,
+          valueAsOf: property.valueAsOf,
+          mortgageBalance: property.mortgageBalance,
+          mortgageAsOf: property.mortgageAsOf,
+          notes: property.notes,
+          archivedAt: property.archivedAt,
+        }}
+        year={year}
+        availableYears={availableYears}
+        summary={summary}
+        taxSummary={taxSummary}
+        prevSummary={prevSummary}
+        transactions={yearTx}
+        tenants={property.tenants}
+        today={today}
+        elapsed={elapsed}
+        occupancy={occ}
+        yieldPct={yieldValue}
+        cash={cash}
+      />
+    </>
   );
 }

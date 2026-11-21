@@ -37,13 +37,11 @@ describe("mapSavingsImport", () => {
     ]);
   });
 
-  it("stores only the last 4 digits of policy numbers, never the full number", () => {
+  it("keeps the full policy number and derives the last-4 match key", () => {
     const m = mapped();
     expect(m.accounts[0].policyLast4).toBe("6789");
+    expect(m.accounts[0].policyNumber).toBe("PN-0001-2345-6789");
     expect(m.accounts[2].policyLast4).toBe("0000");
-    const serialized = JSON.stringify(m);
-    expect(serialized).not.toContain("PN-0001-2345-6789");
-    expect(serialized).not.toContain("12340000");
   });
 
   it("maps balances, fees, deposits and the per-person statement date (month end)", () => {

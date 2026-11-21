@@ -1,15 +1,11 @@
-import { Building2 } from "lucide-react";
-import AppBar from "@/components/layout/AppBar";
+import AppNavShell from "@/components/layout/AppNavShell";
+import CurrencyBoundary from "@/components/ui/currency-boundary";
 
-export default function PropertiesLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+/** Properties pages share the app shell; they bring their own page padding. */
+export default function PropertiesLayout({ children }: LayoutProps<"/properties">) {
   return (
-    <div className="flex flex-col min-h-screen">
-      <AppBar title="Properties" icon={Building2} accent="#FFB547" />
-      <main className="flex-1">{children}</main>
-    </div>
+    <CurrencyBoundary>
+      <AppNavShell flush>{children}</AppNavShell>
+    </CurrencyBoundary>
   );
 }

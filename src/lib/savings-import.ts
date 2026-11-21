@@ -21,6 +21,7 @@ export interface ImportedAccount {
   provider: string;
   planName: string | null;
   policyLast4: string | null;
+  policyNumber: string | null;
   status: string | null;
   currency: Currency;
   balance: number;
@@ -190,6 +191,7 @@ export function mapSavingsImport(doc: SavingsImportDoc): MappedImport {
         provider,
         planName: p.planName ?? null,
         policyLast4: last4,
+        policyNumber: p.policyNumber != null ? String(p.policyNumber).trim() || null : null,
         status: p.status ?? null,
         currency,
         balance: p.balance ?? 0,

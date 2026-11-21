@@ -139,28 +139,38 @@ function monthsBetween(from: Date, to: Date): number {
 // ── FX ─────────────────────────────────────────────────────────────
 
 /**
- * Fallback ILS-per-USD rate when neither the profile override nor the
- * USD_ILS_RATE env var is set.
- * TODO: replace with a live/daily rate source (e.g. Bank of Israel
- * representative rate API) and persist it with the snapshot date.
+ * Fallback ILS-per-USD rate when no profile override, live quote or
+ * USD_ILS_RATE env var is available.
  */
 export const DEFAULT_USD_ILS_RATE = 3.7;
 
+export type FxSource = "profile" | "live" | "env" | "default";
+
 export interface FxRate {
   usdIls: number; // ILS per 1 USD
-  source: "profile" | "env" | "default";
+  source: FxSource;
+  /** Date the rate applies to (YYYY-MM-DD), when known — live quotes only. */
+  asOf?: string | null;
+  /** Live provider ("boi" = Bank of Israel representative rate, "frankfurter" = ECB). */
+  provider?: "boi" | "frankfurter" | null;
 }
 
+/** Resolution order: profile override → live quote → env → default. */
 export function resolveUsdIlsRate(opts: {
   profileOverride?: number | null;
+  live?: { usdIls: number; asOf?: string | null; provider?: "boi" | "frankfurter" | null } | null;
   envValue?: string | null;
 }): FxRate {
   if (opts.profileOverride && opts.profileOverride > 0) {
-    return { usdIls: opts.profileOverride, source: "profile" };
+    return { usdIls: opts.profileOverride, source: "profile", asOf: null, provider: null };
+  }
+  const live = opts.live;
+  if (live && Number.isFinite(live.usdIls) && live.usdIls > 0) {
+    return { usdIls: live.usdIls, source: "live", asOf: live.asOf ?? null, provider: live.provider ?? null };
   }
   const env = opts.envValue != null ? Number(opts.envValue) : NaN;
-  if (Number.isFinite(env) && env > 0) return { usdIls: env, source: "env" };
-  return { usdIls: DEFAULT_USD_ILS_RATE, source: "default" };
+  if (Number.isFinite(env) && env > 0) return { usdIls: env, source: "env", asOf: null, provider: null };
+  return { usdIls: DEFAULT_USD_ILS_RATE, source: "default", asOf: null, provider: null };
 }
 
 export function convert(amount: number, from: Currency, to: Currency, fx: FxRate): number {
@@ -431,6 +441,8 @@ export interface SavingsAccountLite {
   provider: string;
   planName?: string | null;
   policyLast4?: string | null;
+  policyNumber?: string | null;
+  loginUrl?: string | null;
   status?: string | null;
   currency: string;
   balance: number;

@@ -45,6 +45,14 @@ export async function ensureSavingsSchema(): Promise<void> {
   await prisma.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS "SavingsAccount_accountId_idx" ON "SavingsAccount"("accountId")`
   );
+  // Full policy / account number (the user opted in; policyLast4 stays the match key).
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "SavingsAccount" ADD COLUMN IF NOT EXISTS "policyNumber" TEXT`
+  );
+  // Provider sign-in page (falls back to provider-links.ts defaults when null).
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "SavingsAccount" ADD COLUMN IF NOT EXISTS "loginUrl" TEXT`
+  );
   await prisma.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS "SavingsAccount_accountId_owner_provider_type_idx" ON "SavingsAccount"("accountId", "owner", "provider", "type")`
   );

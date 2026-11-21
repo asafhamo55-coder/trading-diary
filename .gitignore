@@ -53,3 +53,4 @@ next-env.d.ts
 
 # Extracted personal financial data — load via /savings/import, never commit
 /private-data/
+/*.pdf

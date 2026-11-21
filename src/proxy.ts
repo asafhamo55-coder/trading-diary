@@ -10,6 +10,10 @@ const PUBLIC_PATHS = [
   "/api/trades/ingest-email",
   // Vercel Cron keep-alive — guarded by CRON_SECRET inside the route.
   "/api/cron/keepalive",
+  // Daily Claude Code advisor routine — bearer SAVINGS_INGEST_TOKEN, checked in each route.
+  "/api/savings/advisor/context",
+  "/api/savings/advisor/ingest",
+  "/api/savings/import", // cookie OR bearer SAVINGS_INGEST_TOKEN, enforced in the route
 ];
 
 export async function proxy(req: NextRequest) {

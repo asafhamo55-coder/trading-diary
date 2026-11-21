@@ -19,7 +19,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
-import { fmtRelative, fmtUsd, fmtUsdCompact } from "./format";
+import { fmtRelative } from "./format";
+import { useDisplayCurrency } from "@/components/ui/currency";
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 } as const;
 const PRIORITY_VARIANT = { high: "danger", medium: "warning", low: "neutral" } as const;
@@ -277,6 +278,7 @@ function ReportBody({ output, ownerName }: { output: AdvisorOutput; ownerName: (
   const [showAll, setShowAll] = useState(false);
   const visible = showAll ? recs : recs.slice(0, 6);
   const totalImpact = recs.reduce((s, r) => s + (r.estimatedImpactUsdPerYear ?? 0), 0);
+  const { money } = useDisplayCurrency();
   const counts = { high: 0, medium: 0, low: 0 };
   for (const r of recs) counts[r.priority]++;
 
@@ -300,7 +302,7 @@ function ReportBody({ output, ownerName }: { output: AdvisorOutput; ownerName: (
           </div>
           <div>
             <dt className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">Est. / yr</dt>
-            <dd className="num text-lg font-semibold text-success">{totalImpact > 0 ? fmtUsdCompact(totalImpact) : "—"}</dd>
+            <dd className="num text-lg font-semibold text-success">{totalImpact > 0 ? money(totalImpact, "USD", { compact: true }) : "—"}</dd>
           </div>
         </dl>
       </div>
@@ -371,6 +373,7 @@ function RecommendationItem({
   ownerName: (k: string) => string;
 }) {
   const household = rec.owner === "household" || rec.owner === "joint";
+  const { money } = useDisplayCurrency();
   return (
     <li className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-surface p-4">
       <div className="flex items-start gap-3">
@@ -395,7 +398,7 @@ function RecommendationItem({
         </div>
         {rec.estimatedImpactUsdPerYear ? (
           <div className="shrink-0 text-right">
-            <p className="num text-sm font-semibold text-success">+{fmtUsd(rec.estimatedImpactUsdPerYear)}</p>
+            <p className="num text-sm font-semibold text-success">+{money(rec.estimatedImpactUsdPerYear)}</p>
             <p className="text-2xs text-muted-foreground">per year</p>
           </div>
         ) : null}

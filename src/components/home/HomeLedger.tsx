@@ -383,7 +383,7 @@ export default function HomeLedger({
 
       {/* Sticky save bar */}
       {pending.size > 0 && (
-        <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom))] md:bottom-3 mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#00D68F]/40 bg-[var(--card)]/95 backdrop-blur-xl px-4 py-3 shadow-lg ring-1 ring-[#00D68F]/10">
+        <div className="sticky bottom-[calc(0.75rem+env(safe-area-inset-bottom))] md:bottom-3 mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#00D68F]/40 bg-[var(--card)]/95 backdrop-blur-xl px-4 py-3 shadow-lg ring-1 ring-[#00D68F]/10">
           <span className="text-sm text-[var(--foreground)]">
             {saveError ? (
               <span className="flex items-center gap-1.5 text-[#FF4D6A]">{saveError}</span>

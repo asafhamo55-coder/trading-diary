@@ -41,6 +41,8 @@ import { AccountCard } from "./AccountCard";
 import { AccountDrawer } from "./AccountDrawer";
 import { fmtMonth, memberName, money, typeLabel, typeLabelHe, typeOrder } from "./format";
 import { He, Notice, Sparkline } from "./ui";
+import { useDisplayCurrency } from "@/components/ui/currency";
+import { fxProvenance } from "@/lib/currency";
 import { useFlash } from "./useFlash";
 
 type Snap = { asOf: string; balance: number };
@@ -78,6 +80,7 @@ function buildTabs(members: HouseholdMember[], accounts: { owner: string }[]): P
 export default function SavingsOverview({ initial }: { initial?: OverviewData }) {
   const preview = !!initial;
   const [data, setData] = React.useState<OverviewData | null>(initial ?? null);
+  const { money: dm, isForeign } = useDisplayCurrency();
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(!initial);
   const [tab, setTab] = React.useState("household");
@@ -173,9 +176,9 @@ export default function SavingsOverview({ initial }: { initial?: OverviewData })
         onAdd={() => setDrawer({ id: null, nonce: Date.now() })}
         meta={
           empty ? null : (
-            <Badge variant="neutral" title={`Rate source: ${fx.source}`}>
+            <Badge variant="neutral" title={`Rate source: ${fxProvenance(fx)}`}>
               1 USD = {money(fx.usdIls, "ILS", { digits: 2 })}
-              {fx.source === "default" ? " (default)" : fx.source === "profile" ? " (your override)" : ""}
+              <span className="font-normal text-muted-foreground"> · {fxProvenance(fx)}</span>
             </Badge>
           )
         }
@@ -256,7 +259,12 @@ export default function SavingsOverview({ initial }: { initial?: OverviewData })
                       {a.policyLast4 ? ` · ••${a.policyLast4}` : ""}
                     </span>
                   </span>
-                  <span className="num text-foreground-secondary">{money(a.balance, normalizeCurrency(a.currency))}</span>
+                  <span className="num text-foreground-secondary">
+                    {dm(a.balance, normalizeCurrency(a.currency))}
+                    {isForeign(a.currency) ? (
+                      <span className="ml-1.5 text-xs text-muted-foreground">{money(a.balance, normalizeCurrency(a.currency))}</span>
+                    ) : null}
+                  </span>
                   <Button size="xs" variant="secondary" onClick={() => setDrawer({ id: a.id, nonce: Date.now() })}>
                     Open
                   </Button>
@@ -327,6 +335,7 @@ function PersonPanel({
   onAdd: () => void;
 }) {
   const fx = netWorth.fx;
+  const { money: dm, currency } = useDisplayCurrency();
   const now = React.useMemo(() => new Date(`${netWorth.asOf}T12:00:00Z`), [netWorth.asOf]);
   const all = netWorth.savings.accounts;
   const accounts = tab.owners ? all.filter((a) => tab.owners!.includes(a.owner)) : all;
@@ -360,14 +369,14 @@ function PersonPanel({
         <Kpi
           label="Savings"
           icon={<Wallet />}
-          value={money(totalUsd, "USD")}
-          hint={`≈ ${money(totalIls, "ILS")} · ${accounts.length} account${accounts.length === 1 ? "" : "s"}`}
+          value={currency === "ILS" ? money(totalIls, "ILS") : money(totalUsd, "USD")}
+          hint={`≈ ${currency === "ILS" ? money(totalUsd, "USD") : money(totalIls, "ILS")} · ${accounts.length} account${accounts.length === 1 ? "" : "s"}`}
         />
-        <Kpi label="Monthly deposits" icon={<Landmark />} value={money(depositsUsd, "USD")} hint="all sources, per month" />
+        <Kpi label="Monthly deposits" icon={<Landmark />} value={dm(depositsUsd, "USD")} hint="all sources, per month" />
         <Kpi
           label="Annual fees"
           icon={<Receipt />}
-          value={money(feesUsd, "USD")}
+          value={dm(feesUsd, "USD")}
           hint={
             missingFees > 0
               ? `${missingFees} account${missingFees === 1 ? "" : "s"} missing fees`
@@ -379,7 +388,7 @@ function PersonPanel({
         <Kpi
           label="10-yr fee drag"
           icon={<TrendingDown />}
-          value={money(dragUsd, "USD")}
+          value={dm(dragUsd, "USD")}
           valueTone={dragUsd > 0 ? "negative" : "default"}
           hint="vs benchmark fees"
         />
@@ -415,7 +424,7 @@ function PersonPanel({
                 </h3>
                 <He className="text-sm">{typeLabelHe(type)}</He>
                 <span className="ml-auto num text-sm text-muted-foreground">
-                  {list.length} · <span className="font-medium text-foreground">{money(groupUsd, "USD")}</span>
+                  {list.length} · <span className="font-medium text-foreground">{dm(groupUsd, "USD")}</span>
                 </span>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
@@ -423,7 +432,6 @@ function PersonPanel({
                   <AccountCard
                     key={a.id}
                     a={a}
-                    fx={fx}
                     now={now}
                     history={history[a.id]?.map((s) => s.balance)}
                     ownerName={showOwner ? memberName(a.owner, members) : undefined}
@@ -446,6 +454,7 @@ function HouseholdInsights({ netWorth, members }: { netWorth: NetWorthResponse; 
   const gaps = netWorth.dataGaps.filter((g) => /fees missing|balance/i.test(g));
   const countries = Object.entries(netWorth.byCountry);
   const total = netWorth.savings.totalUsd || 1;
+  const { money: dm } = useDisplayCurrency();
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <Card>
@@ -466,7 +475,7 @@ function HouseholdInsights({ netWorth, members }: { netWorth: NetWorthResponse; 
               <li key={o}>
                 <div className="flex items-baseline justify-between gap-2 text-sm">
                   <span className="text-foreground-secondary">{memberName(o, members)}</span>
-                  <span className="num font-medium text-foreground">{money(v, "USD")}</span>
+                  <span className="num font-medium text-foreground">{dm(v, "USD")}</span>
                 </div>
                 <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-subtle" aria-hidden>
                   <div className="h-full rounded-full bg-primary" style={{ width: `${(v / max) * 100}%` }} />
@@ -491,9 +500,9 @@ function HouseholdInsights({ netWorth, members }: { netWorth: NetWorthResponse; 
             <>
               <Sparkline values={hist.map((h) => h.savingsUsd)} width={320} height={84} className="h-[84px] w-full" />
               <div className="mt-2 flex justify-between text-xs text-muted-foreground num">
-                <span>{money(hist[0].savingsUsd, "USD", { compact: true })}</span>
+                <span>{dm(hist[0].savingsUsd, "USD", { compact: true })}</span>
                 <span className="font-medium text-foreground">
-                  {money(hist[hist.length - 1].savingsUsd, "USD", { compact: true })}
+                  {dm(hist[hist.length - 1].savingsUsd, "USD", { compact: true })}
                 </span>
               </div>
             </>
@@ -542,6 +551,7 @@ function RetirementStrip({
   now: Date;
 }) {
   const m = members.find((x) => x.key === memberKey);
+  const { money: dm } = useDisplayCurrency();
   if (!m) {
     return (
       <Notice tone="warning" title="Not in the household profile yet">
@@ -574,7 +584,7 @@ function RetirementStrip({
         </div>
         <div>
           <dt className="text-xs text-muted-foreground">Projected pension (IL)</dt>
-          <dd className="num text-lg font-semibold text-foreground">{pensionIls > 0 ? `${money(pensionIls, "ILS")}/mo` : "—"}</dd>
+          <dd className="num text-lg font-semibold text-foreground">{pensionIls > 0 ? `${dm(pensionIls, "ILS")}/mo` : "—"}</dd>
         </div>
       </dl>
       {t.age == null || t.targetAgeAssumed ? (
@@ -591,6 +601,7 @@ function RetirementStrip({
 }
 
 function KidsStrip({ members, netWorth, now }: { members: HouseholdMember[]; netWorth: NetWorthResponse; now: Date }) {
+  const { money: dm } = useDisplayCurrency();
   const ms = childMilestones(
     members,
     netWorth.savings.accounts.map((a) => ({ owner: a.owner, type: a.type, balanceUsd: a.balanceUsd })),
@@ -619,7 +630,7 @@ function KidsStrip({ members, netWorth, now }: { members: HouseholdMember[]; net
                 חיסכון לכל ילד
               </dt>
               <dd className="num text-foreground">
-                {c.hasSavingsForEveryChildAccount ? money(c.savingsForEveryChildBalanceUsd, "USD") : (
+                {c.hasSavingsForEveryChildAccount ? dm(c.savingsForEveryChildBalanceUsd, "USD") : (
                   <span className="text-warning">none</span>
                 )}
               </dd>

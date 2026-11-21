@@ -398,6 +398,8 @@ model SavingsAccount {
   provider                String
   planName                String?
   policyLast4             String?   // only the last 4 digits of the policy/account number are stored
+  policyNumber            String?   // full policy/account number (user opted in)
+  loginUrl                String?   // provider sign-in page; null = provider default
   status                  String?
   currency                String    @default("ILS") // "ILS" | "USD"
   balance                 Float     @default(0)

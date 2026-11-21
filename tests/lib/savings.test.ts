@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_RETIREMENT_AGE,
   DEFAULT_USD_ILS_RATE,
@@ -21,6 +21,8 @@ import {
   type HouseholdMember,
   type SavingsAccountLite,
 } from "../../src/lib/savings";
+import { fetchLiveUsdIls, parseBoiCsv, parseFrankfurter } from "../../src/lib/fx";
+import { convertTo, formatCurrency, fxProvenance, parseDisplayCurrency } from "../../src/lib/currency";
 
 const fx: FxRate = { usdIls: 4, source: "profile" };
 const asOf = new Date(Date.UTC(2026, 10, 21)); // 2026-11-21
@@ -58,16 +60,112 @@ describe("dates", () => {
 });
 
 describe("FX", () => {
-  it("prefers profile override, then env, then the default constant", () => {
-    expect(resolveUsdIlsRate({ profileOverride: 3.5, envValue: "3.9" })).toEqual({ usdIls: 3.5, source: "profile" });
-    expect(resolveUsdIlsRate({ profileOverride: null, envValue: "3.9" })).toEqual({ usdIls: 3.9, source: "env" });
-    expect(resolveUsdIlsRate({ envValue: "abc" })).toEqual({ usdIls: DEFAULT_USD_ILS_RATE, source: "default" });
+  const live = { usdIls: 3.326, asOf: "2026-11-20", provider: "boi" as const };
+
+  it("resolves profile override → live → env → default", () => {
+    expect(resolveUsdIlsRate({ profileOverride: 3.5, live, envValue: "3.9" })).toEqual({
+      usdIls: 3.5,
+      source: "profile",
+      asOf: null,
+      provider: null,
+    });
+    expect(resolveUsdIlsRate({ profileOverride: null, live, envValue: "3.9" })).toEqual({
+      usdIls: 3.326,
+      source: "live",
+      asOf: "2026-11-20",
+      provider: "boi",
+    });
+    expect(resolveUsdIlsRate({ profileOverride: null, live: null, envValue: "3.9" })).toEqual({
+      usdIls: 3.9,
+      source: "env",
+      asOf: null,
+      provider: null,
+    });
+    expect(resolveUsdIlsRate({ envValue: "abc" })).toEqual({
+      usdIls: DEFAULT_USD_ILS_RATE,
+      source: "default",
+      asOf: null,
+      provider: null,
+    });
+  });
+
+  it("ignores a zero / NaN live quote", () => {
+    expect(resolveUsdIlsRate({ live: { usdIls: 0 }, envValue: "3.9" }).source).toBe("env");
+    expect(resolveUsdIlsRate({ live: { usdIls: Number.NaN } }).source).toBe("default");
   });
 
   it("converts both ways", () => {
     expect(convert(400, "ILS", "USD", fx)).toBe(100);
     expect(convert(100, "USD", "ILS", fx)).toBe(400);
     expect(convert(7, "USD", "USD", fx)).toBe(7);
+  });
+});
+
+describe("live FX sources", () => {
+  const BOI_CSV =
+    "SERIES_CODE,FREQ,BASE_CURRENCY,COUNTER_CURRENCY,UNIT_MEASURE,DATA_TYPE,DATA_SOURCE,TIME_COLLECT,CONF_STATUS,PUB_WEBSITE,UNIT_MULT,COMMENTS,TIME_PERIOD,OBS_VALUE,RELEASE_STATUS\n" +
+    "RER_USD_ILS,D,USD,ILS,ILS,OF00,BOI_MRKT,V,F,Y,0,,2026-11-20,3.326,YP\n";
+
+  it("parses the Bank of Israel SDMX CSV", () => {
+    expect(parseBoiCsv(BOI_CSV)).toEqual({ usdIls: 3.326, asOf: "2026-11-20", provider: "boi" });
+    expect(parseBoiCsv("SERIES_CODE,OBS_VALUE\n")).toBeNull();
+    expect(parseBoiCsv("TIME_PERIOD,OBS_VALUE\n2026-11-20,abc\n")).toBeNull();
+    expect(parseBoiCsv("<html>error</html>")).toBeNull();
+  });
+
+  it("parses Frankfurter JSON and rejects implausible rates", () => {
+    expect(parseFrankfurter({ amount: 1, base: "USD", date: "2026-11-20", rates: { ILS: 3.3428 } })).toEqual({
+      usdIls: 3.3428,
+      asOf: "2026-11-20",
+      provider: "frankfurter",
+    });
+    expect(parseFrankfurter({ rates: { ILS: 3700 } })).toBeNull();
+    expect(parseFrankfurter(null)).toBeNull();
+  });
+
+  const res = (body: string, ok = true) =>
+    ({ ok, status: ok ? 200 : 503, text: async () => body, json: async () => JSON.parse(body) }) as unknown as Response;
+
+  it("prefers BOI, falls back to Frankfurter, and returns null when both fail", async () => {
+    const quiet = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const frank = JSON.stringify({ date: "2026-11-20", rates: { ILS: 3.34 } });
+
+    const boiOk = vi.fn(async (url: string) => (url.includes("boi.gov.il") ? res(BOI_CSV) : res(frank)));
+    expect((await fetchLiveUsdIls(boiOk))?.provider).toBe("boi");
+    expect(boiOk).toHaveBeenCalledTimes(1);
+
+    const boiDown = vi.fn(async (url: string) => (url.includes("boi.gov.il") ? res("", false) : res(frank)));
+    expect(await fetchLiveUsdIls(boiDown)).toEqual({ usdIls: 3.34, asOf: "2026-11-20", provider: "frankfurter" });
+
+    const allDown = vi.fn(async () => {
+      throw new Error("offline");
+    });
+    expect(await fetchLiveUsdIls(allDown)).toBeNull();
+    quiet.mockRestore();
+  });
+});
+
+describe("display currency", () => {
+  it("converts and formats in the house style", () => {
+    expect(convertTo(100, "USD", "ILS", 3.5)).toBe(350);
+    expect(convertTo(350, "ILS", "USD", 3.5)).toBe(100);
+    expect(convertTo(5, "USD", "USD", 3.5)).toBe(5);
+    expect(formatCurrency(1234567, "USD")).toBe("$1,234,567");
+    expect(formatCurrency(-1234, "ILS")).toBe("−₪1,234");
+    expect(formatCurrency(1_234_567, "ILS", { compact: true })).toBe("₪1.23M");
+    expect(formatCurrency(41_200, "USD", { compact: true, signed: true })).toBe("+$41K");
+    expect(formatCurrency(12.5, "USD", { digits: 2, fixed: true })).toBe("$12.50");
+    expect(formatCurrency(null, "USD")).toBe("—");
+  });
+
+  it("reads the cookie defensively and labels the rate's provenance", () => {
+    expect(parseDisplayCurrency("ILS")).toBe("ILS");
+    expect(parseDisplayCurrency("ils")).toBe("ILS");
+    expect(parseDisplayCurrency("EUR")).toBe("USD");
+    expect(parseDisplayCurrency(undefined)).toBe("USD");
+    expect(fxProvenance({ source: "live", provider: "boi", asOf: "2026-11-20" })).toBe("Bank of Israel, Nov 20");
+    expect(fxProvenance({ source: "live", provider: "frankfurter", asOf: "2026-11-20" })).toBe("ECB via Frankfurter, Nov 20");
+    expect(fxProvenance({ source: "profile", provider: null, asOf: null })).toBe("your saved rate");
   });
 });
 

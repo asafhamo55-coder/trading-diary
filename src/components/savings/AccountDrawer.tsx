@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { JOINT_OWNER, type HouseholdMember, type SavingsAccountLite } from "@/lib/savings";
 import { cn } from "@/lib/utils";
+import { defaultLoginUrl } from "@/lib/provider-links";
 import { api, errMsg } from "./api";
 import {
   TYPE_GROUPS,
@@ -30,6 +31,7 @@ interface FormState {
   provider: string;
   planName: string;
   policyNumber: string;
+  loginUrl: string;
   status: string;
   currency: string;
   balance: string;
@@ -68,7 +70,7 @@ const NUMERIC_KEYS = [
   "insuredSalary",
   "projectedMonthlyPension",
 ] as const;
-const TEXT_KEYS = ["owner", "country", "type", "provider", "planName", "status", "currency", "track"] as const;
+const TEXT_KEYS = ["owner", "country", "type", "provider", "planName", "loginUrl", "status", "currency", "track"] as const;
 const DATE_KEYS = ["balanceAsOf", "liquidityDate"] as const;
 
 const str = (v: unknown) => (v == null ? "" : String(v));
@@ -83,7 +85,8 @@ function toForm(a: SavingsAccountLite | null, defaults: { owner: string; type?: 
     type,
     provider: a?.provider ?? "",
     planName: a?.planName ?? "",
-    policyNumber: "",
+    policyNumber: a?.policyNumber ?? "",
+    loginUrl: a?.loginUrl ?? "",
     status: a?.status ?? (a ? "" : "active"),
     currency: a?.currency ?? (country === "US" ? "USD" : "ILS"),
     balance: numToField(a?.balance),
@@ -417,13 +420,23 @@ export function AccountDrawer({
               <Field label="Plan name">
                 <input className={inputCls} value={form.planName} onChange={(e) => set("planName", e.target.value)} />
               </Field>
-              <Field label={account?.policyLast4 ? `Policy / account no. (now ••${account.policyLast4})` : "Policy / account no."}>
+              <Field label="Policy / account no.">
                 <input
                   className={inputCls}
                   value={form.policyNumber}
                   autoComplete="off"
-                  placeholder={account?.policyLast4 ? "Leave blank to keep" : "Only the last 4 digits are stored"}
+                  placeholder={account?.policyLast4 && !account.policyNumber ? `Ends ••${account.policyLast4} — enter the full number` : "Full policy / account number"}
                   onChange={(e) => set("policyNumber", e.target.value)}
+                />
+              </Field>
+              <Field label="Login page">
+                <input
+                  className={inputCls}
+                  type="url"
+                  value={form.loginUrl}
+                  autoComplete="off"
+                  placeholder={defaultLoginUrl(form.provider) ?? "https://…"}
+                  onChange={(e) => set("loginUrl", e.target.value)}
                 />
               </Field>
               <Field label="Status">

@@ -29,8 +29,9 @@ export const createSavingsAccountSchema = z.object({
   type: savingsTypeSchema,
   provider: z.string().min(1, "Provider is required").max(120),
   planName: z.string().max(200).nullable().optional(),
-  // Full numbers are accepted but only the last 4 digits are stored.
+  // Stored in full (user opted in); the last 4 digits are also kept as the match key.
   policyNumber: z.string().max(60).nullable().optional(),
+  loginUrl: z.string().url().max(500).nullable().optional(),
   status: z.string().max(60).nullable().optional(),
   currency: currencySchema,
   balance: z.number().finite(),

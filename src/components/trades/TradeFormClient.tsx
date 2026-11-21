@@ -287,9 +287,9 @@ export default function TradeFormClient({
   const labelClass = "block text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)] mb-1.5";
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <div className="bg-[var(--background)] text-[var(--foreground)]">
       {/* Sticky header */}
-      <div className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl">
+      <div className="sticky top-topbar z-10 border-b border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl">
         <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6 lg:px-8">
           <Link
             href={isEdit && tradeId ? `/trade/trades/${tradeId}` : "/trade/trades"}

@@ -23,18 +23,18 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import type { SavingsAccountView, CoverageGroup } from "@/lib/savings";
 import { AllocationDonut, HistoryChart } from "./charts";
-import {
-  fmtDate,
-  fmtIls,
-  fmtMoney,
-  fmtMonthShort,
-  fmtPct,
-  fmtSignedUsdCompact,
-  fmtUsd,
-  fmtUsdCompact,
-  riskLabel,
-  typeLabel,
-} from "./format";
+import { fmtDate, fmtMonthShort, fmtPct, riskLabel, typeLabel } from "./format";
+import { useDisplayCurrency } from "@/components/ui/currency";
+import { formatCurrency } from "@/lib/currency";
+
+/** Display-currency formatters for USD amounts from the net-worth payload. */
+function useUsdMoney() {
+  const { money } = useDisplayCurrency();
+  return {
+    full: (usd: number) => money(usd, "USD"),
+    compact: (usd: number) => money(usd, "USD", { compact: true }),
+  };
+}
 import type { AssetGroup, BarRow, GapItem, NetWorth, Person } from "./model";
 import { personName } from "./model";
 
@@ -63,6 +63,7 @@ function LinkButton({ href, children }: { href: string; children: React.ReactNod
 export function AllocationCard({ groups }: { groups: AssetGroup[] }) {
   const positive = groups.filter((g) => g.valueUsd > 0);
   const total = positive.reduce((s, g) => s + g.valueUsd, 0);
+  const { compact } = useUsdMoney();
   return (
     <Card className="h-full">
       <CardHeader>
@@ -83,7 +84,7 @@ export function AllocationCard({ groups }: { groups: AssetGroup[] }) {
                 <li key={g.key} className="flex items-center gap-2.5 text-sm">
                   <span aria-hidden className="size-2.5 shrink-0 rounded-[3px]" style={{ background: g.color }} />
                   <span className="min-w-0 flex-1 text-foreground-secondary">{g.label}</span>
-                  <span className="num shrink-0 font-medium text-foreground">{fmtUsdCompact(g.valueUsd)}</span>
+                  <span className="num shrink-0 font-medium text-foreground">{compact(g.valueUsd)}</span>
                   <span className="num w-11 shrink-0 text-right text-xs text-muted-foreground">
                     {fmtPct((g.valueUsd / total) * 100, 0)}
                   </span>
@@ -100,6 +101,7 @@ export function AllocationCard({ groups }: { groups: AssetGroup[] }) {
 function Bars({ rows, color }: { rows: BarRow[]; color: string }) {
   const max = Math.max(1, ...rows.map((r) => Math.abs(r.valueUsd)));
   const total = rows.reduce((s, r) => s + Math.max(0, r.valueUsd), 0) || 1;
+  const { full, compact } = useUsdMoney();
   return (
     <ul className="space-y-3">
       {rows.map((r) => (
@@ -111,13 +113,13 @@ function Bars({ rows, color }: { rows: BarRow[]; color: string }) {
               {r.note ? <span className="hidden truncate text-xs text-muted-foreground sm:inline">· {r.note}</span> : null}
             </span>
             <span className="flex shrink-0 items-baseline gap-2">
-              <span className="num font-semibold text-foreground">{fmtUsdCompact(r.valueUsd)}</span>
+              <span className="num font-semibold text-foreground">{compact(r.valueUsd)}</span>
               <span className="num w-9 text-right text-xs text-muted-foreground">
                 {r.valueUsd > 0 ? fmtPct((r.valueUsd / total) * 100, 0) : "—"}
               </span>
             </span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-subtle" title={`${r.label}: ${fmtUsd(r.valueUsd)}`}>
+          <div className="h-2 overflow-hidden rounded-full bg-subtle" title={`${r.label}: ${full(r.valueUsd)}`}>
             <div
               className="h-full rounded-full transition-[width] duration-300"
               style={{ width: `${Math.max(1.5, (Math.max(0, r.valueUsd) / max) * 100)}%`, background: color }}
@@ -162,6 +164,7 @@ export function PeopleCountryCard({ people, countries }: { people: BarRow[]; cou
 export function HistoryCard({ history }: { history: NetWorth["history"] }) {
   const last = history[history.length - 1];
   const first = history[0];
+  const { money } = useDisplayCurrency();
   return (
     <Card className="flex h-full flex-col">
       <CardHeader
@@ -169,7 +172,7 @@ export function HistoryCard({ history }: { history: NetWorth["history"] }) {
           history.length >= 2 ? (
             <div className="text-right">
               <p className={cn("num text-sm font-semibold", last.savingsUsd >= first.savingsUsd ? "text-success" : "text-danger")}>
-                {fmtSignedUsdCompact(last.savingsUsd - first.savingsUsd)}
+                {money(last.savingsUsd - first.savingsUsd, "USD", { compact: true, signed: true })}
               </p>
               <p className="text-2xs text-muted-foreground">since {fmtMonthShort(first.month)}</p>
             </div>
@@ -191,7 +194,7 @@ export function HistoryCard({ history }: { history: NetWorth["history"] }) {
         ) : history.length === 1 ? (
           <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border-strong px-4 py-10 text-center">
             <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">{fmtMonthShort(last.month)}</p>
-            <p className="num text-3xl font-semibold tracking-tight text-foreground">{fmtUsd(last.savingsUsd)}</p>
+            <p className="num text-3xl font-semibold tracking-tight text-foreground">{money(last.savingsUsd)}</p>
             <p className="max-w-sm text-sm text-muted-foreground">
               One statement so far. Import an earlier report (e.g. last year’s annual statement) to start a trend line.
             </p>
@@ -291,7 +294,8 @@ function liquidityBadge(a: SavingsAccountView) {
   return <Badge variant="neutral">Liquidity unknown</Badge>;
 }
 
-function feeCell(a: SavingsAccountView) {
+function FeeCell({ a }: { a: SavingsAccountView }) {
+  const { full } = useUsdMoney();
   const hasFees = a.feeDepositPct != null || a.feeAccumulationPct != null;
   if (!hasFees) {
     // RSUs, cash and plain "other" have no management fee to report.
@@ -305,13 +309,21 @@ function feeCell(a: SavingsAccountView) {
         {a.feeDepositPct != null && a.feeAccumulationPct != null ? " · " : ""}
         {a.feeAccumulationPct != null ? `${fmtPct(a.feeAccumulationPct, 2)} bal` : ""}
       </p>
-      <p className="num text-xs text-muted-foreground">{fmtUsd(a.annualFees.totalUsd)}/yr</p>
+      <p className="num text-xs text-muted-foreground">{full(a.annualFees.totalUsd)}/yr</p>
     </div>
   );
 }
 
 export function SavingsTableCard({ nw, people }: { nw: NetWorth; people: Map<string, Person> }) {
   const rows = [...nw.savings.accounts].sort((a, b) => b.balanceUsd - a.balanceUsd);
+  const { currency } = useDisplayCurrency();
+  const { full } = useUsdMoney();
+  // Primary in the display currency (exact native figure when it matches);
+  // secondary in the other currency — the native balance for foreign accounts.
+  const primaryBalance = (a: SavingsAccountView) =>
+    currency === "ILS" ? formatCurrency(a.balanceIls, "ILS") : formatCurrency(a.balanceUsd, "USD");
+  const secondaryBalance = (a: SavingsAccountView) =>
+    currency === "ILS" ? formatCurrency(a.balanceUsd, "USD") : formatCurrency(a.balanceIls, "ILS");
   const columns: DataTableColumn<SavingsAccountView>[] = [
     {
       key: "account",
@@ -345,7 +357,7 @@ export function SavingsTableCard({ nw, people }: { nw: NetWorth; people: Map<str
         </div>
       ),
     },
-    { key: "fees", header: "Fees", numeric: true, hideBelowLg: true, cell: feeCell },
+    { key: "fees", header: "Fees", numeric: true, hideBelowLg: true, cell: (a) => <FeeCell a={a} /> },
     {
       key: "balance",
       header: "Balance",
@@ -353,9 +365,9 @@ export function SavingsTableCard({ nw, people }: { nw: NetWorth; people: Map<str
       mobileAside: true,
       cell: (a) => (
         <div className="text-right">
-          <p className="num font-semibold text-foreground">{fmtUsd(a.balanceUsd)}</p>
+          <p className="num font-semibold text-foreground">{primaryBalance(a)}</p>
           <p className="num text-xs text-muted-foreground">
-            {a.currency.toUpperCase() === "USD" ? fmtIls(a.balanceIls) : fmtMoney(a.balance, a.currency)}
+            {secondaryBalance(a)}
             {a.balanceAsOf ? ` · ${fmtDate(a.balanceAsOf)}` : ""}
           </p>
         </div>
@@ -370,8 +382,8 @@ export function SavingsTableCard({ nw, people }: { nw: NetWorth; people: Map<str
             Savings at a glance
           </h2>
           <p className="text-sm text-muted-foreground">
-            {rows.length} account{rows.length === 1 ? "" : "s"} · {fmtUsd(nw.savings.totalUsd)} · deposits{" "}
-            {fmtUsd(nw.savings.monthlyDepositsUsd)}/mo
+            {rows.length} account{rows.length === 1 ? "" : "s"} · {full(nw.savings.totalUsd)} · deposits{" "}
+            {full(nw.savings.monthlyDepositsUsd)}/mo
           </p>
         </div>
         <LinkButton href="/savings">Manage accounts</LinkButton>
@@ -406,6 +418,7 @@ export function CoverageCard({ nw, people }: { nw: NetWorth; people: Map<string,
   const cov = nw.coverage;
   const owners = [...new Set([...cov.groups.map((g) => g.owner), ...cov.gaps.map((g) => g.owner)])];
   const dupCost = cov.duplicates.reduce((s, g) => s + g.monthlyCostUsd, 0);
+  const { full } = useUsdMoney();
   return (
     <Card>
       <CardHeader
@@ -420,10 +433,10 @@ export function CoverageCard({ nw, people }: { nw: NetWorth; people: Map<string,
         <CardDescription>
           {cov.groups.length > 0 ? (
             <>
-              Total premiums <span className="num font-medium text-foreground">{fmtUsd(cov.totalMonthlyCostUsd)}/mo</span>
+              Total premiums <span className="num font-medium text-foreground">{full(cov.totalMonthlyCostUsd)}/mo</span>
               {dupCost > 0 ? (
                 <>
-                  {" "}· overlapping cover costs <span className="num font-medium text-warning">{fmtUsd(dupCost)}/mo</span>
+                  {" "}· overlapping cover costs <span className="num font-medium text-warning">{full(dupCost)}/mo</span>
                 </>
               ) : null}
             </>
@@ -471,6 +484,7 @@ function OwnerCoverage({
   gaps: NetWorth["coverage"]["gaps"];
 }) {
   const monthly = groups.reduce((s, g) => s + g.monthlyCostUsd, 0);
+  const { full, compact } = useUsdMoney();
   return (
     <div className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-border">
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
@@ -478,7 +492,7 @@ function OwnerCoverage({
           {name}
           {nameHe ? <He>{nameHe}</He> : null}
         </p>
-        <span className="num text-xs text-muted-foreground">{monthly > 0 ? `${fmtUsd(monthly)}/mo` : ""}</span>
+        <span className="num text-xs text-muted-foreground">{monthly > 0 ? `${full(monthly)}/mo` : ""}</span>
       </div>
       <ul className="divide-y divide-border">
         {groups.map((g) => {
@@ -497,8 +511,8 @@ function OwnerCoverage({
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  {g.totalCoverageUsd > 0 ? <p className="num text-sm text-foreground">{fmtUsdCompact(g.totalCoverageUsd)}</p> : null}
-                  {g.monthlyCostUsd > 0 ? <p className="num text-xs text-muted-foreground">{fmtUsd(g.monthlyCostUsd)}/mo</p> : null}
+                  {g.totalCoverageUsd > 0 ? <p className="num text-sm text-foreground">{compact(g.totalCoverageUsd)}</p> : null}
+                  {g.monthlyCostUsd > 0 ? <p className="num text-xs text-muted-foreground">{full(g.monthlyCostUsd)}/mo</p> : null}
                 </div>
               </div>
               {g.duplicate ? (

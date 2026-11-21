@@ -379,6 +379,8 @@ export const SavingsAccountScalarFieldEnum = {
   provider: 'provider',
   planName: 'planName',
   policyLast4: 'policyLast4',
+  policyNumber: 'policyNumber',
+  loginUrl: 'loginUrl',
   status: 'status',
   currency: 'currency',
   balance: 'balance',

@@ -1,11 +1,13 @@
 "use client";
 
-import { Lock, LockOpen, Pencil, TriangleAlert } from "lucide-react";
+import { ExternalLink, Lock, LockOpen, Pencil, TriangleAlert } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge, StatusPill } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BENCHMARK_FEES, convert, normalizeCurrency, type FxRate, type SavingsAccountView } from "@/lib/savings";
+import { BENCHMARK_FEES, normalizeCurrency, type SavingsAccountView } from "@/lib/savings";
+import { useDisplayCurrency } from "@/components/ui/currency";
 import { cn } from "@/lib/utils";
+import { loginUrlFor } from "@/lib/provider-links";
 import { fmtDate, humanize, money, pct, statusTone } from "./format";
 import { Sparkline, Stat } from "./ui";
 
@@ -18,7 +20,8 @@ function monthsAgo(iso: string | null | undefined, now: Date): number | null {
 
 /** Employee / employer / severance split as a stacked bar + legend. */
 function DepositSplit({ a }: { a: SavingsAccountView }) {
-  const cur = a.currency;
+  const cur = normalizeCurrency(a.currency);
+  const { money: dm } = useDisplayCurrency();
   const parts = [
     { key: "Employee", v: a.monthlyDepositEmployee ?? 0, cls: "bg-primary" },
     { key: "Employer", v: a.monthlyDepositEmployer ?? 0, cls: "bg-success" },
@@ -30,7 +33,7 @@ function DepositSplit({ a }: { a: SavingsAccountView }) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="num text-sm font-medium text-foreground">{money(total, cur)}/mo</span>
+        <span className="num text-sm font-medium text-foreground">{dm(total, cur)}/mo</span>
         {splitSum <= 0 ? <span className="text-xs text-muted-foreground">split not recorded</span> : null}
       </div>
       {splitSum > 0 ? (
@@ -44,7 +47,7 @@ function DepositSplit({ a }: { a: SavingsAccountView }) {
             {parts.map((p) => (
               <li key={p.key} className="inline-flex items-center gap-1">
                 <span className={cn("size-2 rounded-full", p.cls)} aria-hidden />
-                {p.key} <span className="num text-foreground-secondary">{money(p.v, cur)}</span>
+                {p.key} <span className="num text-foreground-secondary">{dm(p.v, cur)}</span>
               </li>
             ))}
           </ul>
@@ -56,27 +59,27 @@ function DepositSplit({ a }: { a: SavingsAccountView }) {
 
 export function AccountCard({
   a,
-  fx,
   history,
   ownerName,
   onEdit,
   now,
 }: {
   a: SavingsAccountView;
-  fx: FxRate;
   history: number[] | undefined;
   ownerName?: string;
   onEdit: () => void;
   now: Date;
 }) {
   const cur = normalizeCurrency(a.currency);
-  const isUsd = cur === "USD";
+  // Figures follow the global display currency; the native amount stays as a
+  // secondary line whenever it differs (inputs/edits remain native).
+  const { money: dm, currency: display, isForeign } = useDisplayCurrency();
+  const foreign = isForeign(cur);
   const details = (a.details ?? {}) as Record<string, unknown>;
   const hasFees = a.feeDepositPct != null || a.feeAccumulationPct != null;
   const feeApplies = a.type !== "cash" && a.type !== "rsu" && a.type !== "other";
   const bench = BENCHMARK_FEES[a.type];
   const drag = a.feeDrag10y;
-  const dragUsd = drag ? convert(drag.costVsBenchmark, cur, "USD", fx) : 0;
   const age = monthsAgo(a.balanceAsOf, now);
   const stale = age != null && age > 6;
   const unvested = typeof details.unvestedValue === "number" ? (details.unvestedValue as number) : null;
@@ -95,8 +98,8 @@ export function AccountCard({
             {ownerName && (a.planName || a.policyLast4) ? <span aria-hidden>·</span> : null}
             {a.planName ? <span className="truncate">{a.planName}</span> : null}
             {a.policyLast4 ? (
-              <span className="num" title="Last 4 digits of the policy number">
-                ••{a.policyLast4}
+              <span className="num" title={a.policyNumber ? "Policy / account number" : "Last 4 digits of the policy number"}>
+                Acct {a.policyNumber ?? `••${a.policyLast4}`}
               </span>
             ) : null}
             <Badge variant="outline" className="ml-0.5">
@@ -104,17 +107,34 @@ export function AccountCard({
             </Badge>
           </p>
         </div>
-        <Button variant="ghost" size="icon-sm" aria-label={`Edit ${a.provider}`} onClick={onEdit}>
-          <Pencil />
-        </Button>
+        <div className="flex shrink-0 items-center gap-1">
+          {loginUrlFor(a) ? (
+            <a
+              href={loginUrlFor(a)!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-primary hover:bg-primary-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+              title={`Sign in to ${a.provider}`}
+            >
+              Log in <ExternalLink className="size-3.5" aria-hidden />
+            </a>
+          ) : null}
+          <Button variant="ghost" size="icon-sm" aria-label={`Edit ${a.provider}`} onClick={onEdit}>
+            <Pencil />
+          </Button>
+        </div>
       </div>
 
       {/* Balance + sparkline */}
       <div className="flex items-end justify-between gap-3 px-4 sm:px-5">
         <div className="min-w-0">
-          <p className="num text-2xl font-semibold tracking-tight text-foreground">{money(a.balance, cur)}</p>
+          <p className="num text-2xl font-semibold tracking-tight text-foreground">{dm(a.balance, cur)}</p>
           <p className="num mt-0.5 text-xs text-muted-foreground">
-            {isUsd ? `≈ ${money(a.balanceIls, "ILS")}` : `≈ ${money(a.balanceUsd, "USD")}`}
+            {foreign
+              ? money(a.balance, cur)
+              : display === "USD"
+                ? `≈ ${money(a.balanceIls, "ILS")}`
+                : `≈ ${money(a.balanceUsd, "USD")}`}
             <span aria-hidden> · </span>
             <span className={cn(stale && "font-medium text-warning")}>
               {a.balanceAsOf ? `as of ${fmtDate(a.balanceAsOf)}` : "no date"}
@@ -131,7 +151,7 @@ export function AccountCard({
         {a.type === "rsu" ? (
           <>
             <Stat label="Ticker">{typeof details.ticker === "string" ? details.ticker : "—"}</Stat>
-            <Stat label="Unvested (not counted)">{unvested != null ? money(unvested, cur) : "—"}</Stat>
+            <Stat label="Unvested (not counted)">{unvested != null ? dm(unvested, cur) : "—"}</Stat>
             {typeof details.nextVestDate === "string" ? <Stat label="Next vest">{fmtDate(details.nextVestDate)}</Stat> : null}
           </>
         ) : null}
@@ -149,14 +169,14 @@ export function AccountCard({
                 </span>
               )}
             </Stat>
-            <Stat label="Annual fee cost">{hasFees ? money(a.annualFees.total, cur) : "—"}</Stat>
+            <Stat label="Annual fee cost">{hasFees ? dm(a.annualFees.total, cur) : "—"}</Stat>
           </>
         ) : null}
 
         {(a.type === "pension" || a.type === "managers_insurance") && a.projectedMonthlyPension ? (
-          <Stat label="Projected pension">{money(a.projectedMonthlyPension, cur)}/mo</Stat>
+          <Stat label="Projected pension">{dm(a.projectedMonthlyPension, cur)}/mo</Stat>
         ) : null}
-        {a.insuredSalary ? <Stat label="Insured salary">{money(a.insuredSalary, cur)}</Stat> : null}
+        {a.insuredSalary ? <Stat label="Insured salary">{dm(a.insuredSalary, cur)}</Stat> : null}
 
         {a.liquidity ? (
           <div className="col-span-2">
@@ -202,8 +222,8 @@ export function AccountCard({
         >
           {drag.costVsBenchmark > 0 ? (
             <p className="text-foreground-secondary">
-              <span className="font-semibold text-warning">10-yr fee drag {money(drag.costVsBenchmark, cur)}</span>
-              {!isUsd ? <span className="num text-muted-foreground"> (≈ {money(dragUsd, "USD")})</span> : null} vs. a
+              <span className="font-semibold text-warning">10-yr fee drag {dm(drag.costVsBenchmark, cur)}</span>
+              {foreign ? <span className="num text-muted-foreground"> ({money(drag.costVsBenchmark, cur)})</span> : null} vs. a
               benchmark of {pct(bench.depositPct)} / {pct(bench.accumulationPct)}.
             </p>
           ) : (

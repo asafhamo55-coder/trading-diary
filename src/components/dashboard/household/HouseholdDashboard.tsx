@@ -30,13 +30,14 @@ import {
   PeopleCountryCard,
   SavingsTableCard,
 } from "./sections";
-import { fmtDate, fmtIls, fmtIlsCompact, fmtMonthShort, fmtPct, fmtUsd, fmtUsdCompact } from "./format";
+import { fmtDate, fmtMonthShort, fmtPct } from "./format";
+import { useDisplayCurrency } from "@/components/ui/currency";
+import { formatCurrency, fxProvenance } from "@/lib/currency";
 import {
   assetGroups,
   byCountry,
   byPerson,
   dataGaps,
-  fxSourceLabel,
   headerInfo,
   kpis,
   peopleDirectory,
@@ -64,6 +65,8 @@ export default function HouseholdDashboard({
   const people = useMemo(() => peopleDirectory(profile, nw), [profile, nw]);
   const gaps = useMemo(() => dataGaps(nw, profile, people), [nw, profile, people]);
   const ownerName = (k: string) => personName(people, k);
+  const { money, currency } = useDisplayCurrency();
+  const compact = (usd: number) => money(usd, "USD", { compact: true });
 
   if (!nw) {
     return (
@@ -117,32 +120,44 @@ export default function HouseholdDashboard({
               label="Retirement savings (IL)"
               icon={<Landmark />}
               href="/savings"
-              value={k.ilRetirementCount ? fmtUsdCompact(k.ilRetirementUsd) : "—"}
-              hint={k.ilRetirementCount ? `${fmtIlsCompact(k.ilRetirementIls)} · ${k.ilRetirementCount} funds` : "Not added yet"}
+              value={
+                k.ilRetirementCount
+                  ? currency === "ILS"
+                    ? formatCurrency(k.ilRetirementIls, "ILS", { compact: true })
+                    : compact(k.ilRetirementUsd)
+                  : "—"
+              }
+              hint={
+                k.ilRetirementCount
+                  ? currency === "ILS"
+                    ? `${k.ilRetirementCount} funds`
+                    : `${formatCurrency(k.ilRetirementIls, "ILS", { compact: true })} · ${k.ilRetirementCount} funds`
+                  : "Not added yet"
+              }
             />
             <Kpi
               label="US retirement (401k)"
               icon={<Flag />}
               href="/savings"
-              value={k.usRetirementCount ? fmtUsdCompact(k.usRetirementUsd) : "—"}
+              value={k.usRetirementCount ? compact(k.usRetirementUsd) : "—"}
               hint={k.usRetirementCount ? `${k.usRetirementCount} account${k.usRetirementCount === 1 ? "" : "s"}` : "Not added yet"}
             />
             <Kpi
               label="Equity comp (RSU)"
               icon={<Briefcase />}
               href="/savings"
-              value={k.rsuCount ? fmtUsdCompact(k.rsuUsd) : "—"}
+              value={k.rsuCount ? compact(k.rsuUsd) : "—"}
               hint={k.rsuCount ? "vested + unvested" : "Not added yet"}
             />
             <Kpi
               label="Real estate equity"
               icon={<Building2 />}
               href="/properties"
-              value={k.propertyCount ? fmtUsdCompact(k.realEstateEquityUsd) : "—"}
+              value={k.propertyCount ? compact(k.realEstateEquityUsd) : "—"}
               valueTone={k.realEstateEquityUsd < 0 ? "negative" : "default"}
               hint={
                 k.propertyCount
-                  ? `${k.propertyCount} properties · ${fmtUsdCompact(k.mortgagesUsd)} owed`
+                  ? `${k.propertyCount} properties · ${compact(k.mortgagesUsd)} owed`
                   : "No properties yet"
               }
             />
@@ -150,7 +165,7 @@ export default function HouseholdDashboard({
               label="Trading account"
               icon={<CandlestickChart />}
               href="/trade/dashboard"
-              value={k.tradeUsd != null ? fmtUsdCompact(k.tradeUsd) : "—"}
+              value={k.tradeUsd != null ? compact(k.tradeUsd) : "—"}
               valueTone={k.tradeUsd != null && k.tradeUsd < 0 ? "negative" : "default"}
               hint={k.tradeUsd != null ? "realized equity" : "Not connected"}
             />
@@ -158,11 +173,11 @@ export default function HouseholdDashboard({
               label="Annual fees paid"
               icon={<Receipt />}
               href="/savings"
-              value={k.accountsWithFees ? fmtUsd(k.annualFeesUsd) : "—"}
+              value={k.accountsWithFees ? money(k.annualFeesUsd) : "—"}
               valueTone={k.accountsWithFees ? "default" : "muted"}
               hint={
                 k.feeDrag10yUsd > 0
-                  ? `${fmtUsdCompact(k.feeDrag10yUsd)} 10-yr drag vs benchmark`
+                  ? `${compact(k.feeDrag10yUsd)} 10-yr drag vs benchmark`
                   : k.accountsWithFees
                     ? `${k.accountsWithFees} accounts with fees`
                     : "Fee data missing"
@@ -228,6 +243,14 @@ function Hero({
   const barTotal = positive.reduce((s, g) => s + g.valueUsd, 0) || 1;
   const change = info.savingsChange;
   const negative = nw.totals.netWorthUsd < 0;
+  const { money, currency } = useDisplayCurrency();
+  const compact = (usd: number) => money(usd, "USD", { compact: true });
+  // Net worth: the payload carries both currencies at the same rate, so show
+  // the chosen one big and the other as the secondary line.
+  const primary =
+    currency === "ILS" ? formatCurrency(nw.totals.netWorthIls, "ILS") : formatCurrency(nw.totals.netWorthUsd, "USD");
+  const secondary =
+    currency === "ILS" ? formatCurrency(nw.totals.netWorthUsd, "USD") : formatCurrency(nw.totals.netWorthIls, "ILS");
   return (
     <Card className="relative overflow-hidden">
       <div
@@ -243,10 +266,10 @@ function Hero({
               negative ? "text-danger" : "text-foreground"
             )}
           >
-            {fmtUsd(nw.totals.netWorthUsd)}
+            {primary}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm">
-            <span className="num text-lg font-medium text-foreground-secondary">{fmtIls(nw.totals.netWorthIls)}</span>
+            <span className="num text-lg font-medium text-foreground-secondary">{secondary}</span>
             {change ? (
               <span
                 className={cn(
@@ -256,7 +279,7 @@ function Hero({
               >
                 {change.deltaUsd >= 0 ? <ArrowUpRight className="size-3.5" aria-hidden /> : <ArrowDownRight className="size-3.5" aria-hidden />}
                 {change.deltaUsd >= 0 ? "+" : "−"}
-                {fmtUsdCompact(Math.abs(change.deltaUsd))}
+                {compact(Math.abs(change.deltaUsd))}
                 {change.pct != null ? ` (${fmtPct(Math.abs(change.pct))})` : ""}
               </span>
             ) : null}
@@ -266,17 +289,17 @@ function Hero({
         <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm lg:text-right">
           <div>
             <dt className="text-xs text-muted-foreground">Assets</dt>
-            <dd className="num text-base font-semibold text-foreground">{fmtUsdCompact(nw.totals.assetsUsd)}</dd>
+            <dd className="num text-base font-semibold text-foreground">{compact(nw.totals.assetsUsd)}</dd>
           </div>
           <div>
             <dt className="text-xs text-muted-foreground">Liabilities</dt>
             <dd className="num text-base font-semibold text-foreground">
-              {nw.totals.liabilitiesUsd > 0 ? `−${fmtUsdCompact(nw.totals.liabilitiesUsd)}` : "$0"}
+              {nw.totals.liabilitiesUsd > 0 ? `−${compact(nw.totals.liabilitiesUsd)}` : compact(0)}
             </dd>
           </div>
           <div>
             <dt className="text-xs text-muted-foreground">Monthly deposits</dt>
-            <dd className="num text-base font-semibold text-foreground">{fmtUsdCompact(nw.savings.monthlyDepositsUsd)}</dd>
+            <dd className="num text-base font-semibold text-foreground">{compact(nw.savings.monthlyDepositsUsd)}</dd>
           </div>
           <div>
             <dt className="text-xs text-muted-foreground">Accounts</dt>
@@ -293,7 +316,7 @@ function Hero({
             {positive.map((g) => (
               <div
                 key={g.key}
-                title={`${g.label}: ${fmtUsd(g.valueUsd)}`}
+                title={`${g.label}: ${money(g.valueUsd)}`}
                 className="h-full first:rounded-l-full last:rounded-r-full"
                 style={{ width: `${(g.valueUsd / barTotal) * 100}%`, background: g.color }}
               />
@@ -312,7 +335,7 @@ function Hero({
             {info.oldestBalanceAsOf
               ? `Balances from ${fmtDate(info.oldestBalanceAsOf)}${info.newestBalanceAsOf !== info.oldestBalanceAsOf ? ` to ${fmtDate(info.newestBalanceAsOf)}` : ""} · `
               : ""}
-            ₪{nw.fx.usdIls.toFixed(2)} = $1 ({fxSourceLabel(nw.fx.source)}) ·{" "}
+            ₪{nw.fx.usdIls.toFixed(2)} = $1 ({fxProvenance(nw.fx)}) ·{" "}
             <He className="text-2xs">שווי נקי משפחתי</He>
           </p>
         </div>

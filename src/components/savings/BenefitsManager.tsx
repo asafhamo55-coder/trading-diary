@@ -48,6 +48,7 @@ import {
   riskLabel,
   typeLabel,
 } from "./format";
+import { useDisplayCurrency } from "@/components/ui/currency";
 import { ConfirmDialog, Drawer, FormSection, He, Notice, selectCls } from "./ui";
 import { useFlash } from "./useFlash";
 
@@ -66,6 +67,7 @@ const ESSENTIAL = new Set(["death", "disability"]);
 export default function BenefitsManager({ initial }: { initial?: BenefitsData }) {
   const preview = !!initial;
   const [data, setData] = React.useState<BenefitsData | null>(initial ?? null);
+  const { money: dm, currency: display, isForeign } = useDisplayCurrency();
   const [error, setError] = React.useState<string | null>(null);
   const [owner, setOwner] = React.useState("all");
   const [drawer, setDrawer] = React.useState<{ id: string | null; nonce: number } | null>(null);
@@ -170,7 +172,16 @@ export default function BenefitsManager({ initial }: { initial?: BenefitsData })
       key: "amount",
       header: "Cover",
       numeric: true,
-      cell: (b) => (b.coverageAmount != null ? money(b.coverageAmount, b.coverageCurrency ?? "ILS") : "—"),
+      cell: (b) => {
+        if (b.coverageAmount == null) return "—";
+        const cur = b.coverageCurrency ?? "ILS";
+        return (
+          <span className="inline-flex flex-col items-end leading-tight">
+            <span>{dm(b.coverageAmount, cur)}</span>
+            {isForeign(cur) ? <span className="text-xs font-normal text-muted-foreground">{money(b.coverageAmount, cur)}</span> : null}
+          </span>
+        );
+      },
     },
     {
       key: "cost",
@@ -180,12 +191,18 @@ export default function BenefitsManager({ initial }: { initial?: BenefitsData })
       cell: (b) => {
         if (b.monthlyCost == null) return <span className="text-muted-foreground">—</span>;
         const cur = b.costCurrency ?? b.coverageCurrency ?? "ILS";
+        // Primary in the display currency (the server's USD figure in USD mode),
+        // native cost underneath when it differs.
         const usd = costUsdById.get(b.id);
+        const [amt, from] = display === "USD" && usd != null ? [usd, "USD"] : [b.monthlyCost, cur];
+        const digitsFor = (v: number) => (Math.abs(v) < 100 ? 2 : 0);
         return (
           <span className="inline-flex flex-col items-end leading-tight">
-            <span>{money(b.monthlyCost, cur, { digits: b.monthlyCost < 100 ? 2 : 0 })}</span>
-            {cur !== "USD" && usd != null ? (
-              <span className="text-xs font-normal text-muted-foreground">≈ {money(usd, "USD", { digits: usd < 100 ? 2 : 0 })}</span>
+            <span>{dm(amt, from, { digits: digitsFor(amt) })}</span>
+            {isForeign(cur) ? (
+              <span className="text-xs font-normal text-muted-foreground">
+                {money(b.monthlyCost, cur, { digits: digitsFor(b.monthlyCost) })}
+              </span>
             ) : null}
           </span>
         );
@@ -233,7 +250,7 @@ export default function BenefitsManager({ initial }: { initial?: BenefitsData })
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Kpi label="Monthly premiums" icon={<Wallet />} value={money(coverage.totalMonthlyCostUsd, "USD")} hint="all coverage, in USD" />
+            <Kpi label="Monthly premiums" icon={<Wallet />} value={dm(coverage.totalMonthlyCostUsd, "USD")} hint={`all coverage, in ${display === "USD" ? "USD" : "ILS"}`} />
             <Kpi label="Coverages" icon={<ShieldCheck />} value={benefits.length} hint={`${new Set(benefits.map((b) => b.owner)).size} people covered`} />
             <Kpi
               label="Possible duplicates"
@@ -305,6 +322,7 @@ export default function BenefitsManager({ initial }: { initial?: BenefitsData })
 // ── Coverage report ────────────────────────────────────────────────
 
 function CoverageReportView({ coverage, members }: { coverage: CoverageReport; members: HouseholdMember[] }) {
+  const { money: dm } = useDisplayCurrency();
   const people = [
     ...members.filter((m) => m.role === "adult").map((m) => m.key),
     ...[...new Set(coverage.groups.map((g) => g.owner))].filter(
@@ -366,7 +384,7 @@ function CoverageReportView({ coverage, members }: { coverage: CoverageReport; m
                               {g.countries.length > 1 ? ` · ${g.countries.join("+")}` : ""}
                             </span>
                             {g.totalCoverageUsd > 0 ? (
-                              <span className="num text-xs text-foreground-secondary">{money(g.totalCoverageUsd, "USD", { compact: true })}</span>
+                              <span className="num text-xs text-foreground-secondary">{dm(g.totalCoverageUsd, "USD", { compact: true })}</span>
                             ) : null}
                           </span>
                         )}
@@ -429,7 +447,7 @@ function CoverageReportView({ coverage, members }: { coverage: CoverageReport; m
                         {memberName(g.owner, members)} · {riskLabel(g.risk)}
                       </p>
                       <p className="num text-xs text-muted-foreground">
-                        {money(g.totalCoverageUsd, "USD", { compact: true })} cover · {money(g.monthlyCostUsd, "USD")}/mo
+                        {dm(g.totalCoverageUsd, "USD", { compact: true })} cover · {dm(g.monthlyCostUsd, "USD")}/mo
                       </p>
                     </div>
                     <ul className="mt-2 space-y-1 text-xs">
@@ -438,7 +456,7 @@ function CoverageReportView({ coverage, members }: { coverage: CoverageReport; m
                           <Badge variant="outline">{it.country}</Badge>
                           <span>{it.source}</span>
                           <span className="text-muted-foreground">({benefitLabel(it.category)}{it.insideSavingsAccount ? ", inside a savings policy" : ""})</span>
-                          {it.coverageUsd != null ? <span className="num ml-auto">{money(it.coverageUsd, "USD", { compact: true })}</span> : null}
+                          {it.coverageUsd != null ? <span className="num ml-auto">{dm(it.coverageUsd, "USD", { compact: true })}</span> : null}
                         </li>
                       ))}
                     </ul>
@@ -689,7 +707,7 @@ function BenefitDrawer({
               </Field>
             </div>
             <Field label="Beneficiary">
-              <input className={inputCls} placeholder="e.g. Einat" value={f.beneficiary} onChange={(e) => set({ beneficiary: e.target.value })} />
+              <input className={inputCls} placeholder="e.g. Dana" value={f.beneficiary} onChange={(e) => set({ beneficiary: e.target.value })} />
             </Field>
           </FormSection>
           <FormSection title="Notes">

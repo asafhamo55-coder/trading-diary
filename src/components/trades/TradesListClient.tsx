@@ -163,9 +163,9 @@ export default function TradesListClient({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <div className="bg-[var(--background)] text-[var(--foreground)]">
       {/* Sticky header */}
-      <div className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl">
+      <div className="sticky top-topbar z-10 border-b border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight">Trades</h1>

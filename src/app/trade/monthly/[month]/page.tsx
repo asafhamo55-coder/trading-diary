@@ -1,6 +1,8 @@
 import { getTradesByMonth } from "@/lib/data";
 import MonthlyDetailClient from "@/components/monthly/MonthlyDetailClient";
 import { parseYear } from "@/lib/year";
+import { MONTH_NAMES } from "@/lib/types";
+import { PageCrumbs } from "@/components/layout/AppNavShell";
 
 export const dynamic = "force-dynamic";
 
@@ -15,5 +17,11 @@ export default async function MonthlyDetailPage({
   const sp = await searchParams;
   const year = parseYear(sp.year) ?? new Date().getFullYear();
   const trades = await getTradesByMonth(parseInt(month), year);
-  return <MonthlyDetailClient month={parseInt(month)} trades={trades} />;
+  const monthName = MONTH_NAMES[parseInt(month) - 1];
+  return (
+    <>
+      {monthName ? <PageCrumbs items={[{ label: `${monthName} ${year}` }]} /> : null}
+      <MonthlyDetailClient month={parseInt(month)} trades={trades} />
+    </>
+  );
 }

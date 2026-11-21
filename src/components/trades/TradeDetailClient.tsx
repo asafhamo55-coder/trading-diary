@@ -56,7 +56,7 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
   }
   if (!trade) {
     return (
-      <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex items-center justify-center px-4">
+      <div className="bg-[var(--background)] text-[var(--foreground)] flex items-center justify-center px-4">
         <div className="flex flex-col items-center text-center">
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--muted)]">
             <FileQuestion className="h-8 w-8 text-[var(--muted-foreground)]" />
@@ -96,9 +96,9 @@ export default function TradeDetailClient({ trade }: { trade: Trade | null }) {
     .sort((a, b) => a.legOrder - b.legOrder);
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <div className="bg-[var(--background)] text-[var(--foreground)]">
       {/* Sticky navigation */}
-      <div className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl">
+      <div className="sticky top-topbar z-10 border-b border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
           <Link
             href="/trade/trades"

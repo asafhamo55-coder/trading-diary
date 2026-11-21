@@ -9,6 +9,7 @@ import {
   getTradeById,
 } from "@/lib/data";
 import type { Trade } from "@/lib/types";
+import { PageCrumbs } from "@/components/layout/AppNavShell";
 
 export const dynamic = "force-dynamic";
 
@@ -61,12 +62,15 @@ export default async function EditTradePage({
   ]);
 
   return (
-    <TradeFormClient
-      tradeId={trade.id}
-      initialValues={tradeToFormValues(trade)}
-      errorDefinitions={errorDefs.map((e) => ({ id: e.id, name: e.name }))}
-      commissionPerShare={account.commissionPerShare}
-      riskUnit={review?.riskUnit ?? 1000}
-    />
+    <>
+      <PageCrumbs items={[{ label: trade.symbol, href: `/trade/trades/${trade.id}` }, { label: "Edit" }]} />
+      <TradeFormClient
+        tradeId={trade.id}
+        initialValues={tradeToFormValues(trade)}
+        errorDefinitions={errorDefs.map((e) => ({ id: e.id, name: e.name }))}
+        commissionPerShare={account.commissionPerShare}
+        riskUnit={review?.riskUnit ?? 1000}
+      />
+    </>
   );
 }
