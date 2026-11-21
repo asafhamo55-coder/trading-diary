@@ -48,6 +48,7 @@ model Property {
   valueAsOf     DateTime?  // date of the current value estimate
   mortgageBalance Float?   // outstanding mortgage principal (liability) — for equity
   mortgageAsOf  DateTime?  // date of the mortgage balance
+  usage         String   @default("rental") // "rental" | "residence" (primary home: net worth only)
   notes         String?
   archivedAt    DateTime?  // null = active; set = archived (hidden from active list)
 

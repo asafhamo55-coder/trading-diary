@@ -14,6 +14,7 @@ interface ValueInfo {
   valueAsOf: string | null;
   mortgageBalance: number | null;
   mortgageAsOf: string | null;
+  usage: string;
 }
 
 function pct(n: number): string {
@@ -41,6 +42,7 @@ export default function PropertyValueSection({
     valueAsOf: property.valueAsOf ?? "",
     mortgageBalance: property.mortgageBalance != null ? String(property.mortgageBalance) : "",
     mortgageAsOf: property.mortgageAsOf ?? "",
+    usage: property.usage,
   });
 
   const appr = computeAppreciation(property);
@@ -62,6 +64,7 @@ export default function PropertyValueSection({
           valueAsOf: form.valueAsOf || (form.currentValue ? today : null),
           mortgageBalance: form.mortgageBalance ? Number(form.mortgageBalance) : null,
           mortgageAsOf: form.mortgageAsOf || (form.mortgageBalance ? today : null),
+          usage: form.usage,
         }),
       });
       if (!res.ok) {
@@ -122,6 +125,12 @@ export default function PropertyValueSection({
               <input type="date" value={form.valueAsOf}
                 onChange={(e) => setForm({ ...form, valueAsOf: e.target.value })}
                 className={inputCls} />
+            </Field>
+            <Field label="Use">
+              <select value={form.usage} onChange={(e) => setForm({ ...form, usage: e.target.value })} className={inputCls}>
+                <option value="rental">Rental property</option>
+                <option value="residence">Primary residence (net worth only)</option>
+              </select>
             </Field>
             <Field label="Mortgage balance (0 if paid off)">
               <input type="number" min="0" step="1000" value={form.mortgageBalance}

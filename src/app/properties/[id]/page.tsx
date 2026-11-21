@@ -71,6 +71,7 @@ export default async function PropertyDetailPage({
           valueAsOf: property.valueAsOf,
           mortgageBalance: property.mortgageBalance,
           mortgageAsOf: property.mortgageAsOf,
+          usage: property.usage,
           notes: property.notes,
           archivedAt: property.archivedAt,
         }}

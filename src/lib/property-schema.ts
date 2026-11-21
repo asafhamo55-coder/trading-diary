@@ -55,6 +55,10 @@ export async function ensurePropertySchema(): Promise<void> {
   await prisma.$executeRawUnsafe(
     `ALTER TABLE "Property" ADD COLUMN IF NOT EXISTS "mortgageAsOf" TIMESTAMP(3)`
   );
+  // Rental vs the family's primary residence (counted in net worth, not in rental returns).
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "Property" ADD COLUMN IF NOT EXISTS "usage" TEXT NOT NULL DEFAULT 'rental'`
+  );
 
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "PropertyTransaction" (

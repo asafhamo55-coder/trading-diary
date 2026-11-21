@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Building2,
+  Home,
   Plus,
   MapPin,
   X,
@@ -21,6 +22,19 @@ import { Button } from "@/components/ui/button";
 import { Field, SummaryTile, inputCls } from "@/components/properties/shared";
 import { REALTOR_PCT, CLOSING_PCT } from "@/lib/property";
 import YearPicker from "@/components/layout/YearPicker";
+
+const EMPTY_FORM = {
+  street: "",
+  unit: "",
+  city: "",
+  state: "",
+  zip: "",
+  purchasePrice: "",
+  purchaseDate: "",
+  residence: false,
+  currentValue: "",
+  mortgageBalance: "",
+};
 
 interface Row {
   id: string;
@@ -43,6 +57,9 @@ interface Row {
   purchaseDate: string | null;
   currentValue: number | null;
   valueAsOf: string | null;
+  mortgageBalance: number | null;
+  /** "rental" or "residence" (the family's own home — net worth only). */
+  usage: string;
   yieldPct: number | null;
   /** Return on cash invested, summed across the units of this building. */
   cashOnCashPct: number | null;
@@ -71,20 +88,15 @@ export default function PropertiesClient({
   const [adding, setAdding] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    street: "",
-    unit: "",
-    city: "",
-    state: "",
-    zip: "",
-    purchasePrice: "",
-    purchaseDate: "",
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const [showArchived, setShowArchived] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const activeRows = rows.filter((r) => !r.archived);
+  // The family's own home counts in net worth but not in rental returns, so it
+  // is listed on its own and left out of every rental figure below.
+  const homes = rows.filter((r) => !r.archived && r.usage === "residence");
+  const activeRows = rows.filter((r) => !r.archived && r.usage !== "residence");
   const archivedRows = rows.filter((r) => r.archived);
 
   const grandIncome = activeRows.reduce((sum, r) => sum + r.income, 0);
@@ -153,21 +165,18 @@ export default function PropertiesClient({
           zip: form.zip || null,
           purchasePrice: form.purchasePrice ? Number(form.purchasePrice) : null,
           purchaseDate: form.purchaseDate || null,
+          usage: form.residence ? "residence" : "rental",
+          currentValue: form.currentValue ? Number(form.currentValue) : null,
+          valueAsOf: form.currentValue ? new Date().toISOString().slice(0, 10) : null,
+          mortgageBalance: form.mortgageBalance ? Number(form.mortgageBalance) : null,
+          mortgageAsOf: form.mortgageBalance ? new Date().toISOString().slice(0, 10) : null,
         }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Failed to add property");
       }
-      setForm({
-        street: "",
-        unit: "",
-        city: "",
-        state: "",
-        zip: "",
-        purchasePrice: "",
-        purchaseDate: "",
-      });
+      setForm(EMPTY_FORM);
       setAdding(false);
       router.refresh();
     } catch (err) {
@@ -294,6 +303,41 @@ export default function PropertiesClient({
                 />
               </Field>
             </div>
+            <label className="sm:col-span-6 flex items-center gap-2 text-sm text-[var(--foreground)]">
+              <input
+                type="checkbox"
+                checked={form.residence}
+                onChange={(e) => setForm({ ...form, residence: e.target.checked })}
+                className="size-4 accent-[var(--ring)]"
+              />
+              This is our primary residence (counts in net worth, not in rental returns)
+            </label>
+            <div className="sm:col-span-3">
+              <Field label="Current value (optional)">
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  value={form.currentValue}
+                  onChange={(e) => setForm({ ...form, currentValue: e.target.value })}
+                  placeholder="750000"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-3">
+              <Field label="Mortgage balance (optional)">
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  value={form.mortgageBalance}
+                  onChange={(e) => setForm({ ...form, mortgageBalance: e.target.value })}
+                  placeholder="400000"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
           </div>
           {error && (
             <div className="flex items-center gap-2 rounded-lg border border-loss/30 bg-loss/10 px-3 py-2 text-sm text-loss">
@@ -310,6 +354,15 @@ export default function PropertiesClient({
             </Button>
           </div>
         </form>
+      )}
+
+      {/* Primary residence(s) — equity only, no rental metrics */}
+      {homes.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {homes.map((h) => (
+            <HomeCard key={h.id} row={h} />
+          ))}
+        </div>
       )}
 
       {/* Portfolio KPI strip */}
@@ -366,7 +419,7 @@ export default function PropertiesClient({
 
       {/* Active property list */}
       {activeRows.length === 0 ? (
-        archivedRows.length === 0 && (
+        archivedRows.length === 0 && homes.length === 0 && (
           <div className="rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-sm px-6 py-14 text-center">
             <div className="mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-amber/10 ring-1 ring-inset ring-accent-amber/20">
               <Building2 className="w-8 h-8 text-accent-amber" />
@@ -624,5 +677,47 @@ function PropertyCard({
         </div>
       )}
     </div>
+  );
+}
+
+function HomeCard({ row: r }: { row: Row }) {
+  const equity = r.currentValue != null ? r.currentValue - (r.mortgageBalance ?? 0) : null;
+  return (
+    <Link
+      href={`/properties/${r.id}`}
+      className="pressable block rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+    >
+      <div className="flex items-center gap-2">
+        <Home className="size-4 text-accent-blue" aria-hidden />
+        <h3 className="truncate text-sm font-semibold text-[var(--foreground)]">{r.title}</h3>
+        <span className="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-accent-blue/10 text-accent-blue">
+          Primary residence
+        </span>
+      </div>
+      <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-[var(--muted-foreground)]">
+        <MapPin className="size-3 shrink-0" />
+        {r.address}
+      </p>
+      <div className="mt-3 grid grid-cols-3 gap-3 text-xs">
+        <div>
+          <p className="text-[var(--muted-foreground)]">Value</p>
+          <p className="font-data text-sm font-semibold text-[var(--foreground)]">
+            {r.currentValue != null ? formatCurrency(r.currentValue) : "Add"}
+          </p>
+        </div>
+        <div>
+          <p className="text-[var(--muted-foreground)]">Mortgage</p>
+          <p className="font-data text-sm font-semibold text-[var(--foreground)]">
+            {r.mortgageBalance != null ? formatCurrency(r.mortgageBalance) : "Add"}
+          </p>
+        </div>
+        <div>
+          <p className="text-[var(--muted-foreground)]">Equity</p>
+          <p className={cn("font-data text-sm font-semibold", equity != null ? signedClass(equity) : "text-[var(--muted-foreground)]")}>
+            {equity != null ? formatCurrency(equity) : "—"}
+          </p>
+        </div>
+      </div>
+    </Link>
   );
 }

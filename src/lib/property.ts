@@ -76,6 +76,7 @@ export interface PropertyDTO {
   valueAsOf: string | null;
   mortgageBalance: number | null;
   mortgageAsOf: string | null;
+  usage: string;
   notes: string | null;
   archivedAt: string | null;
 }

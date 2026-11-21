@@ -114,6 +114,8 @@ const propertyBaseSchema = z.object({
     .optional()
     .nullable()
     .transform((s) => (s ? new Date(s) : null)),
+  // "residence" = the family's own home: net worth only, no rental metrics.
+  usage: z.enum(["rental", "residence"]).optional(),
   // Outstanding mortgage, so equity = value − mortgage on the net-worth dashboard.
   mortgageBalance: z.number().nonnegative().optional().nullable(),
   mortgageAsOf: z

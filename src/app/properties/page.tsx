@@ -63,6 +63,8 @@ export default async function PropertiesPage({
       purchaseDate: p.purchaseDate,
       currentValue: p.currentValue,
       valueAsOf: p.valueAsOf,
+      mortgageBalance: p.mortgageBalance,
+      usage: p.usage,
       yieldPct: yieldPct(summary.net, p.purchasePrice, elapsed),
     };
   });

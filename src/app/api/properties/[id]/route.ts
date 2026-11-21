@@ -78,6 +78,7 @@ export async function PATCH(
         ...(data.valueAsOf !== undefined ? { valueAsOf: data.valueAsOf } : {}),
         ...(data.mortgageBalance !== undefined ? { mortgageBalance: data.mortgageBalance } : {}),
         ...(data.mortgageAsOf !== undefined ? { mortgageAsOf: data.mortgageAsOf } : {}),
+        ...(data.usage !== undefined ? { usage: data.usage } : {}),
         ...(data.notes !== undefined ? { notes: data.notes } : {}),
         ...(data.archived !== undefined
           ? { archivedAt: data.archived ? new Date() : null }

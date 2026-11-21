@@ -79,6 +79,7 @@ function serializeProperty(p: {
   valueAsOf: Date | null;
   mortgageBalance: number | null;
   mortgageAsOf: Date | null;
+  usage: string;
   notes: string | null;
   archivedAt: Date | null;
 }): PropertyDTO {
@@ -98,6 +99,7 @@ function serializeProperty(p: {
     valueAsOf: p.valueAsOf ? toDateStr(p.valueAsOf) : null,
     mortgageBalance: p.mortgageBalance,
     mortgageAsOf: p.mortgageAsOf ? toDateStr(p.mortgageAsOf) : null,
+    usage: p.usage,
     notes: p.notes,
     archivedAt: p.archivedAt ? p.archivedAt.toISOString() : null,
   };

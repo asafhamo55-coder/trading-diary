@@ -65,6 +65,7 @@ interface PropertyInfo {
   valueAsOf: string | null;
   mortgageBalance: number | null;
   mortgageAsOf: string | null;
+  usage: string;
   notes: string | null;
   archivedAt: string | null;
 }
@@ -624,6 +625,7 @@ export default function PropertyDetailClient({
           valueAsOf: property.valueAsOf,
           mortgageBalance: property.mortgageBalance,
           mortgageAsOf: property.mortgageAsOf,
+          usage: property.usage,
         }}
         today={today}
       />

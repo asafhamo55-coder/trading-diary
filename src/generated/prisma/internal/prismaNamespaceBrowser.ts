@@ -122,6 +122,7 @@ export const PropertyScalarFieldEnum = {
   valueAsOf: 'valueAsOf',
   mortgageBalance: 'mortgageBalance',
   mortgageAsOf: 'mortgageAsOf',
+  usage: 'usage',
   notes: 'notes',
   archivedAt: 'archivedAt',
   createdAt: 'createdAt',
