@@ -493,3 +493,16 @@ model Benefit {
   @@index([linkedSavingsAccountId])
   @@index([importKey])
 }
+
+// ── Trade guidelines ───────────────────────────────────────────────
+// House rules for the stocks account (target mix, rebalance band, dip rule).
+// One row per Account; `config` is a GuidelineConfig (src/lib/guidelines.ts),
+// validated with zod on write. `accountId` is a plain field (no relation),
+// like HouseholdProfile. DDL: src/lib/guidelines-schema.ts (self-heal).
+model TradingGuideline {
+  id        String   @id @default(cuid())
+  accountId String   @unique
+  config    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { jsonResponse, errorResponse } from "@/lib/api-helpers";
 import { checkSavingsToken } from "@/lib/ingest-auth";
 import { getHomeCashFlowSummary, getLatestAdvisorReport, getNetWorth, getProfile } from "@/lib/savings-data";
+import { getGuidelineSummary } from "@/lib/guidelines-data";
 import { ADVISOR_OUTPUT_SCHEMA, ADVISOR_SYSTEM, buildAdvisorSnapshot, snapshotHash } from "@/lib/advisor";
 
 // GET /api/savings/advisor/context — everything the daily Claude Code advisor
@@ -13,7 +14,12 @@ export async function GET(req: NextRequest) {
   try {
     const [netWorth, profile, cashFlow] = await Promise.all([getNetWorth(), getProfile(), getHomeCashFlowSummary()]);
     const { coverage, ...nw } = netWorth;
-    const snapshot = buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow });
+    // The trading account's standing allocation rules (SPY/QQQ/large caps/cash)
+    // ride along so the advisor can comment on drift and dip signals.
+    const snapshot = {
+      ...buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow }),
+      tradingGuidelines: await getGuidelineSummary(),
+    };
     const inputHash = snapshotHash(snapshot);
     const latest = await getLatestAdvisorReport();
     return jsonResponse({

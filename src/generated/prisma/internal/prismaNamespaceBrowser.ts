@@ -71,7 +71,8 @@ export const ModelName = {
   SavingsSnapshot: 'SavingsSnapshot',
   HouseholdProfile: 'HouseholdProfile',
   AdvisorReport: 'AdvisorReport',
-  Benefit: 'Benefit'
+  Benefit: 'Benefit',
+  TradingGuideline: 'TradingGuideline'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -470,6 +471,17 @@ export const BenefitScalarFieldEnum = {
 } as const
 
 export type BenefitScalarFieldEnum = (typeof BenefitScalarFieldEnum)[keyof typeof BenefitScalarFieldEnum]
+
+
+export const TradingGuidelineScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  config: 'config',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TradingGuidelineScalarFieldEnum = (typeof TradingGuidelineScalarFieldEnum)[keyof typeof TradingGuidelineScalarFieldEnum]
 
 
 export const SortOrder = {

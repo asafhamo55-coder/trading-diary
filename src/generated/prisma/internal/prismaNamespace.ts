@@ -404,7 +404,8 @@ export const ModelName = {
   SavingsSnapshot: 'SavingsSnapshot',
   HouseholdProfile: 'HouseholdProfile',
   AdvisorReport: 'AdvisorReport',
-  Benefit: 'Benefit'
+  Benefit: 'Benefit',
+  TradingGuideline: 'TradingGuideline'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "account" | "property" | "tenant" | "propertyTransaction" | "fundTransaction" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage" | "homeAccount" | "homeCategory" | "homeTransaction" | "homeImport" | "homeCategoryRule" | "savingsAccount" | "savingsSnapshot" | "householdProfile" | "advisorReport" | "benefit"
+    modelProps: "account" | "property" | "tenant" | "propertyTransaction" | "fundTransaction" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage" | "homeAccount" | "homeCategory" | "homeTransaction" | "homeImport" | "homeCategoryRule" | "savingsAccount" | "savingsSnapshot" | "householdProfile" | "advisorReport" | "benefit" | "tradingGuideline"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1978,6 +1979,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TradingGuideline: {
+      payload: Prisma.$TradingGuidelinePayload<ExtArgs>
+      fields: Prisma.TradingGuidelineFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TradingGuidelineFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TradingGuidelineFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload>
+        }
+        findFirst: {
+          args: Prisma.TradingGuidelineFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TradingGuidelineFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload>
+        }
+        findMany: {
+          args: Prisma.TradingGuidelineFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload>[]
+        }
+        create: {
+          args: Prisma.TradingGuidelineCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload>
+        }
+        createMany: {
+          args: Prisma.TradingGuidelineCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TradingGuidelineCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload>[]
+        }
+        delete: {
+          args: Prisma.TradingGuidelineDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload>
+        }
+        update: {
+          args: Prisma.TradingGuidelineUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload>
+        }
+        deleteMany: {
+          args: Prisma.TradingGuidelineDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TradingGuidelineUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TradingGuidelineUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload>[]
+        }
+        upsert: {
+          args: Prisma.TradingGuidelineUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TradingGuidelinePayload>
+        }
+        aggregate: {
+          args: Prisma.TradingGuidelineAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTradingGuideline>
+        }
+        groupBy: {
+          args: Prisma.TradingGuidelineGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TradingGuidelineGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TradingGuidelineCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TradingGuidelineCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2399,6 +2474,17 @@ export const BenefitScalarFieldEnum = {
 export type BenefitScalarFieldEnum = (typeof BenefitScalarFieldEnum)[keyof typeof BenefitScalarFieldEnum]
 
 
+export const TradingGuidelineScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  config: 'config',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TradingGuidelineScalarFieldEnum = (typeof TradingGuidelineScalarFieldEnum)[keyof typeof TradingGuidelineScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2715,6 +2801,7 @@ export type GlobalOmitConfig = {
   householdProfile?: Prisma.HouseholdProfileOmit
   advisorReport?: Prisma.AdvisorReportOmit
   benefit?: Prisma.BenefitOmit
+  tradingGuideline?: Prisma.TradingGuidelineOmit
 }
 
 /* Types for Logging */

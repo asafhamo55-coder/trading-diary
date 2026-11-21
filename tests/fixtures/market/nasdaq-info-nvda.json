@@ -1,0 +1,46 @@
+{
+ "data": {
+  "symbol": "NVDA",
+  "companyName": "NVIDIA Corporation Common Stock",
+  "stockType": "Common Stock",
+  "exchange": "NASDAQ-GS",
+  "isNasdaqListed": true,
+  "isNasdaq100": true,
+  "isHeld": false,
+  "primaryData": {
+   "lastSalePrice": "$128.3744",
+   "netChange": "-17.6056",
+   "percentageChange": "-12.06%",
+   "deltaIndicator": "down",
+   "lastTradeTimestamp": "Nov 20, 2026",
+   "isRealTime": false,
+   "bidPrice": "N/A",
+   "askPrice": "N/A",
+   "bidSize": "N/A",
+   "askSize": "N/A",
+   "volume": "633,418,432",
+   "currency": null
+  },
+  "secondaryData": null,
+  "marketStatus": "Closed",
+  "assetClass": "STOCKS",
+  "keyStats": {
+   "fiftyTwoWeekHighLow": {
+    "label": "52 Week Range:",
+    "value": "145.71 - 243.37"
+   },
+   "dayrange": {
+    "label": "High/Low:",
+    "value": "NA"
+   }
+  },
+  "notifications": [],
+  "gtEnabled": false
+ },
+ "message": null,
+ "status": {
+  "rCode": 200,
+  "bCodeMessage": null,
+  "developerMessage": null
+ }
+}

@@ -35,6 +35,7 @@ describe("resolveNav", () => {
   it("maps the Trade area to /trade/* even without an index", () => {
     expect(resolveNav("/trade").area?.id).toBe("trade");
     expect(resolveNav("/trade/settings").page?.label).toBe("Settings");
+    expect(resolveNav("/trade/guidelines").page?.label).toBe("Guidelines");
   });
 
   it("gives every area an icon and unique page hrefs", () => {

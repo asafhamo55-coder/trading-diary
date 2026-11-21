@@ -122,3 +122,8 @@ export type AdvisorReport = Prisma.AdvisorReportModel
  * 
  */
 export type Benefit = Prisma.BenefitModel
+/**
+ * Model TradingGuideline
+ * 
+ */
+export type TradingGuideline = Prisma.TradingGuidelineModel

@@ -21,6 +21,7 @@ import EChart from "@/components/charts/EChart";
 import type { EChartsCoreOption } from "echarts/core";
 import type { DashboardInsights } from "@/lib/data";
 import YearPicker from "@/components/layout/YearPicker";
+import GuidelinesDashboardCard from "@/components/guidelines/GuidelinesDashboardCard";
 
 interface SegmentStats {
   count: number;
@@ -289,6 +290,9 @@ export default function DashboardClient({
             </div>
           </div>
         </div>
+
+        {/* Stocks account vs its guidelines */}
+        <GuidelinesDashboardCard />
 
         {/* Monthly P&L widgets */}
         <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
