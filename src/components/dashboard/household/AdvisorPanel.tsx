@@ -6,7 +6,7 @@ import {
   ArrowRight,
   ChevronDown,
   HelpCircle,
-  KeyRound,
+  CalendarClock,
   RefreshCw,
   Sparkles,
   User,
@@ -150,7 +150,7 @@ export default function AdvisorPanel({
               <Sparkles />
             </span>
             <CardTitle as="h2" className="text-lg">
-              Fable advisor
+              Household advisor
             </CardTitle>
             <Badge variant="ai">AI</Badge>
           </div>
@@ -161,8 +161,8 @@ export default function AdvisorPanel({
           {report ? (
             <p className="text-xs text-muted-foreground">
               Last run {fmtRelative(report.createdAt)}
-              {usage?.estCostUsd != null ? ` · cost $${usage.estCostUsd.toFixed(2)}` : ""}
-              {` · ${usage?.servedByModel ?? report.model}`}
+              {usage?.estCostUsd ? ` · cost $${usage.estCostUsd.toFixed(2)}` : ""}
+              {` · ${report.model === "claude-code" ? "Claude Code" : (usage?.servedByModel ?? report.model)}`}
               {usage?.fallbackUsed ? " (fallback)" : ""}
               {lastCached ? " · inputs unchanged, reused saved report" : ""}
             </p>
@@ -173,17 +173,14 @@ export default function AdvisorPanel({
       {running ? <ProgressBlock startedAt={(run as { startedAt: number }).startedAt} /> : null}
 
       {run.kind === "needsKey" ? (
-        <div className="m-5 flex gap-3 rounded-lg border border-warning/25 bg-warning-subtle p-4 text-sm">
-          <KeyRound className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
-          <div className="space-y-1">
-            <p className="font-semibold text-foreground">Connect the advisor</p>
-            <p className="text-foreground-secondary">
-              The advisor runs on Claude Fable and needs an Anthropic API key. Add{" "}
-              <code className="rounded bg-surface px-1 py-0.5 font-mono text-xs">ANTHROPIC_API_KEY</code> to the
-              project’s Environment Variables in Vercel (Settings → Environment Variables), then redeploy.
-              {report ? " Your last saved report is shown below." : ""}
-            </p>
-          </div>
+        <div className="mx-5 mt-4 flex gap-3 rounded-lg border border-border bg-subtle/60 px-4 py-3 text-sm">
+          <CalendarClock className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+          <p className="text-foreground-secondary">
+            Refreshed every morning at 7:00 AM by Claude Code on your Claude subscription, using the latest
+            data and laws. For an update now, ask Claude Code to{" "}
+            <span className="font-medium text-foreground">“run the advisor”</span>.
+            {report ? "" : " Your first report arrives by tomorrow morning."}
+          </p>
         </div>
       ) : null}
 
