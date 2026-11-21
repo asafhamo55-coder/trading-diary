@@ -1,0 +1,86 @@
+{
+  "asOf": { "adult_a": "2026-06", "adult_b": "2026-05" },
+  "currency": "ILS",
+  "people": [
+    {
+      "key": "adult_a",
+      "nameHe": "בדיקה א",
+      "nameEn": "Test A",
+      "birthDate": "1980-01-15",
+      "retirementAge": 67,
+      "summary": { "totalBalance": 350000, "ytdReturnPct": 5.1 },
+      "products": [
+        {
+          "type": "pension",
+          "typeHe": "קרן פנסיה מקיפה",
+          "provider": "Sample Pension Co",
+          "planName": "Sample Comprehensive",
+          "policyNumber": "PN-0001-2345-6789",
+          "status": "active",
+          "openDate": "01/03/2010",
+          "balance": "250,000",
+          "track": "age-based",
+          "ytdReturnPct": 5.2,
+          "feeDepositPct": "1.5%",
+          "feeAccumulationPct": 0.25,
+          "conversionFactor": 195,
+          "monthlyDeposit": { "employee": 900, "employer": 975, "severance": 1250, "total": 3125 },
+          "insuredSalary": 15000,
+          "projectedMonthlyPension": 9000,
+          "coverages": [
+            { "type": "survivors", "typeHe": "פנסיית שארים", "amount": 6000, "monthlyCost": 80 },
+            { "type": "disability", "typeHe": "אובדן כושר עבודה", "amount": 11000, "monthlyCost": 60 }
+          ],
+          "sourcePage": 3
+        },
+        {
+          "type": "hishtalmut",
+          "typeHe": "קרן השתלמות",
+          "provider": "Sample Study Fund",
+          "policyNumber": "778899",
+          "status": "active",
+          "openDate": "2022-02-01",
+          "balance": 100000,
+          "feeAccumulationPct": 0.7,
+          "monthlyDeposit": { "employee": 375, "employer": 1125, "total": 1500 },
+          "sourcePage": 5
+        },
+        {
+          "type": "other",
+          "typeHe": "ביטוח ריסק",
+          "provider": "Sample Insurer",
+          "planName": "Term life",
+          "policyNumber": "55-4321",
+          "balance": 0,
+          "coverages": [{ "type": "death", "typeHe": "מוות", "amount": 1000000, "monthlyCost": 120 }],
+          "sourcePage": 7
+        }
+      ]
+    },
+    {
+      "key": "adult_b",
+      "nameEn": "Test B",
+      "products": [
+        {
+          "type": "managers_insurance",
+          "typeHe": "ביטוח מנהלים",
+          "provider": "Sample Insurer",
+          "policyNumber": 12340000,
+          "status": "frozen",
+          "balance": 80000,
+          "feeDepositPct": 3,
+          "feeAccumulationPct": 1.05,
+          "guaranteedFactor": "yes",
+          "sourcePage": 2
+        },
+        {
+          "type": "crypto_wallet",
+          "provider": "Sample Other",
+          "balance": 500,
+          "sourcePage": 9
+        }
+      ]
+    }
+  ],
+  "agentNotes": ["synthetic fixture — no real data"]
+}

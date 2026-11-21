@@ -6,7 +6,10 @@ import { getAvailableYears, parseYear, resolveSelectedYear } from "@/lib/year";
 import { agg, equitySummary, buildEquityRecommendations, type EquityData } from "@/lib/equity-coach";
 import { hasLLMKey } from "@/lib/llm";
 import { todayInEastern } from "@/lib/utils";
+import { Suspense } from "react";
 import HubClient from "@/components/home/HubClient";
+import HouseholdSection from "@/components/dashboard/household/HouseholdSection";
+import HouseholdSkeleton from "@/components/dashboard/household/HouseholdSkeleton";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -141,6 +144,11 @@ export default async function HomeEquityPage({
       aiConfigured={aiConfigured}
       hasData={hasData}
       mtd={mtd}
-    />
+    >
+      {/* Household net worth streams in independently of the cash-flow data. */}
+      <Suspense fallback={<HouseholdSkeleton />}>
+        <HouseholdSection />
+      </Suspense>
+    </HubClient>
   );
 }

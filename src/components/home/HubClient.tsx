@@ -6,14 +6,16 @@ import { ArrowUpRight, TrendingUp, Lock, BarChart3, CalendarDays, CalendarClock 
 import EChart from "@/components/charts/EChart";
 import type { EChartsCoreOption } from "echarts/core";
 import { cn, formatCurrency } from "@/lib/utils";
-import Logo from "@/components/layout/Logo";
 import YearPicker from "@/components/layout/YearPicker";
-import ThemeToggle from "@/components/layout/ThemeToggle";
 import RecommendationList from "@/components/home/RecommendationList";
 import CoPilotChat from "@/components/home/CoPilotChat";
 import { Sparkles, PiggyBank } from "lucide-react";
 import type { EquitySummary } from "@/lib/equity-coach";
 import type { Recommendation } from "@/lib/home-coach";
+import HubShell from "@/components/home/HubShell";
+import { Kpi } from "@/components/ui/stat-tile";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useThemeTokens } from "@/lib/use-theme-tokens";
 
 interface RevExp {
   revenue: number;
@@ -64,10 +66,12 @@ interface MtdData {
   home: RevExp;
 }
 
+// Module colours as design tokens (theme-aware). Charts use the resolved
+// values from useThemeTokens().
 const SOURCE_COLORS: Record<SourceRow["key"], string> = {
-  trade: "#3B82F6",
-  properties: "#FFB547",
-  home: "#00D68F",
+  trade: "var(--primary)",
+  properties: "var(--accent)",
+  home: "var(--success)",
 };
 
 const EQUITY_SUGGESTIONS = [
@@ -87,7 +91,9 @@ export default function HubClient({
   aiConfigured,
   hasData,
   mtd,
+  children,
 }: {
+  children?: React.ReactNode;
   monthly: MonthlyRow[];
   sources: SourceRow[];
   year: number;
@@ -110,14 +116,20 @@ export default function HubClient({
     [monthly]
   );
 
-  const cumulative = useMemo(() => {
-    let running = 0;
-    return netByMonth.map((n) => (running += n));
-  }, [netByMonth]);
+  const cumulative = useMemo(
+    () => netByMonth.map((_, i) => netByMonth.slice(0, i + 1).reduce((a, b) => a + b, 0)),
+    [netByMonth]
+  );
 
   const chartHasData = netByMonth.some((n) => n !== 0);
 
+  const t = useThemeTokens();
   const option = useMemo<EChartsCoreOption>(() => {
+    const chartColors: Record<SourceRow["key"], string> = {
+      trade: t.primary,
+      properties: t.accent,
+      home: t.success,
+    };
     const series = [
       { key: "trade" as const, name: "Trade" },
       { key: "properties" as const, name: "Properties" },
@@ -127,7 +139,7 @@ export default function HubClient({
       type: "bar" as const,
       stack: "net",
       data: monthly.map((m) => net(m[s.key])),
-      itemStyle: { color: SOURCE_COLORS[s.key], borderRadius: [0, 0, 0, 0] },
+      itemStyle: { color: chartColors[s.key], borderRadius: [0, 0, 0, 0] },
       barMaxWidth: 28,
       animation: false,
     }));
@@ -140,15 +152,15 @@ export default function HubClient({
         icon: "roundRect",
         itemWidth: 10,
         itemHeight: 10,
-        textStyle: { color: "#8892A6", fontSize: 11 },
+        textStyle: { color: t.muted, fontSize: 11 },
       },
       tooltip: {
         trigger: "axis",
-        backgroundColor: "#0C0F14",
-        borderColor: "#2A3040",
+        backgroundColor: t.elevated,
+        borderColor: t.border,
         borderWidth: 1,
-        textStyle: { color: "#E8ECF4", fontSize: 12 },
-        axisPointer: { type: "shadow", shadowStyle: { color: "#3B82F610" } },
+        textStyle: { color: t.foreground, fontSize: 12 },
+        axisPointer: { type: "shadow", shadowStyle: { color: `${t.primary}14` } },
         formatter: (params: unknown) => {
           const arr = Array.isArray(params) ? params : [params];
           const name = (arr[0] as { name: string })?.name ?? "";
@@ -164,26 +176,26 @@ export default function HubClient({
             .filter(Boolean)
             .join("");
           return (
-            `<div style="color:#8892A6;font-size:11px;margin-bottom:4px">${name}</div>` +
-            (rows || `<div style="color:#8892A6">No activity</div>`) +
-            `<div style="margin-top:4px;border-top:1px solid #2A3040;padding-top:4px;color:${net >= 0 ? "#00D68F" : "#FF4D6A"}"><b>Net ${net >= 0 ? "+" : ""}${formatCurrency(net)}</b></div>`
+            `<div style="color:${t.muted};font-size:11px;margin-bottom:4px">${name}</div>` +
+            (rows || `<div style="color:${t.muted}">No activity</div>`) +
+            `<div style="margin-top:4px;border-top:1px solid ${t.border};padding-top:4px;color:${net >= 0 ? t.success : t.danger}"><b>Net ${net >= 0 ? "+" : ""}${formatCurrency(net)}</b></div>`
           );
         },
       },
       xAxis: {
         type: "category",
         data: monthly.map((m) => m.name),
-        axisLine: { lineStyle: { color: "#2A3040" } },
+        axisLine: { lineStyle: { color: t.border } },
         axisTick: { show: false },
-        axisLabel: { color: "#8892A6", fontSize: 11 },
+        axisLabel: { color: t.muted, fontSize: 11 },
       },
       yAxis: {
         type: "value",
         axisLine: { show: false },
         axisTick: { show: false },
-        splitLine: { lineStyle: { color: "#2A3040", type: "dashed" } },
+        splitLine: { lineStyle: { color: t.border, type: [2, 4] } },
         axisLabel: {
-          color: "#8892A6",
+          color: t.muted,
           fontSize: 11,
           formatter: (val: number) =>
             val === 0 ? "0" : `$${Math.round(val / 100) / 10}k`,
@@ -197,57 +209,52 @@ export default function HubClient({
           data: cumulative,
           smooth: true,
           showSymbol: false,
-          lineStyle: { color: "#E8ECF4", width: 2, type: "dashed" },
-          itemStyle: { color: "#E8ECF4" },
+          lineStyle: { color: t.foreground, width: 2, type: "dashed" },
+          itemStyle: { color: t.foreground },
           animation: false,
           z: 3,
         },
       ],
     };
-  }, [monthly, cumulative]);
+  }, [monthly, cumulative, t]);
 
   return (
-    <div className="flex-1 p-4 md:p-8 space-y-8 md:space-y-10 overflow-y-auto max-w-6xl mx-auto w-full">
-      {/* Hero */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex flex-col gap-1">
-          <Logo size="lg" />
-          <p className="text-xs md:text-sm text-[var(--muted-foreground)] pl-0.5">
-            Your unified financial overview
-          </p>
+    <HubShell>
+    <div className="mx-auto w-full max-w-7xl space-y-6 md:space-y-8">
+      {children}
+
+      <section aria-labelledby="cash-flow-title" className="space-y-6 border-t border-border pt-8 md:space-y-8 md:pt-10">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Monthly</p>
+          <h2 id="cash-flow-title" className="text-xl font-semibold tracking-[-0.015em] text-foreground">
+            Cash flow
+          </h2>
+          <p className="text-sm text-muted-foreground">Income and expenses across Trade, Properties &amp; Home.</p>
         </div>
-        <div className="flex items-center gap-2">
-          {availableYears.length > 0 && (
-            <YearPicker years={availableYears} selected={year} />
-          )}
-          <ThemeToggle collapsed />
-        </div>
-      </div>
+        {availableYears.length > 0 ? <YearPicker years={availableYears} selected={year} /> : null}
+      </header>
 
       {/* Consolidated equity summary */}
-      <div className="relative overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8 shadow-sm">
-        <div
-          className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full blur-3xl opacity-[0.12]"
-          style={{ background: grandTotal >= 0 ? "#00D68F" : "#FF4D6A" }}
-        />
+      <div className="relative overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 md:p-6">
         <div className="relative">
           <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-primary-subtle text-primary">
               <TrendingUp className="w-3.5 h-3.5" />
             </span>
             <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
               Consolidated equity · {year}
             </p>
           </div>
-          <h1
+          <p
             className={cn(
-              "text-4xl md:text-6xl font-bold font-data tracking-tight leading-none",
-              grandTotal >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
+              "text-4xl md:text-5xl font-semibold num tracking-tight leading-none",
+              grandTotal >= 0 ? "text-success" : "text-danger"
             )}
           >
             {grandTotal >= 0 ? "+" : ""}
             {formatCurrency(grandTotal)}
-          </h1>
+          </p>
           <p className="text-xs text-[var(--muted-foreground)] mt-3">
             Aggregated across Hamo Trade, Properties &amp; Home
           </p>
@@ -268,8 +275,8 @@ export default function HubClient({
                     !s.ready
                       ? "text-[var(--muted-foreground)]"
                       : s.total >= 0
-                        ? "text-[#00D68F]"
-                        : "text-[#FF4D6A]"
+                        ? "text-success"
+                        : "text-danger"
                   )}
                 >
                   {s.ready ? `${s.total >= 0 ? "+" : ""}${formatCurrency(s.total)}` : "—"}
@@ -281,31 +288,27 @@ export default function HubClient({
       </div>
 
       {/* This month — month-to-date across all modules */}
-      <div className="relative overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8 shadow-sm">
-        <div
-          className="pointer-events-none absolute -top-24 -left-16 w-64 h-64 rounded-full blur-3xl opacity-[0.10]"
-          style={{ background: "#FFB547" }}
-        />
+      <div className="relative overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 md:p-6">
         <div className="relative">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-[#FFB547]/12 text-[#FFB547]">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-accent-subtle text-accent-fg">
                   <CalendarClock className="w-3.5 h-3.5" />
                 </span>
                 <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                   This month · {mtd.monthName} {mtd.year} · MTD
                 </p>
               </div>
-              <h2
+              <p
                 className={cn(
-                  "text-3xl md:text-5xl font-bold font-data tracking-tight leading-none",
-                  mtdNet >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
+                  "text-3xl md:text-4xl font-semibold num tracking-tight leading-none",
+                  mtdNet >= 0 ? "text-success" : "text-danger"
                 )}
               >
                 {mtdNet >= 0 ? "+" : ""}
                 {formatCurrency(mtdNet)}
-              </h2>
+              </p>
               <p className="text-xs text-[var(--muted-foreground)] mt-3">
                 Net month-to-date · as of {mtd.asOf}
               </p>
@@ -315,7 +318,7 @@ export default function HubClient({
                 <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)] mb-1">
                   In
                 </p>
-                <p className="text-lg md:text-xl font-bold font-data text-[#00D68F]">
+                <p className="text-lg md:text-xl font-semibold num text-success">
                   +{formatCurrency(mtdIn)}
                 </p>
               </div>
@@ -323,7 +326,7 @@ export default function HubClient({
                 <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)] mb-1">
                   Out
                 </p>
-                <p className="text-lg md:text-xl font-bold font-data text-[#FF4D6A]">
+                <p className="text-lg md:text-xl font-semibold num text-danger">
                   −{formatCurrency(mtdOut)}
                 </p>
               </div>
@@ -352,21 +355,21 @@ export default function HubClient({
                   </div>
                   <p
                     className={cn(
-                      "text-lg font-bold font-data",
+                      "text-lg font-semibold num",
                       n > 0
-                        ? "text-[#00D68F]"
+                        ? "text-success"
                         : n < 0
-                          ? "text-[#FF4D6A]"
+                          ? "text-danger"
                           : "text-[var(--muted-foreground)]"
                     )}
                   >
                     {n === 0 ? "—" : `${n >= 0 ? "+" : ""}${formatCurrency(n)}`}
                   </p>
                   <div className="flex items-center gap-3 mt-1 text-[11px] font-data">
-                    <span className="text-[#00D68F]">
+                    <span className="text-success">
                       {rx.revenue ? `+${formatCurrency(rx.revenue)}` : "—"}
                     </span>
-                    <span className="text-[#FF4D6A]">
+                    <span className="text-danger">
                       {rx.expense ? `−${formatCurrency(rx.expense)}` : "—"}
                     </span>
                   </div>
@@ -390,9 +393,9 @@ export default function HubClient({
           const card = (
             <div
               className={cn(
-                "group relative h-full overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 transition-all duration-200",
+                "group relative h-full overflow-hidden bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 transition-all duration-200",
                 s.ready
-                  ? "shadow-sm hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
+                  ? "hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-md cursor-pointer"
                   : "opacity-75"
               )}
             >
@@ -407,7 +410,7 @@ export default function HubClient({
                 <div className="flex items-center gap-2">
                   <span
                     className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-bold"
-                    style={{ background: `${color}1F`, color }}
+                    style={{ background: `color-mix(in srgb, ${color} 12%, transparent)`, color }}
                   >
                     <span
                       className="w-2 h-2 rounded-full"
@@ -427,15 +430,15 @@ export default function HubClient({
               {s.ready ? (
                 <p
                   className={cn(
-                    "text-2xl font-bold font-data mb-2 tracking-tight",
-                    s.total >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"
+                    "text-2xl font-semibold num mb-2 tracking-tight",
+                    s.total >= 0 ? "text-success" : "text-danger"
                   )}
                 >
                   {s.total >= 0 ? "+" : ""}
                   {formatCurrency(s.total)}
                 </p>
               ) : (
-                <p className="text-2xl font-bold font-data mb-2 text-[var(--muted-foreground)]">
+                <p className="text-2xl font-semibold num mb-2 text-[var(--muted-foreground)]">
                   —
                 </p>
               )}
@@ -462,7 +465,7 @@ export default function HubClient({
       {/* Annual breakdown — one square per month, revenue & expense per module */}
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+          <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary-subtle text-primary">
             <CalendarDays className="w-4 h-4" />
           </span>
           <h3 className="text-sm font-semibold text-[var(--foreground)]">
@@ -498,11 +501,11 @@ export default function HubClient({
                   </span>
                   <span
                     className={cn(
-                      "text-sm font-bold font-data",
+                      "text-sm font-semibold num",
                       monthNet > 0
-                        ? "text-[#00D68F]"
+                        ? "text-success"
                         : monthNet < 0
-                          ? "text-[#FF4D6A]"
+                          ? "text-danger"
                           : "text-[var(--muted-foreground)]"
                     )}
                   >
@@ -525,10 +528,10 @@ export default function HubClient({
                           <span className="truncate">{mod.label}</span>
                         </span>
                         <span className="flex items-center gap-2 font-data shrink-0 tabular-nums">
-                          <span className="text-[#00D68F]">
+                          <span className="text-success">
                             {rx.revenue ? `$${Math.round(rx.revenue).toLocaleString("en-US")}` : "—"}
                           </span>
-                          <span className="text-[#FF4D6A]">
+                          <span className="text-danger">
                             {rx.expense ? `−$${Math.round(rx.expense).toLocaleString("en-US")}` : "—"}
                           </span>
                         </span>
@@ -542,19 +545,19 @@ export default function HubClient({
         </div>
         <div className="flex items-center gap-4 mt-3 text-[11px] text-[var(--muted-foreground)]">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#00D68F]" /> Revenue
+            <span className="w-2 h-2 rounded-full bg-success" /> Revenue
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#FF4D6A]" /> Expense
+            <span className="w-2 h-2 rounded-full bg-danger" /> Expense
           </span>
           <span>· net shown top-right of each month</span>
         </div>
       </div>
 
       {/* Monthly equity chart */}
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 md:p-6">
         <div className="flex items-center gap-2 mb-4">
-          <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#3B82F6]/12 text-[#3B82F6]">
+          <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary-subtle text-primary">
             <BarChart3 className="w-4 h-4" />
           </span>
           <h3 className="text-sm font-semibold text-[var(--foreground)]">
@@ -569,20 +572,12 @@ export default function HubClient({
             <EChart option={option} />
           </div>
         ) : (
-          <div className="h-56 flex flex-col items-center justify-center text-center gap-3 px-6">
-            <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--muted)] text-[var(--muted-foreground)]">
-              <BarChart3 className="w-6 h-6" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-[var(--foreground)]">
-                No equity activity yet
-              </p>
-              <p className="text-xs text-[var(--muted-foreground)] mt-1 max-w-xs">
-                Once you log trades and entries for {year}, your monthly net by
-                source will appear here.
-              </p>
-            </div>
-          </div>
+          <EmptyState
+            variant="plain"
+            icon={<BarChart3 />}
+            title="No equity activity yet"
+            description={`Once you log trades and entries for ${year}, your monthly net by source will appear here.`}
+          />
         )}
       </div>
 
@@ -590,25 +585,22 @@ export default function HubClient({
         <>
           {/* Consolidated analysis snapshot */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            <EquityTile label={`Total in · ${year}`} value={summary.totalIncome} color="text-[#00D68F]" icon={<TrendingUp className="w-5 h-5" />} />
-            <EquityTile label={`Total out · ${year}`} value={summary.totalExpense} color="text-[#FF4D6A]" icon={<PiggyBank className="w-5 h-5" />} />
-            <EquityTile label={`Net equity · ${year}`} value={summary.net} color={summary.net >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]"} icon={<Sparkles className="w-5 h-5" />} signed />
-            <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-[var(--muted-foreground)] font-medium">Retention</span>
-                <PiggyBank className="w-5 h-5 text-[var(--muted-foreground)]" />
-              </div>
-              <p className={cn("text-2xl font-bold font-data", summary.retention >= 0 ? "text-[#00D68F]" : "text-[#FF4D6A]")}>
-                {Math.round(summary.retention * 100)}%
-              </p>
-              <p className="text-xs text-[var(--muted-foreground)] mt-1">of income kept</p>
-            </div>
+            <EquityTile label={`Total in · ${year}`} value={summary.totalIncome} color="text-success" icon={<TrendingUp className="w-5 h-5" />} />
+            <EquityTile label={`Total out · ${year}`} value={summary.totalExpense} color="text-danger" icon={<PiggyBank className="w-5 h-5" />} />
+            <EquityTile label={`Net equity · ${year}`} value={summary.net} color={summary.net >= 0 ? "text-success" : "text-danger"} icon={<Sparkles className="w-5 h-5" />} signed />
+            <Kpi
+              label="Retention"
+              icon={<PiggyBank />}
+              valueTone={summary.retention >= 0 ? "positive" : "negative"}
+              value={`${Math.round(summary.retention * 100)}%`}
+              hint="of income kept"
+            />
           </div>
 
           {/* Recommendations */}
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 md:p-6">
             <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#00D68F]/12 text-[#00D68F]">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-success-subtle text-success">
                 <Sparkles className="w-4 h-4" />
               </span>
               <h3 className="text-sm font-semibold text-[var(--foreground)]">Recommendations to grow your equity</h3>
@@ -620,14 +612,16 @@ export default function HubClient({
           <CoPilotChat
             endpoint="/api/equity/copilot"
             suggestions={EQUITY_SUGGESTIONS}
-            accent="#3B82F6"
+            accent="#2563EB"
             aiConfigured={aiConfigured}
             title="Equity co-pilot"
             subtitle="Ask across all your modules"
           />
         </>
       )}
+      </section>
     </div>
+    </HubShell>
   );
 }
 
@@ -645,15 +639,11 @@ function EquityTile({
   signed?: boolean;
 }) {
   return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-[var(--muted-foreground)] font-medium">{label}</span>
-        <div className="text-[var(--muted-foreground)]">{icon}</div>
-      </div>
-      <p className={cn("text-2xl font-bold font-data", color)}>
-        {signed && value >= 0 ? "+" : ""}
-        {formatCurrency(value)}
-      </p>
-    </div>
+    <Kpi
+      label={label}
+      icon={icon}
+      valueTone={color === "text-danger" ? "negative" : "positive"}
+      value={`${signed && value >= 0 ? "+" : ""}${formatCurrency(value)}`}
+    />
   );
 }

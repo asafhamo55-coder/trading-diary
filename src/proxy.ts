@@ -8,6 +8,8 @@ const PUBLIC_PATHS = [
   // Token-authenticated (INGEST_TOKEN bearer) — used by the Gmail add-on, which
   // can't carry the app password cookie. The route enforces its own auth.
   "/api/trades/ingest-email",
+  // Vercel Cron keep-alive — guarded by CRON_SECRET inside the route.
+  "/api/cron/keepalive",
 ];
 
 export async function proxy(req: NextRequest) {

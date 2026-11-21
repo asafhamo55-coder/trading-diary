@@ -66,7 +66,12 @@ export const ModelName = {
   HomeCategory: 'HomeCategory',
   HomeTransaction: 'HomeTransaction',
   HomeImport: 'HomeImport',
-  HomeCategoryRule: 'HomeCategoryRule'
+  HomeCategoryRule: 'HomeCategoryRule',
+  SavingsAccount: 'SavingsAccount',
+  SavingsSnapshot: 'SavingsSnapshot',
+  HouseholdProfile: 'HouseholdProfile',
+  AdvisorReport: 'AdvisorReport',
+  Benefit: 'Benefit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -115,6 +120,8 @@ export const PropertyScalarFieldEnum = {
   purchaseDate: 'purchaseDate',
   currentValue: 'currentValue',
   valueAsOf: 'valueAsOf',
+  mortgageBalance: 'mortgageBalance',
+  mortgageAsOf: 'mortgageAsOf',
   notes: 'notes',
   archivedAt: 'archivedAt',
   createdAt: 'createdAt',
@@ -363,12 +370,126 @@ export const HomeCategoryRuleScalarFieldEnum = {
 export type HomeCategoryRuleScalarFieldEnum = (typeof HomeCategoryRuleScalarFieldEnum)[keyof typeof HomeCategoryRuleScalarFieldEnum]
 
 
+export const SavingsAccountScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  owner: 'owner',
+  country: 'country',
+  type: 'type',
+  provider: 'provider',
+  planName: 'planName',
+  policyLast4: 'policyLast4',
+  status: 'status',
+  currency: 'currency',
+  balance: 'balance',
+  balanceAsOf: 'balanceAsOf',
+  track: 'track',
+  feeDepositPct: 'feeDepositPct',
+  feeAccumulationPct: 'feeAccumulationPct',
+  monthlyDepositEmployee: 'monthlyDepositEmployee',
+  monthlyDepositEmployer: 'monthlyDepositEmployer',
+  monthlyDepositSeverance: 'monthlyDepositSeverance',
+  monthlyDepositTotal: 'monthlyDepositTotal',
+  insuredSalary: 'insuredSalary',
+  liquidityDate: 'liquidityDate',
+  projectedMonthlyPension: 'projectedMonthlyPension',
+  details: 'details',
+  source: 'source',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SavingsAccountScalarFieldEnum = (typeof SavingsAccountScalarFieldEnum)[keyof typeof SavingsAccountScalarFieldEnum]
+
+
+export const SavingsSnapshotScalarFieldEnum = {
+  id: 'id',
+  savingsAccountId: 'savingsAccountId',
+  asOf: 'asOf',
+  balance: 'balance',
+  createdAt: 'createdAt'
+} as const
+
+export type SavingsSnapshotScalarFieldEnum = (typeof SavingsSnapshotScalarFieldEnum)[keyof typeof SavingsSnapshotScalarFieldEnum]
+
+
+export const HouseholdProfileScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  members: 'members',
+  goals: 'goals',
+  goalsText: 'goalsText',
+  riskTolerance: 'riskTolerance',
+  usdIlsRate: 'usdIlsRate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HouseholdProfileScalarFieldEnum = (typeof HouseholdProfileScalarFieldEnum)[keyof typeof HouseholdProfileScalarFieldEnum]
+
+
+export const AdvisorReportScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  model: 'model',
+  inputHash: 'inputHash',
+  snapshot: 'snapshot',
+  output: 'output',
+  usage: 'usage',
+  createdAt: 'createdAt'
+} as const
+
+export type AdvisorReportScalarFieldEnum = (typeof AdvisorReportScalarFieldEnum)[keyof typeof AdvisorReportScalarFieldEnum]
+
+
+export const BenefitScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  owner: 'owner',
+  country: 'country',
+  source: 'source',
+  category: 'category',
+  coverageAmount: 'coverageAmount',
+  coverageCurrency: 'coverageCurrency',
+  monthlyCost: 'monthlyCost',
+  costCurrency: 'costCurrency',
+  payer: 'payer',
+  beneficiary: 'beneficiary',
+  endsAt: 'endsAt',
+  linkedSavingsAccountId: 'linkedSavingsAccountId',
+  details: 'details',
+  origin: 'origin',
+  importKey: 'importKey',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BenefitScalarFieldEnum = (typeof BenefitScalarFieldEnum)[keyof typeof BenefitScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -385,4 +506,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

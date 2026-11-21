@@ -97,3 +97,28 @@ export type HomeImport = Prisma.HomeImportModel
  * 
  */
 export type HomeCategoryRule = Prisma.HomeCategoryRuleModel
+/**
+ * Model SavingsAccount
+ * 
+ */
+export type SavingsAccount = Prisma.SavingsAccountModel
+/**
+ * Model SavingsSnapshot
+ * 
+ */
+export type SavingsSnapshot = Prisma.SavingsSnapshotModel
+/**
+ * Model HouseholdProfile
+ * 
+ */
+export type HouseholdProfile = Prisma.HouseholdProfileModel
+/**
+ * Model AdvisorReport
+ * 
+ */
+export type AdvisorReport = Prisma.AdvisorReportModel
+/**
+ * Model Benefit
+ * 
+ */
+export type Benefit = Prisma.BenefitModel

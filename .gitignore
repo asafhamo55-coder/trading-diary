@@ -43,3 +43,13 @@ next-env.d.ts
 # Prisma generated client (uncomment if using postinstall script)
 # /src/generated/prisma
 .env*.local
+
+# Personal financial reports (contain national ID numbers) — never commit
+*Insurance*.pdf
+*Insirance*.pdf
+401K*.pdf
+*Benefits*.pdf
+*RSU*.pdf
+
+# Extracted personal financial data — load via /savings/import, never commit
+/private-data/

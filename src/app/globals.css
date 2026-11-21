@@ -1,57 +1,242 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────────────────
+ * Design tokens — ported from HomeownerHub (packages/ui/src/tokens.ts,
+ * hub "hoa": brand blue #2563EB). See docs/design/homeownerhub-port.md.
+ *
+ * The legacy variable names (--card, --muted, --muted-foreground, …) are
+ * REMAPPED onto the HomeownerHub roles so every existing page picks up the
+ * new palette. Naming differences to remember:
+ *   HomeownerHub `muted` (text)   → --muted-foreground  (utility: text-muted-foreground)
+ *   HomeownerHub `subtle` (fill)  → --muted / --subtle  (utility: bg-subtle)
+ *   HomeownerHub `input` (border) → --input-border      (--input stays a field fill)
+ * ────────────────────────────────────────────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-profit: #00D68F;
-  --color-loss: #FF4D6A;
-  --color-accent-blue: #3B82F6;
-  --color-accent-amber: #FFB547;
-  --color-accent-purple: #A78BFA;
-  --font-sans: "DM Sans", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-elevated: var(--elevated);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input-border);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-accent: var(--accent);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-fg: var(--accent-fg);
+  --color-success: var(--success);
+  --color-success-solid: var(--success-solid);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-solid: var(--warning-solid);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-danger: var(--danger);
+  --color-danger-solid: var(--danger-solid);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-info: var(--info);
+  --color-info-solid: var(--info-solid);
+  --color-info-subtle: var(--info-subtle);
+  --color-on-solid: var(--on-solid);
+
+  /* Legacy accent utilities, now theme-aware token aliases. */
+  --color-profit: var(--success);
+  --color-loss: var(--danger);
+  --color-accent-blue: var(--primary);
+  --color-accent-amber: var(--accent);
+  --color-accent-purple: var(--violet);
+
+  /* Typography: Be Vietnam Pro + JetBrains Mono (next/font, see layout.tsx). */
+  --font-sans: var(--font-be-vietnam), "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-2xs--letter-spacing: 0.01em;
+
+  /* Radii: controls 6px, cards 12px, pills full. */
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+
+  /* Elevation (values switch per theme below). */
+  --shadow-xs: var(--elev-xs);
+  --shadow-sm: var(--elev-sm);
+  --shadow: var(--elev-sm);
+  --shadow-md: var(--elev-md);
+  --shadow-lg: var(--elev-lg);
+  --shadow-xl: var(--elev-xl);
+  --shadow-2xl: var(--elev-xl);
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Shell dimensions */
+  --spacing-sidebar: 15rem;
+  --spacing-sidebar-collapsed: 3.75rem;
+  --spacing-topbar: 3.5rem;
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-fade-in: fadeIn 180ms cubic-bezier(0.2, 0, 0, 1);
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 }
 
+/* Dark is this app's default (no class / `.dark`). */
 :root,
 :root.dark {
-  --background: #0C0F14;
-  --foreground: #E8ECF4;
-  --card: #151921;
-  --card-foreground: #E8ECF4;
-  --border: #2A3040;
-  --muted: #1C2130;
-  --muted-foreground: #8892A6;
-  --input: #1C2130;
-  --ring: #3B82F6;
+  --background: #0A0F1A;
+  --surface: #111827;
+  --elevated: #182235;
+  --subtle: #1E293B;
+  --border: #243045;
+  --border-strong: #334155;
+  --input-border: #6B7A90;
+  --foreground: #F1F5F9;
+  --foreground-secondary: #CBD5E1;
+  --muted-foreground: #94A3B8;
+  --primary: #60A5FA;
+  --primary-hover: #93C5FD;
+  --primary-fg: #0A0F1A;
+  --primary-subtle: #172554;
+  --ring: #60A5FA;
+  --accent: #FDB022;
+  --accent-subtle: #2B2110;
+  --accent-fg: #FEC84B;
+  --success: #4ACB8B;
+  --success-solid: #047857;
+  --success-subtle: #0D2419;
+  --warning: #FDB022;
+  --warning-solid: #B54708;
+  --warning-subtle: #2B2110;
+  --danger: #F97B70;
+  --danger-solid: #C4261B;
+  --danger-subtle: #2C1414;
+  --info: #5CB5FD;
+  --info-solid: #026AA2;
+  --info-subtle: #0B2133;
+  --on-solid: #FFFFFF;
+  --violet: #AE96FB;
+  /* Categorical chart series (validated 8-hue order, stepped for the dark surface). */
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+  --chart-6: #008300;
+  --chart-7: #9085e9;
+  --chart-8: #e66767;
+  --elev-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --elev-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), inset 0 1px 0 0 rgb(255 255 255 / 0.03);
+  --elev-md: 0 4px 8px -2px rgb(0 0 0 / 0.5), inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+  --elev-lg: 0 12px 16px -4px rgb(0 0 0 / 0.55), inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+  --elev-xl: 0 20px 24px -4px rgb(0 0 0 / 0.6), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+
+  /* Legacy names, remapped. */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --muted: var(--subtle);
+  --input: var(--surface);
   /* Themes native controls (date pickers, <select> menus, scrollbars) dark */
   color-scheme: dark;
 }
 
 :root.light {
-  --background: #F5F7FB;
-  --foreground: #0C0F14;
-  --card: #FFFFFF;
-  --card-foreground: #0C0F14;
-  --border: #D9DEE7;
-  --muted: #EEF1F6;
-  --muted-foreground: #59637A;
-  --input: #FFFFFF;
-  --ring: #3B82F6;
+  --background: #F5F8FC;
+  --surface: #FFFFFF;
+  --elevated: #FFFFFF;
+  --subtle: #EEF3F9;
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --input-border: #7A879C;
+  --foreground: #0F172A;
+  --foreground-secondary: #334155;
+  --muted-foreground: #526077;
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-fg: #FFFFFF;
+  --primary-subtle: #EFF6FF;
+  --ring: #2563EB;
+  --accent: #F79009;
+  --accent-subtle: #FFF6E5;
+  --accent-fg: #93370D;
+  --success: #047857;
+  --success-solid: #047857;
+  --success-subtle: #ECFDF5;
+  --warning: #A6420A;
+  --warning-solid: #B54708;
+  --warning-subtle: #FFF8E6;
+  --danger: #C4261B;
+  --danger-solid: #C4261B;
+  --danger-subtle: #FEF3F2;
+  --info: #026AA2;
+  --info-solid: #026AA2;
+  --info-subtle: #EFF8FF;
+  --on-solid: #FFFFFF;
+  --violet: #6D3FE0;
+  /* Categorical chart series (validated 8-hue order, light surface). */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --chart-6: #008300;
+  --chart-7: #6250d6;
+  --chart-8: #e34948;
+  --elev-xs: 0 1px 2px 0 rgb(16 24 40 / 0.05);
+  --elev-sm: 0 1px 3px 0 rgb(16 24 40 / 0.08), 0 1px 2px -1px rgb(16 24 40 / 0.06);
+  --elev-md: 0 4px 8px -2px rgb(16 24 40 / 0.08), 0 2px 4px -2px rgb(16 24 40 / 0.05);
+  --elev-lg: 0 12px 16px -4px rgb(16 24 40 / 0.08), 0 4px 6px -2px rgb(16 24 40 / 0.03);
+  --elev-xl: 0 20px 24px -4px rgb(16 24 40 / 0.10), 0 8px 8px -4px rgb(16 24 40 / 0.04);
   color-scheme: light;
 }
 
-@font-face {
-  font-family: "DM Sans";
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+/* Sidebar rail + touch variants (HomeownerHub tailwind preset). */
+@custom-variant coarse (@media (pointer: coarse));
+@custom-variant sidebar-collapsed (:root[data-sidebar="collapsed"] &);
+@custom-variant in-rail (:root[data-sidebar="collapsed"] [data-collapsible] &);
+
+/* Money and counts: tabular, lining figures so columns align. */
+@utility num {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum", "lnum", "cv02", "cv03", "cv04", "cv11";
+}
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-* {
-  border-color: var(--border);
-  /* Kill the blue tap flash on mobile for a native feel */
-  -webkit-tap-highlight-color: transparent;
+::selection {
+  background-color: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+/* In the base layer so utilities like `border-transparent` can override it
+   (an unlayered rule beats every Tailwind utility). */
+@layer base {
+  * {
+    border-color: var(--border);
+    /* Kill the blue tap flash on mobile for a native feel */
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 html {
@@ -63,7 +248,9 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
+  /* Inter-style alternates (HomeownerHub "UI" look) */
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Contain overscroll so the page doesn't rubber-band to a white gap */
@@ -154,16 +341,16 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2A3040;
+  background: var(--border);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3A4050;
+  background: var(--border-strong);
 }
 
 /* Number/financial data font */
 .font-data {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }

@@ -12,6 +12,8 @@ interface ValueInfo {
   purchaseDate: string | null;
   currentValue: number | null;
   valueAsOf: string | null;
+  mortgageBalance: number | null;
+  mortgageAsOf: string | null;
 }
 
 function pct(n: number): string {
@@ -37,6 +39,8 @@ export default function PropertyValueSection({
     purchaseDate: property.purchaseDate ?? "",
     currentValue: property.currentValue != null ? String(property.currentValue) : "",
     valueAsOf: property.valueAsOf ?? "",
+    mortgageBalance: property.mortgageBalance != null ? String(property.mortgageBalance) : "",
+    mortgageAsOf: property.mortgageAsOf ?? "",
   });
 
   const appr = computeAppreciation(property);
@@ -56,6 +60,8 @@ export default function PropertyValueSection({
           purchaseDate: form.purchaseDate || null,
           currentValue: form.currentValue ? Number(form.currentValue) : null,
           valueAsOf: form.valueAsOf || (form.currentValue ? today : null),
+          mortgageBalance: form.mortgageBalance ? Number(form.mortgageBalance) : null,
+          mortgageAsOf: form.mortgageAsOf || (form.mortgageBalance ? today : null),
         }),
       });
       if (!res.ok) {
@@ -117,6 +123,16 @@ export default function PropertyValueSection({
                 onChange={(e) => setForm({ ...form, valueAsOf: e.target.value })}
                 className={inputCls} />
             </Field>
+            <Field label="Mortgage balance (0 if paid off)">
+              <input type="number" min="0" step="1000" value={form.mortgageBalance}
+                onChange={(e) => setForm({ ...form, mortgageBalance: e.target.value })}
+                placeholder="320000" className={inputCls} />
+            </Field>
+            <Field label="Mortgage balance as of">
+              <input type="date" value={form.mortgageAsOf}
+                onChange={(e) => setForm({ ...form, mortgageAsOf: e.target.value })}
+                className={inputCls} />
+            </Field>
           </div>
           {error && <p className="text-sm text-[#FF4D6A]">{error}</p>}
           <div className="flex justify-end gap-2">
@@ -142,6 +158,13 @@ export default function PropertyValueSection({
             <span className="text-[var(--muted-foreground)]">→</span>
             <ValueBox label="Now worth" value={property.currentValue} sub={property.valueAsOf ?? undefined} accent />
           </div>
+          {property.mortgageBalance != null && property.currentValue != null && (
+            <div className="flex items-center gap-3">
+              <ValueBox label="Mortgage" value={property.mortgageBalance} sub={property.mortgageAsOf ?? undefined} />
+              <span className="text-[var(--muted-foreground)]">=</span>
+              <ValueBox label="Equity" value={property.currentValue - property.mortgageBalance} accent />
+            </div>
+          )}
 
           {appr && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

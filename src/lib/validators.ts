@@ -114,6 +114,13 @@ const propertyBaseSchema = z.object({
     .optional()
     .nullable()
     .transform((s) => (s ? new Date(s) : null)),
+  // Outstanding mortgage, so equity = value − mortgage on the net-worth dashboard.
+  mortgageBalance: z.number().nonnegative().optional().nullable(),
+  mortgageAsOf: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((s) => (s ? new Date(s) : null)),
   notes: z.string().max(1000).optional().nullable(),
 });
 

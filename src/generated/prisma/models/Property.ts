@@ -30,12 +30,14 @@ export type PropertyAvgAggregateOutputType = {
   purchasePrice: number | null
   downPayment: number | null
   currentValue: number | null
+  mortgageBalance: number | null
 }
 
 export type PropertySumAggregateOutputType = {
   purchasePrice: number | null
   downPayment: number | null
   currentValue: number | null
+  mortgageBalance: number | null
 }
 
 export type PropertyMinAggregateOutputType = {
@@ -53,6 +55,8 @@ export type PropertyMinAggregateOutputType = {
   purchaseDate: Date | null
   currentValue: number | null
   valueAsOf: Date | null
+  mortgageBalance: number | null
+  mortgageAsOf: Date | null
   notes: string | null
   archivedAt: Date | null
   createdAt: Date | null
@@ -74,6 +78,8 @@ export type PropertyMaxAggregateOutputType = {
   purchaseDate: Date | null
   currentValue: number | null
   valueAsOf: Date | null
+  mortgageBalance: number | null
+  mortgageAsOf: Date | null
   notes: string | null
   archivedAt: Date | null
   createdAt: Date | null
@@ -95,6 +101,8 @@ export type PropertyCountAggregateOutputType = {
   purchaseDate: number
   currentValue: number
   valueAsOf: number
+  mortgageBalance: number
+  mortgageAsOf: number
   notes: number
   archivedAt: number
   createdAt: number
@@ -107,12 +115,14 @@ export type PropertyAvgAggregateInputType = {
   purchasePrice?: true
   downPayment?: true
   currentValue?: true
+  mortgageBalance?: true
 }
 
 export type PropertySumAggregateInputType = {
   purchasePrice?: true
   downPayment?: true
   currentValue?: true
+  mortgageBalance?: true
 }
 
 export type PropertyMinAggregateInputType = {
@@ -130,6 +140,8 @@ export type PropertyMinAggregateInputType = {
   purchaseDate?: true
   currentValue?: true
   valueAsOf?: true
+  mortgageBalance?: true
+  mortgageAsOf?: true
   notes?: true
   archivedAt?: true
   createdAt?: true
@@ -151,6 +163,8 @@ export type PropertyMaxAggregateInputType = {
   purchaseDate?: true
   currentValue?: true
   valueAsOf?: true
+  mortgageBalance?: true
+  mortgageAsOf?: true
   notes?: true
   archivedAt?: true
   createdAt?: true
@@ -172,6 +186,8 @@ export type PropertyCountAggregateInputType = {
   purchaseDate?: true
   currentValue?: true
   valueAsOf?: true
+  mortgageBalance?: true
+  mortgageAsOf?: true
   notes?: true
   archivedAt?: true
   createdAt?: true
@@ -280,6 +296,8 @@ export type PropertyGroupByOutputType = {
   purchaseDate: Date | null
   currentValue: number | null
   valueAsOf: Date | null
+  mortgageBalance: number | null
+  mortgageAsOf: Date | null
   notes: string | null
   archivedAt: Date | null
   createdAt: Date
@@ -324,6 +342,8 @@ export type PropertyWhereInput = {
   purchaseDate?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   currentValue?: Prisma.FloatNullableFilter<"Property"> | number | null
   valueAsOf?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+  mortgageBalance?: Prisma.FloatNullableFilter<"Property"> | number | null
+  mortgageAsOf?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
@@ -348,6 +368,8 @@ export type PropertyOrderByWithRelationInput = {
   purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   currentValue?: Prisma.SortOrderInput | Prisma.SortOrder
   valueAsOf?: Prisma.SortOrderInput | Prisma.SortOrder
+  mortgageBalance?: Prisma.SortOrderInput | Prisma.SortOrder
+  mortgageAsOf?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -375,6 +397,8 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   purchaseDate?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   currentValue?: Prisma.FloatNullableFilter<"Property"> | number | null
   valueAsOf?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+  mortgageBalance?: Prisma.FloatNullableFilter<"Property"> | number | null
+  mortgageAsOf?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
@@ -399,6 +423,8 @@ export type PropertyOrderByWithAggregationInput = {
   purchaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   currentValue?: Prisma.SortOrderInput | Prisma.SortOrder
   valueAsOf?: Prisma.SortOrderInput | Prisma.SortOrder
+  mortgageBalance?: Prisma.SortOrderInput | Prisma.SortOrder
+  mortgageAsOf?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -428,6 +454,8 @@ export type PropertyScalarWhereWithAggregatesInput = {
   purchaseDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Property"> | Date | string | null
   currentValue?: Prisma.FloatNullableWithAggregatesFilter<"Property"> | number | null
   valueAsOf?: Prisma.DateTimeNullableWithAggregatesFilter<"Property"> | Date | string | null
+  mortgageBalance?: Prisma.FloatNullableWithAggregatesFilter<"Property"> | number | null
+  mortgageAsOf?: Prisma.DateTimeNullableWithAggregatesFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Property"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Property"> | Date | string
@@ -448,6 +476,8 @@ export type PropertyCreateInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -472,6 +502,8 @@ export type PropertyUncheckedCreateInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -494,6 +526,8 @@ export type PropertyUpdateInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -518,6 +552,8 @@ export type PropertyUncheckedUpdateInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -541,6 +577,8 @@ export type PropertyCreateManyInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -561,6 +599,8 @@ export type PropertyUpdateManyMutationInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -582,6 +622,8 @@ export type PropertyUncheckedUpdateManyInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -613,6 +655,8 @@ export type PropertyCountOrderByAggregateInput = {
   purchaseDate?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
   valueAsOf?: Prisma.SortOrder
+  mortgageBalance?: Prisma.SortOrder
+  mortgageAsOf?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -623,6 +667,7 @@ export type PropertyAvgOrderByAggregateInput = {
   purchasePrice?: Prisma.SortOrder
   downPayment?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
+  mortgageBalance?: Prisma.SortOrder
 }
 
 export type PropertyMaxOrderByAggregateInput = {
@@ -640,6 +685,8 @@ export type PropertyMaxOrderByAggregateInput = {
   purchaseDate?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
   valueAsOf?: Prisma.SortOrder
+  mortgageBalance?: Prisma.SortOrder
+  mortgageAsOf?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -661,6 +708,8 @@ export type PropertyMinOrderByAggregateInput = {
   purchaseDate?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
   valueAsOf?: Prisma.SortOrder
+  mortgageBalance?: Prisma.SortOrder
+  mortgageAsOf?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -671,6 +720,7 @@ export type PropertySumOrderByAggregateInput = {
   purchasePrice?: Prisma.SortOrder
   downPayment?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
+  mortgageBalance?: Prisma.SortOrder
 }
 
 export type PropertyScalarRelationFilter = {
@@ -778,6 +828,8 @@ export type PropertyCreateWithoutAccountInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -800,6 +852,8 @@ export type PropertyUncheckedCreateWithoutAccountInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -852,6 +906,8 @@ export type PropertyScalarWhereInput = {
   purchaseDate?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   currentValue?: Prisma.FloatNullableFilter<"Property"> | number | null
   valueAsOf?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
+  mortgageBalance?: Prisma.FloatNullableFilter<"Property"> | number | null
+  mortgageAsOf?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"Property"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Property"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Property"> | Date | string
@@ -872,6 +928,8 @@ export type PropertyCreateWithoutTenantsInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -895,6 +953,8 @@ export type PropertyUncheckedCreateWithoutTenantsInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -932,6 +992,8 @@ export type PropertyUpdateWithoutTenantsInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -955,6 +1017,8 @@ export type PropertyUncheckedUpdateWithoutTenantsInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -976,6 +1040,8 @@ export type PropertyCreateWithoutTransactionsInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -999,6 +1065,8 @@ export type PropertyUncheckedCreateWithoutTransactionsInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -1036,6 +1104,8 @@ export type PropertyUpdateWithoutTransactionsInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1059,6 +1129,8 @@ export type PropertyUncheckedUpdateWithoutTransactionsInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1080,6 +1152,8 @@ export type PropertyCreateManyAccountInput = {
   purchaseDate?: Date | string | null
   currentValue?: number | null
   valueAsOf?: Date | string | null
+  mortgageBalance?: number | null
+  mortgageAsOf?: Date | string | null
   notes?: string | null
   archivedAt?: Date | string | null
   createdAt?: Date | string
@@ -1100,6 +1174,8 @@ export type PropertyUpdateWithoutAccountInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1122,6 +1198,8 @@ export type PropertyUncheckedUpdateWithoutAccountInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1144,6 +1222,8 @@ export type PropertyUncheckedUpdateManyWithoutAccountInput = {
   purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   valueAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mortgageBalance?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  mortgageAsOf?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1205,6 +1285,8 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   purchaseDate?: boolean
   currentValue?: boolean
   valueAsOf?: boolean
+  mortgageBalance?: boolean
+  mortgageAsOf?: boolean
   notes?: boolean
   archivedAt?: boolean
   createdAt?: boolean
@@ -1230,6 +1312,8 @@ export type PropertySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   purchaseDate?: boolean
   currentValue?: boolean
   valueAsOf?: boolean
+  mortgageBalance?: boolean
+  mortgageAsOf?: boolean
   notes?: boolean
   archivedAt?: boolean
   createdAt?: boolean
@@ -1252,6 +1336,8 @@ export type PropertySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   purchaseDate?: boolean
   currentValue?: boolean
   valueAsOf?: boolean
+  mortgageBalance?: boolean
+  mortgageAsOf?: boolean
   notes?: boolean
   archivedAt?: boolean
   createdAt?: boolean
@@ -1274,13 +1360,15 @@ export type PropertySelectScalar = {
   purchaseDate?: boolean
   currentValue?: boolean
   valueAsOf?: boolean
+  mortgageBalance?: boolean
+  mortgageAsOf?: boolean
   notes?: boolean
   archivedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "nickname" | "address" | "street" | "unit" | "city" | "state" | "zip" | "purchasePrice" | "downPayment" | "purchaseDate" | "currentValue" | "valueAsOf" | "notes" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
+export type PropertyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "nickname" | "address" | "street" | "unit" | "city" | "state" | "zip" | "purchasePrice" | "downPayment" | "purchaseDate" | "currentValue" | "valueAsOf" | "mortgageBalance" | "mortgageAsOf" | "notes" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["property"]>
 export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   transactions?: boolean | Prisma.Property$transactionsArgs<ExtArgs>
@@ -1316,6 +1404,8 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     purchaseDate: Date | null
     currentValue: number | null
     valueAsOf: Date | null
+    mortgageBalance: number | null
+    mortgageAsOf: Date | null
     notes: string | null
     archivedAt: Date | null
     createdAt: Date
@@ -1760,6 +1850,8 @@ export interface PropertyFieldRefs {
   readonly purchaseDate: Prisma.FieldRef<"Property", 'DateTime'>
   readonly currentValue: Prisma.FieldRef<"Property", 'Float'>
   readonly valueAsOf: Prisma.FieldRef<"Property", 'DateTime'>
+  readonly mortgageBalance: Prisma.FieldRef<"Property", 'Float'>
+  readonly mortgageAsOf: Prisma.FieldRef<"Property", 'DateTime'>
   readonly notes: Prisma.FieldRef<"Property", 'String'>
   readonly archivedAt: Prisma.FieldRef<"Property", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Property", 'DateTime'>
