@@ -33,6 +33,13 @@ const date = z
   .transform((s) => (s == null || s.trim() === "" ? null : s.trim()))
   .refine((s) => s == null || DATE_RE.test(s), { message: "Use YYYY-MM-DD" });
 
+// Selects post "" when left on the placeholder option; treat that as "not set".
+const blank = (v: unknown) => (v === "" ? undefined : v);
+const optEnum = <T extends readonly [string, ...string[]]>(values: T) =>
+  z.preprocess(blank, z.enum(values).nullish()).transform((v) => v ?? null);
+const defEnum = <T extends readonly [string, ...string[]]>(values: T, fallback: T[number]) =>
+  z.preprocess(blank, z.enum(values).default(fallback as never));
+
 const money = z.number().finite().nonnegative().nullish().transform((v) => v ?? null);
 const num = z.number().finite().nullish().transform((v) => v ?? null);
 const int = z.number().int().nonnegative().nullish().transform((v) => v ?? null);
@@ -49,7 +56,7 @@ export const PROPERTY_TYPE_LABELS: Record<(typeof PROPERTY_TYPES)[number], strin
 };
 
 export const factsSchema = z.object({
-  propertyType: z.enum(PROPERTY_TYPES).nullish().transform((v) => v ?? null),
+  propertyType: optEnum(PROPERTY_TYPES),
   beds: num,
   baths: num,
   sqft: int,
@@ -99,12 +106,12 @@ export const propertyTaxSchema = z.object({
 });
 
 export const managementSchema = z.object({
-  mode: z.enum(["self", "manager"]).nullish().transform((v) => v ?? null),
+  mode: optEnum(["self", "manager"] as const),
   company: text(),
   contact: text(),
   email: text(),
   phone: text(40),
-  feeType: z.enum(["percent", "flat"]).nullish().transform((v) => v ?? null),
+  feeType: optEnum(["percent", "flat"] as const),
   /** Percent of rent collected, or a flat monthly amount. */
   feeValue: money,
   portalUrl: url,
@@ -212,7 +219,7 @@ export const LOAN_KIND_LABELS: Record<(typeof LOAN_KINDS)[number], string> = {
 };
 
 export const loanInputSchema = z.object({
-  kind: z.enum(LOAN_KINDS).default("first"),
+  kind: defEnum(LOAN_KINDS, "first"),
   lender: text(),
   servicer: text(),
   loanNumber: text(80),
@@ -222,7 +229,7 @@ export const loanInputSchema = z.object({
   startDate: date,
   termMonths: z.number().int().min(1).max(600).nullish().transform((v) => v ?? null),
   interestRate: z.number().finite().min(0).max(30).nullish().transform((v) => v ?? null),
-  rateType: z.enum(["fixed", "arm"]).default("fixed"),
+  rateType: defEnum(["fixed", "arm"] as const, "fixed"),
   armResetDate: date,
   armIndex: text(60),
   armMargin: num,
@@ -242,14 +249,14 @@ export const improvementInputSchema = z.object({
   date: z.string().regex(DATE_RE, "Date is required"),
   description: z.string().trim().min(1, "Describe the work").max(300),
   amount: z.number().finite().nonnegative(),
-  category: z.enum(IMPROVEMENT_CATEGORIES).default("improvement"),
+  category: defEnum(IMPROVEMENT_CATEGORIES, "improvement"),
   notes: text(1000),
 });
 
 export const maintenanceInputSchema = z.object({
   date: z.string().regex(DATE_RE, "Date is required"),
   vendor: text(),
-  system: z.enum(SYSTEM_KINDS).nullish().transform((v) => v ?? null),
+  system: optEnum(SYSTEM_KINDS),
   cost: money,
   notes: text(1000),
   transactionId: text(60),
@@ -268,7 +275,7 @@ export const DOCUMENT_TYPE_LABELS: Record<(typeof DOCUMENT_TYPES)[number], strin
 };
 
 export const documentInputSchema = z.object({
-  type: z.enum(DOCUMENT_TYPES).default("other"),
+  type: defEnum(DOCUMENT_TYPES, "other"),
   title: z.string().trim().min(1, "Give it a name").max(200),
   url: z
     .string()
@@ -292,7 +299,7 @@ export const utilityInputSchema = z.object({
   kind: z.enum(UTILITY_KINDS),
   provider: text(),
   accountNumber: text(80),
-  paidBy: z.enum(["tenant", "owner"]).default("tenant"),
+  paidBy: defEnum(["tenant", "owner"] as const, "tenant"),
   portalUrl: url,
 });
 

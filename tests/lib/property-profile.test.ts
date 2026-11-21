@@ -242,3 +242,14 @@ describe("summarizeRecord", () => {
     expect(s.keyDates).toEqual([]);
   });
 });
+
+describe("blank select values", () => {
+  it("treats an unselected dropdown (\"\") as not set instead of failing", async () => {
+    const { managementSchema, loanInputSchema } = await import("../../src/lib/property-profile");
+    const m = managementSchema.safeParse({ mode: "", feeType: "", company: "Acme PM" });
+    expect(m.success).toBe(true);
+    expect(m.success && m.data.feeType).toBe(null);
+    const l = loanInputSchema.safeParse({ kind: "", rateType: "" });
+    expect(l.success && l.data.rateType).toBe("fixed");
+  });
+});
