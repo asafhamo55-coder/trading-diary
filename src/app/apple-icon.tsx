@@ -3,6 +3,7 @@ import { ImageResponse } from "next/og";
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
+// Hamo Home Equity mark: a bold "H" on the brand blue gradient.
 export default function AppleIcon() {
   return new ImageResponse(
     (
@@ -13,24 +14,15 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background:
-            "linear-gradient(135deg, #1E40AF 0%, #3B82F6 60%, #00D68F 100%)",
-          borderRadius: 40,
+          background: "linear-gradient(135deg, #1E40AF 0%, #2563EB 55%, #3B82F6 100%)",
+          borderRadius: 36,
+          color: "white",
+          fontSize: 128,
+          fontWeight: 800,
+          lineHeight: 1,
         }}
       >
-        <svg
-          width="110"
-          height="110"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-          <polyline points="16 7 22 7 22 13" />
-        </svg>
+        H
       </div>
     ),
     { ...size }

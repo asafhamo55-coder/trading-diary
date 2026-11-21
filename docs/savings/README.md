@@ -34,8 +34,9 @@ deploy never needs a manual migration.
 | `AdvisorReport` | Saved advisor outputs. | `model`, `inputHash`, `snapshot`, `output`, `usage`. |
 
 Enumerations live in `src/lib/savings.ts` (`SAVINGS_TYPES`, `BENEFIT_CATEGORIES`,
-`BENEFIT_PAYERS`, `COUNTRIES`, `CURRENCIES`). Owner keys today: `asaf`,
-`einat`, `joint`, `yoav`, `nadav`, `roni`.
+`BENEFIT_PAYERS`, `COUNTRIES`, `CURRENCIES`). Owner keys are the household
+members' keys from the profile (`GET /api/savings/profile`, `members[].key`),
+plus `joint`.
 
 Code layout:
 - `src/lib/savings.ts`: pure domain logic (net worth, fees, fee drag, liquidity, retirement projection, coverage overlaps, child milestones). Unit-tested.

@@ -32,6 +32,11 @@ shows it in the "Advisor" panel.
    If a figure that drives a recommendation is more than about 6 months old, or the year
    has rolled over (contribution limits, tax brackets), check it with a quick web search
    and say so in the rationale.
+   - **When running locally, also read `private-data/advisor/*.md` if present**
+     (`israel-household.md`, `us-household.md`). These gitignored companions hold the
+     household-specific notes, checklists and open questions that were kept out of the
+     public knowledge docs. They may be absent (e.g. in a cloud routine); then rely on the
+     snapshot alone. Never copy their contents into a committed file.
 3. **Reason as the advisor.** Follow the `system` brief from the context exactly: ground
    every number in the snapshot, never invent figures, list what can't be concluded
    under `questionsForUser`, and put the highest-impact actions first. Then combine:

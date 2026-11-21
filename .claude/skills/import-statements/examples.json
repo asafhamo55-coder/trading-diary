@@ -1,0 +1,204 @@
+{
+  "il_consolidated_report": {
+    "israel": {
+      "asOf": { "dana": "2026-09-30" },
+      "currency": "ILS",
+      "people": [
+        {
+          "key": "dana",
+          "nameHe": "דנה",
+          "nameEn": "Dana",
+          "birthDate": null,
+          "retirementAge": null,
+          "summary": {
+            "totalBalance": 612500,
+            "byWithdrawalType": { "annuityPaying": 400000, "annuityNonPaying": 2500, "lumpSum": 210000 },
+            "reconciliation": "Products sum to 612,500 = headline סה\"כ חיסכון."
+          },
+          "products": [
+            {
+              "type": "pension",
+              "typeHe": "קרן פנסיה מקיפה",
+              "provider": "Sample Pension Ltd",
+              "planName": "Sample Comprehensive Pension",
+              "policyNumber": "55501234-2",
+              "status": "active",
+              "accountType": "self-employed",
+              "openDate": "2008-06-01",
+              "balance": 400000,
+              "track": "מניות (Equities) 1001",
+              "tracks": [{ "code": "1001", "name": "מניות", "nameEn": "Equities", "balance": 42000, "ytdPct": 10.0 }],
+              "ytdReturnPct": 10.0,
+              "feeDepositPct": 1.0,
+              "feeAccumulationPct": 0.22,
+              "monthlyDeposit": { "employee": null, "employer": null, "severance": null, "total": 1350 },
+              "insuredSalary": 8500,
+              "projectedMonthlyPension": 6100,
+              "coverages": [
+                { "type": "disability_pension", "typeHe": "פנסיית נכות", "amount": 6375, "monthlyCost": 140, "period": "monthly" },
+                { "type": "survivors_spouse", "typeHe": "שארים אלמן/ה", "amount": 5100, "monthlyCost": 23, "period": "monthly" }
+              ],
+              "sourcePage": [2, 4],
+              "notes": "Track rows sum to 42,000 but the balance is 400,000; balance taken from the product summary row."
+            },
+            {
+              "type": "managers_insurance",
+              "typeHe": "ביטוח מנהלים",
+              "provider": "Sample Insurance Co",
+              "policyNumber": "7700123",
+              "status": "frozen",
+              "balance": 2500,
+              "conversionFactor": 205.4,
+              "guaranteedFactor": null,
+              "coverages": [{ "type": "death", "typeHe": "סכום ביטוח למקרה מוות", "amount": 900000, "monthlyCost": 100 }],
+              "sourcePage": 3
+            },
+            {
+              "type": "hishtalmut",
+              "typeHe": "קרן השתלמות",
+              "provider": "Sample Study Fund",
+              "policyNumber": "101234",
+              "status": "active",
+              "balance": 210000,
+              "liquidityDate": "2016-03-31",
+              "track": "השתלמות מניות 1003",
+              "ytdReturnPct": 11.7,
+              "feeAccumulationPct": 0.6,
+              "lastDeposit": 150000,
+              "monthlyDeposit": null,
+              "notes": "Last deposit 150,000 with 0 deposits this year is a transfer in, not a contribution; monthlyDeposit left null.",
+              "sourcePage": 5
+            },
+            {
+              "type": "other",
+              "typeHe": "ביטוח ריסק",
+              "provider": "Sample Risk Insurer",
+              "planName": "Term life (ריסק)",
+              "policyNumber": "360000001",
+              "status": "active",
+              "balance": 0,
+              "coverages": [{ "type": "term_life", "typeHe": "ריסק", "amount": 1200000, "monthlyCost": 118 }],
+              "sourcePage": 5
+            }
+          ]
+        }
+      ],
+      "agentNotes": ["Report shows no fees for the insurance policy; feeDepositPct/feeAccumulationPct left out."]
+    }
+  },
+  "us_401k": {
+    "accounts": [
+      {
+        "owner": "alex",
+        "country": "US",
+        "type": "401k",
+        "provider": "Sample Recordkeeper",
+        "planName": "Acme Corp 401(k) Plan",
+        "policyNumber": null,
+        "status": "active (employed)",
+        "currency": "USD",
+        "balance": 85000.25,
+        "balanceAsOf": "2026-09-30",
+        "track": "90% stock funds / 10% bond funds",
+        "feeDepositPct": null,
+        "feeAccumulationPct": null,
+        "monthlyDepositEmployee": 2000,
+        "monthlyDepositEmployer": 1000,
+        "monthlyDepositSeverance": null,
+        "monthlyDepositTotal": 3000,
+        "insuredSalary": null,
+        "liquidityDate": null,
+        "projectedMonthlyPension": 550,
+        "details": {
+          "statementPeriod": "2026-07-01..2026-09-30",
+          "vestedPct": 100,
+          "changeInValue": {
+            "thisPeriod": { "beginning": 76000, "employeeContributions": 6000, "employerContributions": 3000, "planAdminFees": -10.5, "gainLoss": 10.75, "ending": 85000.25 },
+            "ytd": { "beginning": 55000, "employeeContributions": 18000, "employerContributions": 9000, "planAdminFees": -30, "gainLoss": 3030.25, "ending": 85000.25 }
+          },
+          "monthlyDepositBasis": "YTD contributions ÷ 9 months",
+          "returnNote": "Statement prints no rate of return.",
+          "sourceDocument": "401K.pdf (Q3 2026)"
+        }
+      }
+    ],
+    "benefits": [
+      { "owner": "alex", "country": "US", "source": "employer:Acme Corp / 401(k)", "category": "401k_match", "coverageAmount": null, "coverageCurrency": null, "monthlyCost": 0, "costCurrency": "USD", "payer": "employer", "details": { "ytdEmployerContributions": 9000 } }
+    ]
+  },
+  "us_benefits": {
+    "benefits": [
+      {
+        "owner": "joint",
+        "country": "US",
+        "source": "employer:Acme Corp / Sample Health",
+        "category": "health",
+        "coverageAmount": null,
+        "coverageCurrency": null,
+        "monthlyCost": 400,
+        "costCurrency": "USD",
+        "payer": "split",
+        "beneficiary": null,
+        "endsAt": null,
+        "details": {
+          "perPaycheck": { "employee": 200, "employer": 1000 },
+          "monthly": { "employee": 400, "employer": 2000, "total": 2400 },
+          "payFrequencyAssumed": "semi-monthly (24/yr)",
+          "plan": "Sample HDHP",
+          "tier": "Employee + Family",
+          "coveredMembers": ["alex", "dana", "noa", "eli", "maya"],
+          "effectiveDate": "2027-01-01"
+        }
+      },
+      { "owner": "alex", "country": "US", "source": "employer:Acme Corp / Sample Life Co", "category": "life", "coverageAmount": 400000, "coverageCurrency": "USD", "monthlyCost": 0, "costCurrency": "USD", "payer": "employer", "details": { "plan": "Basic Life 2x salary" } },
+      { "owner": "alex", "country": "US", "source": "employer:Acme Corp / Sample Life Co (basic AD&D)", "category": "add", "coverageAmount": 400000, "coverageCurrency": "USD", "monthlyCost": 0, "costCurrency": "USD", "payer": "employer" },
+      { "owner": "alex", "country": "US", "source": "employer:Acme Corp / Sample Life Co (voluntary AD&D)", "category": "add", "coverageAmount": 250000, "coverageCurrency": "USD", "monthlyCost": 8.5, "costCurrency": "USD", "payer": "employee", "details": { "perPaycheck": { "employee": 4.25 } } },
+      { "owner": "alex", "country": "US", "source": "employer:Acme Corp / Sample Disability Co", "category": "ltd", "coverageAmount": 10000, "coverageCurrency": "USD", "monthlyCost": 0, "costCurrency": "USD", "payer": "employer", "details": { "coverageIsMonthlyBenefit": true } },
+      { "owner": "alex", "country": "US", "source": "employer:Acme Corp / Sample HSA Bank", "category": "hsa", "coverageAmount": null, "coverageCurrency": null, "monthlyCost": 100, "costCurrency": "USD", "payer": "split", "details": { "perPaycheck": { "employee": 50, "employer": 50 } } }
+    ]
+  },
+  "us_stock_plan": {
+    "accounts": [
+      {
+        "owner": "alex",
+        "country": "US",
+        "type": "rsu",
+        "provider": "Sample Stock Plan Broker",
+        "planName": "Acme Ltd stock plan",
+        "policyNumber": "XX-1234",
+        "status": "active",
+        "currency": "USD",
+        "balance": 45000,
+        "balanceAsOf": "2026-06-30",
+        "details": {
+          "ticker": "ACME",
+          "vestedHeldShares": 500,
+          "pricePerShareAsOf": { "date": "2026-06-30", "price": 90 },
+          "unvestedShares": 300,
+          "unvestedValue": 27000,
+          "vestSchedule": [{ "date": "2026-12-01", "shares": 100 }],
+          "unvestedNote": "Unvested value is not counted in net worth.",
+          "transactions": [{ "date": "2026-06-01", "type": "Release", "shares": 100 }]
+        }
+      }
+    ]
+  },
+  "other_best_effort": {
+    "accounts": [
+      {
+        "owner": "joint",
+        "country": "US",
+        "type": "brokerage",
+        "provider": "Sample Brokerage",
+        "policyNumber": "9876-5432",
+        "currency": "USD",
+        "balance": 12000,
+        "balanceAsOf": "2026-10-31",
+        "details": { "extractionNote": "Best-effort read of a monthly brokerage statement; cash and positions combined.", "confidence": "medium" }
+      }
+    ],
+    "profile": {
+      "members": [{ "key": "noa", "name": "Noa", "role": "child", "birthDate": null }]
+    }
+  }
+}

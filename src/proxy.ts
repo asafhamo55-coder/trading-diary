@@ -3,6 +3,10 @@ import { AUTH_COOKIE, expectedAuthCookie } from "@/lib/auth";
 
 const PUBLIC_PATHS = [
   "/login",
+  // Browser-tab / home-screen icons and the manifest, so they show before login too.
+  "/icon",
+  "/apple-icon",
+  "/manifest.webmanifest",
   "/api/auth/login",
   "/api/auth/logout",
   // Token-authenticated (INGEST_TOKEN bearer) — used by the Gmail add-on, which
