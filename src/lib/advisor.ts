@@ -122,6 +122,7 @@ Ground everything:
 - If the snapshot has tradingGuidelines (the stocks account's house rules: SPY/QQQ/large caps/cash targets, drift, dip signals), use it under the allocation theme: name the drift and the specific trades from its actions; don't contradict the guidelines.
 - When profile data is missing (ages, retirement targets, goals, risk tolerance, employment, residence, children's accounts), say what you cannot conclude and add a precise question to questionsForUser; add a "data" theme recommendation for material gaps.
 - Rules and limits change yearly; when a recommendation depends on a current-year ceiling, limit or tax rate, use the knowledge-base figure with its year, or tell them to verify it — never state one you are unsure of.
+- household.members[].usStatus (citizen / green_card / visa / none) and usStatusSince decide US tax residency after any move abroad. A green-card holder stays a US tax resident on worldwide income until the card is formally abandoned (Form I-407) or the treaty tie-breaker is claimed; with a green card in 8 of the last 15 years, that exit is an expatriation (Form 8854, covered-expatriate test, special rules for 401(k)/NQDC/IRAs). Apply this to every relocation, retirement-account, deferred-comp and cross-border recommendation.
 - Owners and action-item "who": the member keys from the snapshot, or "household".
 - Be concise and concrete.
 - Include short disclaimers: not licensed financial/tax/legal advice; verify with an Israeli pension advisor (יועץ פנסיוני) and a cross-border CPA before acting.`;
@@ -142,6 +143,8 @@ export interface AdvisorSnapshot {
       targetRetirementAge?: number | null;
       employment?: string | null;
       residence?: string | null;
+      usStatus?: string | null;
+      usStatusSince?: number | null;
     }[];
     goals: HouseholdProfileDTO["goals"];
     goalsText: string | null;
@@ -236,6 +239,8 @@ export function buildAdvisorSnapshot(input: {
   for (const m of members.filter((x) => x.role === "adult")) {
     if (!m.employment) gaps.push(`Employment not set for ${m.key}.`);
     if (!m.residence) gaps.push(`Country of residence not set for ${m.key}.`);
+    if (!m.usStatus) gaps.push(`US status (citizen / green card / visa) not set for ${m.key}.`);
+    else if (m.usStatus === "green_card" && !m.usStatusSince) gaps.push(`Green-card start year not set for ${m.key} (needed for the 8-of-15-year exit-tax test).`);
   }
 
   return {
@@ -248,7 +253,7 @@ export function buildAdvisorSnapshot(input: {
         role: m.role,
         age: ageAt(m.birthDate ?? null, asOf),
         ...(m.role === "adult"
-          ? { targetRetirementAge: m.targetRetirementAge ?? null, employment: m.employment ?? null, residence: m.residence ?? null }
+          ? { targetRetirementAge: m.targetRetirementAge ?? null, employment: m.employment ?? null, residence: m.residence ?? null, usStatus: m.usStatus ?? null, usStatusSince: m.usStatusSince ?? null }
           : {}),
       })),
       goals: profile.goals,

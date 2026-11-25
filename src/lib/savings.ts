@@ -68,7 +68,13 @@ export interface HouseholdMember {
   targetRetirementAge?: number | null;
   employment?: string | null; // e.g. "employee", "self-employed", employer name
   residence?: string | null; // country of residence, e.g. "US", "IL"
+  // US immigration/tax status: drives exit tax, treaty, 401(k)/NQDC treatment after a move.
+  usStatus?: UsStatus | null;
+  usStatusSince?: number | null; // year the status began (green card: the 8-of-15-year long-term-resident test)
 }
+
+export const US_STATUSES = ["citizen", "green_card", "visa", "none"] as const;
+export type UsStatus = (typeof US_STATUSES)[number];
 
 /** People who act on the household's behalf (agents, CPA, HR) — the advisor's email recipients. */
 export const CONTACT_ROLES = ["insurance_agent", "pension_agent", "cpa", "hr_benefits", "provider", "property_manager", "other"] as const;

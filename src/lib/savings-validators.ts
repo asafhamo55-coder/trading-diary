@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BENEFIT_CATEGORIES, BENEFIT_PAYERS, CONTACT_ROLES, COUNTRIES, CURRENCIES, SAVINGS_TYPES } from "./savings";
+import { BENEFIT_CATEGORIES, BENEFIT_PAYERS, CONTACT_ROLES, COUNTRIES, CURRENCIES, SAVINGS_TYPES, US_STATUSES } from "./savings";
 
 // Numbers from the extractor may arrive as strings ("1,234.5", "0.22%").
 function looseNumber(v: unknown): unknown {
@@ -65,6 +65,8 @@ export const householdMemberSchema = z.object({
   targetRetirementAge: z.number().int().min(40).max(90).nullable().optional(),
   employment: z.string().max(200).nullable().optional(),
   residence: z.string().max(60).nullable().optional(),
+  usStatus: z.enum(US_STATUSES).nullable().optional(),
+  usStatusSince: z.number().int().min(1950).max(2100).nullable().optional(),
 });
 
 export const householdGoalsSchema = z.object({

@@ -20,6 +20,7 @@ import {
   type HouseholdGoals,
   type HouseholdMember,
   type SavingsAccountLite,
+  type UsStatus,
 } from "@/lib/savings";
 import type { HouseholdProfileDTO } from "@/lib/savings-data";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,8 @@ interface MemberRow {
   targetRetirementAge: string;
   employment: string;
   residence: string;
+  usStatus: string;
+  usStatusSince: string;
 }
 
 interface PurchaseRow {
@@ -125,6 +128,8 @@ function toForm(p: HouseholdProfileDTO): ProfileForm {
       targetRetirementAge: numToField(m.targetRetirementAge),
       employment: m.employment ?? "",
       residence: m.residence ?? "",
+      usStatus: m.usStatus ?? "",
+      usStatusSince: numToField(m.usStatusSince),
     })),
     contacts: (p.contacts ?? []).map((c) => ({
       uid: uid(),
@@ -190,6 +195,12 @@ function toPayload(f: ProfileForm): { body?: Record<string, unknown>; error?: st
       if (n == null || !Number.isInteger(n) || n < 40 || n > 90) return { error: `${label}: target retirement age must be 40–90.` };
       tra = n;
     }
+    let usSince: number | null = null;
+    if ((m.usStatus === "green_card" || m.usStatus === "visa") && m.usStatusSince.trim()) {
+      const n = parseNum(m.usStatusSince);
+      if (n == null || !Number.isInteger(n) || n < 1950 || n > 2100) return { error: `${label}: the US status year must be a year like 2015.` };
+      usSince = n;
+    }
     members.push({
       key: m.key,
       name: t(m.name),
@@ -199,6 +210,8 @@ function toPayload(f: ProfileForm): { body?: Record<string, unknown>; error?: st
       ...(m.role === "adult"
         ? { targetRetirementAge: tra, employment: t(m.employment), residence: t(m.residence) }
         : { residence: t(m.residence) }),
+      usStatus: (m.usStatus || null) as UsStatus | null,
+      usStatusSince: usSince,
     });
   }
   const num = (s: string, what: string, opts: { int?: boolean; min?: number; max?: number } = {}) => {
@@ -373,6 +386,8 @@ export default function ProfileEditor({
         targetRetirementAge: "",
         employment: "",
         residence: "",
+        usStatus: "",
+        usStatusSince: "",
       };
       return { ...f, members: [...f.members, row] };
     });
@@ -969,6 +984,26 @@ function MemberEditor({
             {m.residence && m.residence !== "US" && m.residence !== "IL" ? <option value={m.residence}>{m.residence}</option> : null}
           </select>
         </Field>
+        <Field label="US status">
+          <select className={selectCls} value={m.usStatus} onChange={(e) => onChange({ usStatus: e.target.value })}>
+            <option value="">—</option>
+            <option value="citizen">US citizen</option>
+            <option value="green_card">Green card</option>
+            <option value="visa">Visa</option>
+            <option value="none">None</option>
+          </select>
+        </Field>
+        {m.usStatus === "green_card" || m.usStatus === "visa" ? (
+          <Field label="Since (year)">
+            <input
+              className={cn(inputCls, "num")}
+              inputMode="numeric"
+              placeholder="e.g. 2015"
+              value={m.usStatusSince}
+              onChange={(e) => onChange({ usStatusSince: e.target.value })}
+            />
+          </Field>
+        ) : null}
       </div>
     </div>
   );
