@@ -40,6 +40,9 @@ export async function GET(req: NextRequest) {
       previousRecommendations: previousRecommendationsOf(previous, statuses),
       // Investment ideas already suggested last time — rotate unless something changed.
       previousOpportunityTitles: previousOpportunityTitlesOf(previous),
+      // The full previous report, so a one-off recommendation can be appended and
+      // re-ingested without regenerating the whole report.
+      previousOutput: previous,
     });
   } catch (error) {
     console.error("Advisor context error:", error);
