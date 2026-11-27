@@ -528,25 +528,36 @@ export default function PropertyDetailClient({
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-12 gap-1.5 h-24 items-end">
+            <div className="grid grid-cols-12 gap-1.5 h-28">
               {net.map((v, i) => {
                 const future = i >= elapsed;
                 return (
-                  <div
-                    key={i}
-                    title={future ? undefined : formatCurrency(v)}
-                    className={cn(
-                      "w-full rounded-sm",
-                      future
-                        ? "bg-[var(--muted)] opacity-20 min-h-[4px]"
-                        : cn("min-h-[2px]", v >= 0 ? "bg-profit/70" : "bg-loss/70")
+                  <div key={i} className="flex h-full min-w-0 flex-col items-center justify-end">
+                    {future ? null : (
+                      <span
+                        className={cn(
+                          "mb-0.5 max-w-full truncate text-[9px] leading-none tabular-nums sm:text-[10px]",
+                          v >= 0 ? "text-profit" : "text-loss"
+                        )}
+                      >
+                        {formatCompactAmount(v)}
+                      </span>
                     )}
-                    style={
-                      future
-                        ? undefined
-                        : { height: `${Math.max(4, (Math.abs(v) / cashMaxAbs) * 100)}%` }
-                    }
-                  />
+                    <div
+                      title={future ? undefined : formatCurrency(v)}
+                      className={cn(
+                        "w-full rounded-sm",
+                        future
+                          ? "bg-[var(--muted)] opacity-20 min-h-[4px]"
+                          : cn("min-h-[2px]", v >= 0 ? "bg-profit/70" : "bg-loss/70")
+                      )}
+                      style={
+                        future
+                          ? undefined
+                          : { height: `${Math.max(4, (Math.abs(v) / cashMaxAbs) * 80)}%` }
+                      }
+                    />
+                  </div>
                 );
               })}
             </div>
@@ -1131,4 +1142,13 @@ function SummaryGroup({
       </div>
     </div>
   );
+}
+
+/** Short bar label: "$850", "-$1.2k", "$12k". */
+function formatCompactAmount(v: number): string {
+  const abs = Math.abs(v);
+  const sign = v < 0 ? "-" : "";
+  if (abs < 1000) return `${sign}$${Math.round(abs)}`;
+  const k = abs / 1000;
+  return `${sign}$${k < 10 ? k.toFixed(1).replace(/\.0$/, "") : Math.round(k)}k`;
 }
