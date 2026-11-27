@@ -114,7 +114,7 @@ Be specific — no generic advice:
 - urgency.level: critical = money or cover is being lost now, or a hard deadline is within 30 days; high = deadline this quarter or a large recurring cost; medium = this year; low = whenever. urgency.deadline = the actual date (YYYY-MM-DD) when one exists.
 - dependsOn: ids of recommendations that must happen first. risksIfIgnored: what happens if nothing changes, quantified where possible.
 - Merge duplicates; don't split one change into several recommendations. Prefer 8–16 recommendations including the opportunities.
-- id: a stable kebab-case slug describing the change (theme-member-subject, e.g. "fees-adult1-pension-accumulation"). When the request includes previousRecommendations, reuse the same id for the same recommendation and copy the English wording (task.en) of continuing action items verbatim — the app tracks ticked items by id + English task text. Don't re-add finished items. When the request includes dismissedRecommendations, the household rejected those as not relevant: don't recommend them, or the same idea under another id, again unless the snapshot shows a material change that makes it relevant.
+- id: a stable kebab-case slug describing the change (theme-member-subject, e.g. "fees-adult1-pension-accumulation"). When the request includes previousRecommendations, reuse the same id for the same recommendation and copy the English wording (task.en) of continuing action items verbatim — the app tracks ticked items by id + English task text. Don't re-add finished items. When the request includes dismissedRecommendations, the household rejected those as not relevant: don't recommend them, or the same idea under another id, again unless the snapshot shows a material change that makes it relevant. Each carries the household's reason — treat it as a fact about the household and apply it to related recommendations too (e.g. "we're selling that property" or "Einat won't work in the US").
 
 Ground everything:
 - Every figure must come from the SNAPSHOT or the knowledge base. Never invent balances, fees, rates, ages, phone numbers or goals. If you compute something, show the inputs in basis and keep the arithmetic simple.
@@ -433,7 +433,7 @@ export async function generateAdvice(
             ? `\n\n=== previousRecommendations (reuse ids and continuing task wording; done items are finished) ===\n${JSON.stringify(previous.previousRecommendations, null, 2)}`
             : "") +
           (previous.dismissedRecommendations?.length
-            ? `\n\n=== dismissedRecommendations (the household marked these not relevant — don't recommend them or the same idea again) ===\n${JSON.stringify(previous.dismissedRecommendations, null, 2)}`
+            ? `\n\n=== dismissedRecommendations (the household marked these not relevant and said why — don't recommend them or the same idea again, and treat each reason as a fact about the household) ===\n${JSON.stringify(previous.dismissedRecommendations, null, 2)}`
             : "") +
           (previous.previousOpportunityTitles?.length
             ? `\n\n=== previousOpportunityTitles (suggest different investment ideas unless something changed) ===\n${JSON.stringify(previous.previousOpportunityTitles)}`

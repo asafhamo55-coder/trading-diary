@@ -27,7 +27,7 @@ import {
 } from "./savings";
 import { mapSavingsImport } from "./savings-import";
 import { getLiveUsdIls } from "./fx-server";
-import { DISMISS_TASK, actionKey, dismissKey, type ActionStatusMap } from "./advisor-report";
+import { DISMISS_TASK, actionKey, decodeDismissal, dismissKey, encodeDismissal, type ActionStatusMap } from "./advisor-report";
 import type {
   CreateSavingsAccountInput,
   HouseholdBundle,
@@ -805,19 +805,23 @@ export async function getAdvisorActionStatuses(): Promise<ActionStatusMap> {
     const acct = await accountId();
     const rows = await prisma.advisorActionStatus.findMany({ where: { accountId: acct } });
     const out: ActionStatusMap = {};
-    for (const r of rows) out[r.key] = { done: r.done, doneAt: r.doneAt?.toISOString() ?? null };
+    for (const r of rows) {
+      const dismissal = decodeDismissal(r.task);
+      out[r.key] = { done: r.done, doneAt: r.doneAt?.toISOString() ?? null, ...(dismissal ? { reason: dismissal.reason } : {}) };
+    }
     return out;
   });
 }
 
 /**
- * Mark a recommendation "not relevant" (or restore it). The title is kept in
- * the task column (after the reserved marker) so the advisor can be told what
- * was rejected even once the recommendation drops out of the latest report.
+ * Mark a recommendation "not relevant" (or restore it). The title and the
+ * household's reason are kept in the task column (after the reserved marker)
+ * so the advisor learns what was rejected and why, even once the
+ * recommendation drops out of the latest report.
  */
-export async function setAdvisorDismissal(input: { recId: string; title: string; dismissed: boolean; reportId?: string | null }) {
+export async function setAdvisorDismissal(input: { recId: string; title: string; reason: string | null; dismissed: boolean; reportId?: string | null }) {
   const key = dismissKey(input.recId);
-  const task = `${DISMISS_TASK}:${input.title}`;
+  const task = encodeDismissal(input.title, input.reason);
   return withHeal(async () => {
     const acct = await accountId();
     const doneAt = input.dismissed ? new Date() : null;
@@ -826,19 +830,22 @@ export async function setAdvisorDismissal(input: { recId: string; title: string;
       create: { accountId: acct, key, recId: input.recId, task, done: input.dismissed, doneAt, reportId: input.reportId ?? null },
       update: { done: input.dismissed, doneAt, task, reportId: input.reportId ?? null },
     });
-    return { key, done: row.done, doneAt: row.doneAt?.toISOString() ?? null };
+    return { key, done: row.done, doneAt: row.doneAt?.toISOString() ?? null, reason: input.reason };
   });
 }
 
-/** Recommendations the user marked "not relevant", for the next advisor run. */
-export async function getDismissedRecommendations(): Promise<{ id: string; title: string; dismissedAt: string | null }[]> {
+/** Recommendations the user marked "not relevant" and why, for the next advisor run. */
+export async function getDismissedRecommendations(): Promise<{ id: string; title: string; reason: string | null; dismissedAt: string | null }[]> {
   return withHeal(async () => {
     const acct = await accountId();
     const rows = await prisma.advisorActionStatus.findMany({
       where: { accountId: acct, done: true, task: { startsWith: `${DISMISS_TASK}:` } },
       orderBy: { doneAt: "desc" },
     });
-    return rows.map((r) => ({ id: r.recId, title: r.task.slice(DISMISS_TASK.length + 1), dismissedAt: r.doneAt?.toISOString() ?? null }));
+    return rows.map((r) => {
+      const d = decodeDismissal(r.task);
+      return { id: r.recId, title: d?.title ?? r.recId, reason: d?.reason ?? null, dismissedAt: r.doneAt?.toISOString() ?? null };
+    });
   });
 }
 

@@ -941,7 +941,23 @@ export const DISMISS_TASK = "__not_relevant__";
 export const dismissKey = (recId: string) => actionKey(recId, DISMISS_TASK);
 export const isDismissed = (rec: Pick<AdvisorRecommendation, "id">, status: ActionStatusMap) => !!status[dismissKey(rec.id)]?.done;
 
-export type ActionStatusMap = Record<string, { done: boolean; doneAt: string | null }>;
+/** The dismissal row's task column: the marker plus JSON { title, reason }. */
+export function encodeDismissal(title: string, reason: string | null): string {
+  return `${DISMISS_TASK}:${JSON.stringify({ title, reason })}`;
+}
+export function decodeDismissal(task: string): { title: string; reason: string | null } | null {
+  if (!task.startsWith(`${DISMISS_TASK}:`)) return null;
+  const rest = task.slice(DISMISS_TASK.length + 1);
+  try {
+    const v = JSON.parse(rest) as { title?: unknown; reason?: unknown };
+    return { title: typeof v.title === "string" ? v.title : "", reason: typeof v.reason === "string" && v.reason ? v.reason : null };
+  } catch {
+    return { title: rest, reason: null }; // saved before reasons existed: plain title
+  }
+}
+
+/** `reason` is set only on "not relevant" rows. */
+export type ActionStatusMap = Record<string, { done: boolean; doneAt: string | null; reason?: string | null }>;
 
 export interface Progress {
   done: number;

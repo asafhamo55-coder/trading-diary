@@ -9,7 +9,7 @@ import { getAdvisorActionStatuses, setAdvisorActionStatus, setAdvisorDismissal }
 //
 // GET  /api/savings/advisor/actions → { statuses: { [actionKey]: { done, doneAt } } }
 // PUT  /api/savings/advisor/actions   { recId, task, done, reportId? } → { key, done, doneAt }
-// PUT  /api/savings/advisor/actions   { recId, title, dismissed, reportId? } → marks "not relevant"
+// PUT  /api/savings/advisor/actions   { recId, title, reason, dismissed, reportId? } → marks "not relevant"
 // The key is derived on the server from recId + task (actionKey in
 // src/lib/advisor-report.ts), so it survives daily report regeneration.
 
@@ -36,8 +36,10 @@ export async function PUT(req: NextRequest) {
     if (typeof body?.dismissed === "boolean") {
       const title = typeof body.title === "string" ? body.title.trim().slice(0, 500) : "";
       if (!recId || recId.length > 200) return errorResponse("Body needs recId");
+      const reason = typeof body.reason === "string" ? body.reason.trim().slice(0, 1000) || null : null;
+      if (body.dismissed && !reason) return errorResponse("Say why it isn't relevant");
       const reportId = typeof body.reportId === "string" ? body.reportId.slice(0, 64) : null;
-      return jsonResponse(await setAdvisorDismissal({ recId, title: title || recId, dismissed: body.dismissed, reportId }));
+      return jsonResponse(await setAdvisorDismissal({ recId, title: title || recId, reason, dismissed: body.dismissed, reportId }));
     }
     const task = typeof body?.task === "string" ? body.task.trim() : "";
     if (!recId || !task || typeof body?.done !== "boolean") return errorResponse("Body needs recId, task and done (boolean)");

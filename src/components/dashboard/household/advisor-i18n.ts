@@ -66,6 +66,11 @@ interface Strings {
   saveError: string;
   noMatch: string;
   notRelevant: string;
+  dismissPrompt: string;
+  dismissPlaceholder: string;
+  dismissConfirm: string;
+  dismissCancel: string;
+  reasonLabel: string;
   restore: string;
   dismissedCount: (n: number) => string;
   showDismissed: string;
@@ -140,6 +145,11 @@ export const ADVISOR_STRINGS: Record<AdvisorLang, Strings> = {
     saveError: "Couldn’t save that tick — check your connection and try again.",
     noMatch: "No recommendations match these filters.",
   notRelevant: "Not relevant",
+  dismissPrompt: "Why isn’t this relevant? The advisor reads this before every future report.",
+  dismissPlaceholder: "e.g. We’re selling this property next year / Einat won’t work in the US",
+  dismissConfirm: "Mark not relevant",
+  dismissCancel: "Cancel",
+  reasonLabel: "Why",
   restore: "Restore",
   dismissedCount: (n) => `${n} marked not relevant`,
   showDismissed: "Show",
@@ -212,6 +222,11 @@ export const ADVISOR_STRINGS: Record<AdvisorLang, Strings> = {
     saveError: "הסימון לא נשמר — בדקו את החיבור ונסו שוב.",
     noMatch: "אין המלצות שמתאימות לסינון.",
   notRelevant: "לא רלוונטי",
+  dismissPrompt: "למה זה לא רלוונטי? היועץ קורא את זה לפני כל דוח עתידי.",
+  dismissPlaceholder: "למשל: אנחנו מוכרים את הנכס בשנה הבאה / עינת לא תעבוד בארה\"ב",
+  dismissConfirm: "סימון כלא רלוונטי",
+  dismissCancel: "ביטול",
+  reasonLabel: "למה",
   restore: "שחזור",
   dismissedCount: (n) => (n === 1 ? "המלצה אחת סומנה כלא רלוונטית" : `${n} המלצות סומנו כלא רלוונטיות`),
   showDismissed: "הצגה",

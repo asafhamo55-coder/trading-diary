@@ -80,6 +80,17 @@ export function fmtRelative(iso: string, now = Date.now()): string {
   return fmtDate(iso.slice(0, 10));
 }
 
+/** "Nov 27, 2026, 6:04 PM" in the viewer's time zone. */
+export function fmtDateTime(iso: string): string {
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return "—";
+  return d.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+/** A report older than this is flagged as stale (the routine re-runs weekly). */
+export const ADVISOR_STALE_DAYS = 7;
+export const isAdvisorStale = (iso: string, now = Date.now()) => now - new Date(iso).getTime() > ADVISOR_STALE_DAYS * 86_400_000;
+
 // ── Account types ──────────────────────────────────────────────────
 
 export const TYPE_LABELS: Record<string, { en: string; he?: string }> = {

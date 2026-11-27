@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { useDisplayCurrency } from "@/components/ui/currency";
 import { DismissedList, RecommendationRow, emailActionItem, useActionStatus, type EmailHandlers } from "@/components/dashboard/household/AdvisorReport";
 import { ADVISOR_STRINGS, readStoredLang } from "@/components/dashboard/household/advisor-i18n";
+import { fmtDateTime, fmtRelative, isAdvisorStale } from "@/components/dashboard/household/format";
 import { isDismissed, itemKey } from "@/lib/advisor-report";
 
 export interface PropertyRecommendationsProps {
@@ -32,8 +33,8 @@ export interface PropertyRecommendationsProps {
 }
 
 const HEADINGS = {
-  en: { title: "Advisor recommendations", none: "No recommendations for this property in the latest report.", upside: "10-year upside" },
-  he: { title: "המלצות היועץ", none: "אין המלצות לנכס הזה בדוח האחרון.", upside: "פוטנציאל ל־10 שנים" },
+  en: { title: "Advisor recommendations", none: "No recommendations for this property in the latest report.", upside: "10-year upside", lastRun: "Advisor last ran", stale: "Over a week old" },
+  he: { title: "המלצות היועץ", none: "אין המלצות לנכס הזה בדוח האחרון.", upside: "פוטנציאל ל־10 שנים", lastRun: "הרצה אחרונה של היועץ", stale: "ישן משבוע" },
 };
 
 export default function PropertyRecommendations({ propertyId, lang: langProp, title, className }: PropertyRecommendationsProps) {
@@ -113,6 +114,17 @@ export default function PropertyRecommendations({ propertyId, lang: langProp, ti
           <CardTitle as="h2">{title ?? h.title}</CardTitle>
           <Badge variant="ai">AI</Badge>
         </div>
+        {report ? (
+          <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+            <span>
+              {h.lastRun}{" "}
+              <time dateTime={report.createdAt} title={fmtDateTime(report.createdAt)} dir="ltr">
+                {fmtRelative(report.createdAt)}
+              </time>
+            </span>
+            {isAdvisorStale(report.createdAt) ? <Badge variant="warning">{h.stale}</Badge> : null}
+          </p>
+        ) : null}
         {recs.length === 0 ? <CardDescription>{h.none}</CardDescription> : null}
       </CardHeader>
       {recs.length > 0 ? (
@@ -140,7 +152,7 @@ export default function PropertyRecommendations({ propertyId, lang: langProp, ti
                   })
                 }
                 onToggleItem={(item, done) => toggleItem(r, item, done)}
-                onDismiss={() => void setDismissed(r, true)}
+                onDismiss={(reason) => void setDismissed(r, true, reason)}
                 onJump={(id) => setOpen((cur) => new Set(cur).add(id))}
                 titleOf={(id) => tx(output.recommendations.find((x) => x.id === id)?.title, lang) || id}
                 rankOfId={(id) => rankOf.get(id) ?? null}
@@ -155,7 +167,7 @@ export default function PropertyRecommendations({ propertyId, lang: langProp, ti
       ) : null}
       {dismissed.length > 0 ? (
         <CardContent className={recs.length > 0 ? "pt-0" : undefined}>
-          <DismissedList recs={dismissed} open={showDismissed} onToggle={() => setShowDismissed((v) => !v)} onRestore={(r) => void setDismissed(r, false)} lang={lang} s={s} />
+          <DismissedList recs={dismissed} status={status} open={showDismissed} onToggle={() => setShowDismissed((v) => !v)} onRestore={(r) => void setDismissed(r, false)} lang={lang} s={s} />
         </CardContent>
       ) : null}
     </Card>

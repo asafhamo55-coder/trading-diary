@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
-import { fmtRelative } from "./format";
+import { fmtDateTime, fmtRelative, isAdvisorStale } from "./format";
 import AdvisorReport from "./AdvisorReport";
 import { ADVISOR_STRINGS, readStoredLang, storeLang } from "./advisor-i18n";
 
@@ -188,8 +188,12 @@ export default function AdvisorPanel({
           </div>
           <CardDescription>{s.panelDescription}</CardDescription>
           {report ? (
-            <p className="text-xs text-muted-foreground" dir="ltr">
-              Last run {fmtRelative(report.createdAt)}
+            <p className="flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground" dir="ltr">
+              <CalendarClock className="size-3.5" aria-hidden />
+              <span>
+                Last run <time dateTime={report.createdAt} title={fmtDateTime(report.createdAt)}>{fmtRelative(report.createdAt)}</time> ({fmtDateTime(report.createdAt)})
+              </span>
+              {isAdvisorStale(report.createdAt) ? <Badge variant="warning">Over a week old — re-run</Badge> : null}
               {usage?.estCostUsd ? ` · cost $${usage.estCostUsd.toFixed(2)}` : ""}
               {` · ${report.model === "claude-code" ? "Claude Code" : (usage?.servedByModel ?? report.model)}`}
               {usage?.fallbackUsed ? " (fallback)" : ""}

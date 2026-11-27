@@ -136,16 +136,16 @@ export function useActionStatus(initialStatuses: ActionStatusMap | null | undefi
 
   /** Mark a whole recommendation "not relevant" (or restore it). */
   const setDismissed = useCallback(
-    async (rec: AdvisorRecommendation, dismissed: boolean) => {
+    async (rec: AdvisorRecommendation, dismissed: boolean, reason: string | null = null) => {
       const key = dismissKey(rec.id);
       const prev = status[key];
-      setStatus((cur) => ({ ...cur, [key]: { done: dismissed, doneAt: dismissed ? new Date().toISOString() : null } }));
+      setStatus((cur) => ({ ...cur, [key]: { done: dismissed, doneAt: dismissed ? new Date().toISOString() : null, reason } }));
       setSaveError(false);
       try {
         const res = await fetch("/api/savings/advisor/actions", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ recId: rec.id, title: rec.title.en || rec.title.he, dismissed, reportId }),
+          body: JSON.stringify({ recId: rec.id, title: rec.title.en || rec.title.he, reason, dismissed, reportId }),
         });
         if (!res.ok) throw new Error(String(res.status));
       } catch {
@@ -497,7 +497,7 @@ export default function AdvisorReport({
                   expanded={open.has(r.id)}
                   onToggle={() => toggleOpen(r.id)}
                   onToggleItem={(item, done) => toggleItem(r, item, done)}
-                  onDismiss={() => void setDismissed(r, true)}
+                  onDismiss={(reason) => void setDismissed(r, true, reason)}
                   onJump={jumpTo}
                   titleOf={(id) => (byId.get(id) ? tx(byId.get(id)!.title, lang) : id)}
                   rankOfId={(id) => rankOf.get(id) ?? null}
@@ -514,7 +514,7 @@ export default function AdvisorReport({
       ) : null}
 
       {dismissed.length > 0 ? (
-        <DismissedList recs={dismissed} open={showDismissed} onToggle={() => setShowDismissed((v) => !v)} onRestore={(r) => void setDismissed(r, false)} lang={lang} s={s} />
+        <DismissedList recs={dismissed} status={status} open={showDismissed} onToggle={() => setShowDismissed((v) => !v)} onRestore={(r) => void setDismissed(r, false)} lang={lang} s={s} />
       ) : null}
 
       {output.questionsForUser.length > 0 ? (
@@ -758,8 +758,8 @@ export function RecommendationRow({
   onDismiss,
 }: {
   emails: EmailHandlers;
-  /** Shows a "Not relevant" button in the details. */
-  onDismiss?: () => void;
+  /** Shows a "Not relevant" button in the details; it asks for the reason first. */
+  onDismiss?: (reason: string) => void;
   /** When set, a property/group heading rendered above the row. */
   groupHeader?: string | null;
   rec: AdvisorRecommendation;
@@ -784,6 +784,9 @@ export function RecommendationRow({
   const complete = progress.total > 0 && progress.done === progress.total;
   const u = rec.urgency;
   const title = tx(rec.title, lang);
+  const [asking, setAsking] = useState(false);
+  const [reason, setReason] = useState("");
+  const reasonId = useId();
 
   return (
     <>
@@ -873,11 +876,44 @@ export function RecommendationRow({
           />
         ) : null}
         {expanded && onDismiss ? (
-          <div className="mt-4 flex justify-end border-t border-border pt-3">
-            <Button variant="ghost" size="sm" onClick={onDismiss} icon={<ThumbsDown aria-hidden />}>
-              {s.notRelevant}
-            </Button>
-          </div>
+          asking ? (
+            <form
+              className="mt-4 space-y-2 border-t border-border pt-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (reason.trim()) onDismiss(reason.trim());
+              }}
+            >
+              <label htmlFor={reasonId} className="block text-sm font-medium text-foreground">
+                {s.dismissPrompt}
+              </label>
+              <textarea
+                id={reasonId}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder={s.dismissPlaceholder}
+                rows={3}
+                maxLength={1000}
+                required
+                autoFocus
+                className="w-full resize-y rounded-md border border-input bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setAsking(false)}>
+                  {s.dismissCancel}
+                </Button>
+                <Button type="submit" variant="secondary" size="sm" disabled={!reason.trim()} icon={<ThumbsDown aria-hidden />}>
+                  {s.dismissConfirm}
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="mt-4 flex justify-end border-t border-border pt-3">
+              <Button variant="ghost" size="sm" onClick={() => setAsking(true)} icon={<ThumbsDown aria-hidden />}>
+                {s.notRelevant}
+              </Button>
+            </div>
+          )
         ) : null}
       </div>
     </li>
@@ -1045,6 +1081,7 @@ function RecommendationDetail({
 /** Recommendations marked "not relevant", collapsed, each restorable. */
 export function DismissedList({
   recs,
+  status,
   open,
   onToggle,
   onRestore,
@@ -1052,6 +1089,7 @@ export function DismissedList({
   s,
 }: {
   recs: AdvisorRecommendation[];
+  status: ActionStatusMap;
   open: boolean;
   onToggle: () => void;
   onRestore: (rec: AdvisorRecommendation) => void;
@@ -1070,8 +1108,15 @@ export function DismissedList({
       {open ? (
         <ul className="divide-y divide-border rounded-lg border border-dashed border-border">
           {recs.map((r) => (
-            <li key={r.id} className="flex items-center justify-between gap-3 px-3 py-2">
-              <span className="min-w-0 text-sm text-muted-foreground">{tx(r.title, lang)}</span>
+            <li key={r.id} className="flex items-start justify-between gap-3 px-3 py-2">
+              <span className="min-w-0 text-sm">
+                <span className="block text-muted-foreground">{tx(r.title, lang)}</span>
+                {status[dismissKey(r.id)]?.reason ? (
+                  <span className="mt-0.5 block text-xs text-foreground-secondary">
+                    {s.reasonLabel}: {status[dismissKey(r.id)]?.reason}
+                  </span>
+                ) : null}
+              </span>
               <Button variant="ghost" size="sm" onClick={() => onRestore(r)} icon={<RotateCcw aria-hidden />}>
                 {s.restore}
               </Button>
