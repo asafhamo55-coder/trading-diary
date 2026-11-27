@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { sectionFilled, type ProfileSection } from "@/lib/property-profile";
 import {
   AddButton,
@@ -37,6 +38,7 @@ export function ProfileSectionCard({
   values,
   emptyText,
   extra,
+  none,
 }: {
   propertyId: string;
   section: Exclude<ProfileSection, "systems">;
@@ -49,13 +51,16 @@ export function ProfileSectionCard({
   emptyText: string;
   /** Derived figures shown under the fields (read view only). */
   extra?: React.ReactNode;
+  /** Lets the section be marked as not applicable (saved as `{ none: true }`). */
+  none?: { label: string; text: string };
 }) {
   const router = useRouter();
   const [editing, setEditing] = React.useState(false);
   const [state, setState] = React.useState(() => toFormState(fields, values));
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const filled = sectionFilled(values);
+  const isNone = !!none && values?.none === true;
+  const filled = !isNone && sectionFilled(values);
 
   const start = () => {
     setState(toFormState(fields, values));
@@ -63,15 +68,14 @@ export function ProfileSectionCard({
     setEditing(true);
   };
 
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
+  async function persist(data: Values) {
     setSaving(true);
     setError(null);
     try {
       const res = await fetch(`/api/properties/${propertyId}/profile`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ section, data: fromFormState(fields, state) }),
+        body: JSON.stringify({ section, data }),
       });
       if (!res.ok) throw new Error(await apiError(res, "Couldn't save"));
       setEditing(false);
@@ -81,6 +85,11 @@ export function ProfileSectionCard({
     } finally {
       setSaving(false);
     }
+  }
+
+  function save(e: React.FormEvent) {
+    e.preventDefault();
+    void persist(fromFormState(fields, state));
   }
 
   return (
@@ -102,8 +111,32 @@ export function ProfileSectionCard({
           <FieldsView fields={fields} values={values ?? {}} />
           {extra}
         </div>
+      ) : isNone ? (
+        <SectionEmpty
+          text={none.text}
+          action={
+            <Button variant="ghost" size="sm" onClick={start}>
+              Add {title === title.toUpperCase() ? title : title.toLowerCase()}
+            </Button>
+          }
+        />
       ) : (
-        <SectionEmpty text={emptyText} action={<AddButton onClick={start} label={`Add ${title === title.toUpperCase() ? title : title.toLowerCase()}`} />} />
+        <>
+          <SectionEmpty
+            text={emptyText}
+            action={
+              <div className="flex flex-wrap items-center gap-2">
+                {none ? (
+                  <Button variant="ghost" size="sm" disabled={saving} onClick={() => void persist({ none: true })}>
+                    {none.label}
+                  </Button>
+                ) : null}
+                <AddButton onClick={start} label={`Add ${title === title.toUpperCase() ? title : title.toLowerCase()}`} />
+              </div>
+            }
+          />
+          <FormError error={error} />
+        </>
       )}
     </SectionCard>
   );

@@ -420,6 +420,7 @@ export function PropertyRecordSections({
           fields={HOA}
           values={p.hoa as Values | undefined}
           emptyText="No HOA on file. Add one if the property has association dues."
+          none={{ label: "No HOA", text: "No HOA — this property has no association dues." }}
         />
         <ProfileSectionCard
           propertyId={propertyId}

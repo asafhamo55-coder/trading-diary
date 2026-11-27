@@ -69,6 +69,8 @@ export const HOA_FREQUENCIES = ["monthly", "quarterly", "annual"] as const;
 const HOA_PERIODS_PER_YEAR: Record<(typeof HOA_FREQUENCIES)[number], number> = { monthly: 12, quarterly: 4, annual: 1 };
 
 export const hoaSchema = z.object({
+  /** Marked as having no HOA (rather than not filled in yet). */
+  none: flag,
   name: text(),
   /** Dues per billing period (key kept from when dues were monthly-only). */
   monthlyDues: money,
