@@ -65,10 +65,17 @@ export const factsSchema = z.object({
   apn: text(80),
 });
 
+export const HOA_FREQUENCIES = ["monthly", "quarterly", "annual"] as const;
+const HOA_PERIODS_PER_YEAR: Record<(typeof HOA_FREQUENCIES)[number], number> = { monthly: 12, quarterly: 4, annual: 1 };
+
 export const hoaSchema = z.object({
   name: text(),
+  /** Dues per billing period (key kept from when dues were monthly-only). */
   monthlyDues: money,
-  /** Day of the month dues are due (1–31). */
+  frequency: defEnum(HOA_FREQUENCIES, "monthly"),
+  /** Next due date, for quarterly / annual dues. */
+  nextDueDate: date,
+  /** Day of the month dues are due (1–31), for monthly dues. */
   dueDay: z.number().int().min(1).max(31).nullish().transform((v) => v ?? null),
   contact: text(),
   phone: text(40),
@@ -501,6 +508,26 @@ export function nextMonthlyDate(day: number, today: string): string {
   return m === 12 ? clamp(y + 1, 1) : clamp(y, m + 1);
 }
 
+/** Step `date` forward by `months` until it is on or after `today`. */
+function rollForward(date: string, months: number, today: string): string {
+  const [y, m, d] = parts(date);
+  let next = date;
+  for (let k = 1; next < today && k < 400; k++) {
+    const total = m - 1 + months * k;
+    const yy = y + Math.floor(total / 12);
+    const mm = (total % 12) + 1;
+    const last = new Date(Date.UTC(yy, mm, 0)).getUTCDate();
+    next = `${yy}-${String(mm).padStart(2, "0")}-${String(Math.min(d, last)).padStart(2, "0")}`;
+  }
+  return next;
+}
+
+/** HOA dues as a monthly amount, whatever the billing frequency. */
+export function hoaMonthlyEquivalent(hoa: PropertyHoa | undefined): number | null {
+  if (hoa?.monthlyDues == null) return null;
+  return (hoa.monthlyDues * HOA_PERIODS_PER_YEAR[hoa.frequency ?? "monthly"]) / 12;
+}
+
 /** Every dated item in a property's record (the lookahead is applied later). */
 export function keyDatesOf(
   profile: PropertyProfile,
@@ -517,8 +544,14 @@ export function keyDatesOf(
     out.push({ kind: "appeal-deadline", date: profile.tax.nextAppealDeadline, label: "Assessment appeal" });
   }
   const hoa = profile.hoa;
-  if (hoa?.dueDay && hoa.monthlyDues) {
-    out.push({ kind: "hoa-dues", date: nextMonthlyDate(hoa.dueDay, today), label: hoa.name ?? "HOA dues" });
+  if (hoa?.monthlyDues) {
+    const label = hoa.name ?? "HOA dues";
+    const frequency = hoa.frequency ?? "monthly"; // records saved before frequency existed
+    if (frequency === "monthly" && hoa.dueDay) {
+      out.push({ kind: "hoa-dues", date: nextMonthlyDate(hoa.dueDay, today), label });
+    } else if (frequency !== "monthly" && hoa.nextDueDate) {
+      out.push({ kind: "hoa-dues", date: rollForward(hoa.nextDueDate, 12 / HOA_PERIODS_PER_YEAR[frequency], today), label });
+    }
   }
   for (const s of profile.systems?.items ?? []) {
     if (s.warrantyEnd) {
@@ -625,7 +658,7 @@ export function summarizeRecord(record: PropertyRecord, today: string): Property
     management: sectionFilled(p.management)
       ? { mode: p.management!.mode, feeType: p.management!.feeType, feeValue: p.management!.feeValue, company: p.management!.company }
       : null,
-    hoaMonthlyDues: p.hoa?.monthlyDues ?? null,
+    hoaMonthlyDues: hoaMonthlyEquivalent(p.hoa),
     depreciation: depreciationSummary(p.taxBasis, record.improvements),
     keyDates: keyDatesOf(p, record.loans, today).sort((a, b) => a.date.localeCompare(b.date)),
   };

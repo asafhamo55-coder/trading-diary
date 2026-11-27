@@ -61,8 +61,19 @@ const FACTS: FieldSpec[] = [
 
 const HOA: FieldSpec[] = [
   { key: "name", label: "HOA name", type: "text", span: 3 },
-  { key: "monthlyDues", label: "Monthly dues", type: "money" },
-  { key: "dueDay", label: "Due day of month", type: "number", span: 1 },
+  {
+    key: "frequency",
+    label: "Billed",
+    type: "select",
+    options: [
+      { value: "monthly", label: "Monthly" },
+      { value: "quarterly", label: "Quarterly" },
+      { value: "annual", label: "Annually" },
+    ],
+  },
+  { key: "monthlyDues", label: "Dues per period", type: "money" },
+  { key: "dueDay", label: "Due day of month", type: "number", span: 1, showIf: (v) => (v.frequency ?? "monthly") === "monthly" },
+  { key: "nextDueDate", label: "Next due date", type: "date", showIf: (v) => v.frequency === "quarterly" || v.frequency === "annual" },
   { key: "contact", label: "Contact", type: "text" },
   { key: "phone", label: "Phone", type: "tel" },
   { key: "email", label: "Email", type: "email" },
