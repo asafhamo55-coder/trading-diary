@@ -20,9 +20,9 @@ import type { AdvisorReportDTO } from "@/lib/savings-data";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDisplayCurrency } from "@/components/ui/currency";
-import { RecommendationRow, emailActionItem, useActionStatus, type EmailHandlers } from "@/components/dashboard/household/AdvisorReport";
+import { DismissedList, RecommendationRow, emailActionItem, useActionStatus, type EmailHandlers } from "@/components/dashboard/household/AdvisorReport";
 import { ADVISOR_STRINGS, readStoredLang } from "@/components/dashboard/household/advisor-i18n";
-import { itemKey } from "@/lib/advisor-report";
+import { isDismissed, itemKey } from "@/lib/advisor-report";
 
 export interface PropertyRecommendationsProps {
   propertyId: string;
@@ -46,7 +46,8 @@ export default function PropertyRecommendations({ propertyId, lang: langProp, ti
   const s = ADVISOR_STRINGS[lang];
   const { money } = useDisplayCurrency();
   const compact = (usd: number) => money(usd, "USD", { compact: true });
-  const { status, toggleItem } = useActionStatus(null, report?.id ?? null);
+  const { status, toggleItem, setDismissed } = useActionStatus(null, report?.id ?? null);
+  const [showDismissed, setShowDismissed] = useState(false);
   const [open, setOpen] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
@@ -70,7 +71,9 @@ export default function PropertyRecommendations({ propertyId, lang: langProp, ti
   }, []);
 
   const output: AdvisorOutput | null = useMemo(() => readAdvisorOutput(report?.output), [report]);
-  const recs = useMemo(() => output?.recommendations.filter((r) => r.propertyId === propertyId) ?? [], [output, propertyId]);
+  const mine = useMemo(() => output?.recommendations.filter((r) => r.propertyId === propertyId) ?? [], [output, propertyId]);
+  const recs = mine.filter((r) => !isDismissed(r, status));
+  const dismissed = mine.filter((r) => isDismissed(r, status));
   const rankOf = useMemo(() => new Map((output?.recommendations ?? []).map((r, i) => [r.id, i + 1])), [output]);
   const total = recs.reduce((acc, r) => acc + r.benefit.tenYearUsd, 0);
   const h = HEADINGS[lang];
@@ -137,6 +140,7 @@ export default function PropertyRecommendations({ propertyId, lang: langProp, ti
                   })
                 }
                 onToggleItem={(item, done) => toggleItem(r, item, done)}
+                onDismiss={() => void setDismissed(r, true)}
                 onJump={(id) => setOpen((cur) => new Set(cur).add(id))}
                 titleOf={(id) => tx(output.recommendations.find((x) => x.id === id)?.title, lang) || id}
                 rankOfId={(id) => rankOf.get(id) ?? null}
@@ -147,6 +151,11 @@ export default function PropertyRecommendations({ propertyId, lang: langProp, ti
               />
             ))}
           </ol>
+        </CardContent>
+      ) : null}
+      {dismissed.length > 0 ? (
+        <CardContent className={recs.length > 0 ? "pt-0" : undefined}>
+          <DismissedList recs={dismissed} open={showDismissed} onToggle={() => setShowDismissed((v) => !v)} onRestore={(r) => void setDismissed(r, false)} lang={lang} s={s} />
         </CardContent>
       ) : null}
     </Card>

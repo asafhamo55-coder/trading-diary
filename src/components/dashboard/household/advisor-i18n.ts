@@ -65,6 +65,11 @@ interface Strings {
   filterGroup: string;
   saveError: string;
   noMatch: string;
+  notRelevant: string;
+  restore: string;
+  dismissedCount: (n: number) => string;
+  showDismissed: string;
+  hideDismissed: string;
   needToKnow: string;
   unquantified: string;
   recs: (n: number) => string;
@@ -134,6 +139,11 @@ export const ADVISOR_STRINGS: Record<AdvisorLang, Strings> = {
     filterGroup: "Filter recommendations",
     saveError: "Couldn’t save that tick — check your connection and try again.",
     noMatch: "No recommendations match these filters.",
+  notRelevant: "Not relevant",
+  restore: "Restore",
+  dismissedCount: (n) => `${n} marked not relevant`,
+  showDismissed: "Show",
+  hideDismissed: "Hide",
     needToKnow: "The advisor needs to know",
     unquantified: "Unquantified",
     recs: (n) => `${n} rec${n === 1 ? "" : "s"}`,
@@ -201,6 +211,11 @@ export const ADVISOR_STRINGS: Record<AdvisorLang, Strings> = {
     filterGroup: "סינון המלצות",
     saveError: "הסימון לא נשמר — בדקו את החיבור ונסו שוב.",
     noMatch: "אין המלצות שמתאימות לסינון.",
+  notRelevant: "לא רלוונטי",
+  restore: "שחזור",
+  dismissedCount: (n) => (n === 1 ? "המלצה אחת סומנה כלא רלוונטית" : `${n} המלצות סומנו כלא רלוונטיות`),
+  showDismissed: "הצגה",
+  hideDismissed: "הסתרה",
     needToKnow: "היועץ צריך לדעת",
     unquantified: "לא כומת",
     recs: (n) => (n === 1 ? "המלצה אחת" : `${n} המלצות`),

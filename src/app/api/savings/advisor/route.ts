@@ -4,7 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { jsonResponse, errorResponse } from "@/lib/api-helpers";
 import { advisorRequestSchema } from "@/lib/savings-validators";
 import {
-  getAdvisorActionStatuses,
+  getAdvisorActionStatuses, getDismissedRecommendations,
   getHomeCashFlowSummary,
   getLatestAdvisorReport,
   getNetWorth,
@@ -65,11 +65,16 @@ export async function POST(req: NextRequest) {
       if (cached) return jsonResponse({ report: cached, cached: true });
     }
 
-    const [latest, statuses] = await Promise.all([getLatestAdvisorReport(), getAdvisorActionStatuses().catch(() => ({}))]);
+    const [latest, statuses, dismissed] = await Promise.all([
+      getLatestAdvisorReport(),
+      getAdvisorActionStatuses().catch(() => ({})),
+      getDismissedRecommendations().catch(() => []),
+    ]);
     const prevOutput = readAdvisorOutput(latest?.output);
     const { output, usage } = await generateAdvice(snapshot, {
       previousRecommendations: previousRecommendationsOf(prevOutput, statuses),
       previousOpportunityTitles: previousOpportunityTitlesOf(prevOutput),
+      dismissedRecommendations: dismissed,
     });
     const report = await saveAdvisorReport({ model: ADVISOR_MODEL, inputHash, snapshot, output, usage });
     return jsonResponse({ report, cached: false });

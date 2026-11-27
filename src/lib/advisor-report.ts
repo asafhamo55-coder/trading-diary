@@ -933,6 +933,14 @@ export function actionKey(recId: string, task: string): string {
 }
 export const itemKey = (rec: AdvisorRecommendation, item: AdvisorActionItem) => actionKey(rec.id, item.task.en);
 
+/**
+ * "Not relevant" is stored as a reserved pseudo task on the recommendation, so
+ * it rides the same per-id persistence as ticks and survives regeneration.
+ */
+export const DISMISS_TASK = "__not_relevant__";
+export const dismissKey = (recId: string) => actionKey(recId, DISMISS_TASK);
+export const isDismissed = (rec: Pick<AdvisorRecommendation, "id">, status: ActionStatusMap) => !!status[dismissKey(rec.id)]?.done;
+
 export type ActionStatusMap = Record<string, { done: boolean; doneAt: string | null }>;
 
 export interface Progress {
@@ -977,7 +985,8 @@ export function previousRecommendationsOf(
   status: ActionStatusMap
 ): { id: string; title: string; themeId: string; actionItems: { task: string; done: boolean }[] }[] {
   if (!output) return [];
-  return output.recommendations.map((r) => ({
+  // Dismissed ones travel separately (dismissedRecommendations).
+  return output.recommendations.filter((r) => !isDismissed(r, status)).map((r) => ({
     id: r.id,
     title: r.title.en,
     themeId: r.themeId,

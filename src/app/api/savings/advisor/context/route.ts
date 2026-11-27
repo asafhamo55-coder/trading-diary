@@ -2,7 +2,7 @@ import { loadAdvisorPropertyRecords } from "@/lib/advisor-records";
 import { NextRequest } from "next/server";
 import { jsonResponse, errorResponse } from "@/lib/api-helpers";
 import { checkSavingsToken } from "@/lib/ingest-auth";
-import { getAdvisorActionStatuses, getHomeCashFlowSummary, getLatestAdvisorReport, getNetWorth, getProfile } from "@/lib/savings-data";
+import { getAdvisorActionStatuses, getDismissedRecommendations, getHomeCashFlowSummary, getLatestAdvisorReport, getNetWorth, getProfile } from "@/lib/savings-data";
 import { getGuidelineSummary } from "@/lib/guidelines-data";
 import { getProperties } from "@/lib/property-data";
 import { ADVISOR_OUTPUT_SCHEMA, ADVISOR_SYSTEM, buildAdvisorSnapshot, snapshotHash } from "@/lib/advisor";
@@ -27,7 +27,11 @@ export async function GET(req: NextRequest) {
       tradingGuidelines: await getGuidelineSummary(),
     };
     const inputHash = snapshotHash(snapshot);
-    const [latest, statuses] = await Promise.all([getLatestAdvisorReport(), getAdvisorActionStatuses().catch(() => ({}))]);
+    const [latest, statuses, dismissed] = await Promise.all([
+      getLatestAdvisorReport(),
+      getAdvisorActionStatuses().catch(() => ({})),
+      getDismissedRecommendations().catch(() => []),
+    ]);
     const previous = readAdvisorOutput(latest?.output);
     return jsonResponse({
       inputHash,
@@ -38,6 +42,8 @@ export async function GET(req: NextRequest) {
       snapshot,
       // Not part of the snapshot hash: ticking items doesn't force a re-run.
       previousRecommendations: previousRecommendationsOf(previous, statuses),
+      // Marked "not relevant" in the app — never recommend these again.
+      dismissedRecommendations: dismissed,
       // Investment ideas already suggested last time — rotate unless something changed.
       previousOpportunityTitles: previousOpportunityTitlesOf(previous),
       // The full previous report, so a one-off recommendation can be appended and

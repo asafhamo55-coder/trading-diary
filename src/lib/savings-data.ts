@@ -27,7 +27,7 @@ import {
 } from "./savings";
 import { mapSavingsImport } from "./savings-import";
 import { getLiveUsdIls } from "./fx-server";
-import { actionKey, type ActionStatusMap } from "./advisor-report";
+import { DISMISS_TASK, actionKey, dismissKey, type ActionStatusMap } from "./advisor-report";
 import type {
   CreateSavingsAccountInput,
   HouseholdBundle,
@@ -807,6 +807,38 @@ export async function getAdvisorActionStatuses(): Promise<ActionStatusMap> {
     const out: ActionStatusMap = {};
     for (const r of rows) out[r.key] = { done: r.done, doneAt: r.doneAt?.toISOString() ?? null };
     return out;
+  });
+}
+
+/**
+ * Mark a recommendation "not relevant" (or restore it). The title is kept in
+ * the task column (after the reserved marker) so the advisor can be told what
+ * was rejected even once the recommendation drops out of the latest report.
+ */
+export async function setAdvisorDismissal(input: { recId: string; title: string; dismissed: boolean; reportId?: string | null }) {
+  const key = dismissKey(input.recId);
+  const task = `${DISMISS_TASK}:${input.title}`;
+  return withHeal(async () => {
+    const acct = await accountId();
+    const doneAt = input.dismissed ? new Date() : null;
+    const row = await prisma.advisorActionStatus.upsert({
+      where: { accountId_key: { accountId: acct, key } },
+      create: { accountId: acct, key, recId: input.recId, task, done: input.dismissed, doneAt, reportId: input.reportId ?? null },
+      update: { done: input.dismissed, doneAt, task, reportId: input.reportId ?? null },
+    });
+    return { key, done: row.done, doneAt: row.doneAt?.toISOString() ?? null };
+  });
+}
+
+/** Recommendations the user marked "not relevant", for the next advisor run. */
+export async function getDismissedRecommendations(): Promise<{ id: string; title: string; dismissedAt: string | null }[]> {
+  return withHeal(async () => {
+    const acct = await accountId();
+    const rows = await prisma.advisorActionStatus.findMany({
+      where: { accountId: acct, done: true, task: { startsWith: `${DISMISS_TASK}:` } },
+      orderBy: { doneAt: "desc" },
+    });
+    return rows.map((r) => ({ id: r.recId, title: r.task.slice(DISMISS_TASK.length + 1), dismissedAt: r.doneAt?.toISOString() ?? null }));
   });
 }
 

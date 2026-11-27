@@ -25,6 +25,8 @@ import {
   Languages,
   Link2,
   ListChecks,
+  RotateCcw,
+  ThumbsDown,
   User,
   Users,
   X,
@@ -32,6 +34,8 @@ import {
 } from "lucide-react";
 import {
   capturedTenYearUsd,
+  dismissKey,
+  isDismissed,
   itemKey,
   nextActionItem,
   recProgress,
@@ -129,7 +133,34 @@ export function useActionStatus(initialStatuses: ActionStatusMap | null | undefi
     },
     [status, reportId]
   );
-  return { status, toggleItem, saveError };
+
+  /** Mark a whole recommendation "not relevant" (or restore it). */
+  const setDismissed = useCallback(
+    async (rec: AdvisorRecommendation, dismissed: boolean) => {
+      const key = dismissKey(rec.id);
+      const prev = status[key];
+      setStatus((cur) => ({ ...cur, [key]: { done: dismissed, doneAt: dismissed ? new Date().toISOString() : null } }));
+      setSaveError(false);
+      try {
+        const res = await fetch("/api/savings/advisor/actions", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ recId: rec.id, title: rec.title.en || rec.title.he, dismissed, reportId }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+      } catch {
+        setStatus((cur) => {
+          const next = { ...cur };
+          if (prev) next[key] = prev;
+          else delete next[key];
+          return next;
+        });
+        setSaveError(true);
+      }
+    },
+    [status, reportId]
+  );
+  return { status, toggleItem, setDismissed, saveError };
 }
 
 export default function AdvisorReport({
@@ -154,8 +185,11 @@ export default function AdvisorReport({
   const s = ADVISOR_STRINGS[lang];
   const { money } = useDisplayCurrency();
   const compact = useCallback((usd: number) => money(usd, "USD", { compact: true }), [money]);
-  const recs = output.recommendations;
-  const { status, toggleItem, saveError } = useActionStatus(initialStatuses, reportId);
+  const { status, toggleItem, setDismissed, saveError } = useActionStatus(initialStatuses, reportId);
+  // "Not relevant" recommendations drop out of every list, totals and progress.
+  const recs = useMemo(() => output.recommendations.filter((r) => !isDismissed(r, status)), [output, status]);
+  const dismissed = output.recommendations.filter((r) => isDismissed(r, status));
+  const [showDismissed, setShowDismissed] = useState(false);
 
   // ── Filters + expansion ──────────────────────────────────────────
   const [themeFilter, setThemeFilter] = useState<string | null>(null);
@@ -220,7 +254,17 @@ export default function AdvisorReport({
 
   const total = sumProgress(recs, status);
   const captured = capturedTenYearUsd(recs, status);
-  const t = output.totals;
+  // Report totals, less anything marked "not relevant".
+  const t =
+    dismissed.length === 0
+      ? output.totals
+      : {
+          ...output.totals,
+          tenYearUsd: recs.reduce((acc, r) => acc + r.benefit.tenYearUsd, 0),
+          annualUsd: recs.reduce((acc, r) => acc + (r.benefit.annualUsd ?? 0), 0),
+          oneTimeUsd: recs.reduce((acc, r) => acc + (r.benefit.oneTimeUsd ?? 0), 0),
+          recommendationCount: recs.length,
+        };
   const wins = output.quickWins.filter((q) => byId.has(q.recId));
   const showEnglishOnly = lang === "he" && !output.languages.includes("he");
 
@@ -453,6 +497,7 @@ export default function AdvisorReport({
                   expanded={open.has(r.id)}
                   onToggle={() => toggleOpen(r.id)}
                   onToggleItem={(item, done) => toggleItem(r, item, done)}
+                  onDismiss={() => void setDismissed(r, true)}
                   onJump={jumpTo}
                   titleOf={(id) => (byId.get(id) ? tx(byId.get(id)!.title, lang) : id)}
                   rankOfId={(id) => rankOf.get(id) ?? null}
@@ -466,6 +511,10 @@ export default function AdvisorReport({
             </ol>
           )}
         </section>
+      ) : null}
+
+      {dismissed.length > 0 ? (
+        <DismissedList recs={dismissed} open={showDismissed} onToggle={() => setShowDismissed((v) => !v)} onRestore={(r) => void setDismissed(r, false)} lang={lang} s={s} />
       ) : null}
 
       {output.questionsForUser.length > 0 ? (
@@ -706,8 +755,11 @@ export function RecommendationRow({
   s,
   emails,
   groupHeader = null,
+  onDismiss,
 }: {
   emails: EmailHandlers;
+  /** Shows a "Not relevant" button in the details. */
+  onDismiss?: () => void;
   /** When set, a property/group heading rendered above the row. */
   groupHeader?: string | null;
   rec: AdvisorRecommendation;
@@ -819,6 +871,13 @@ export function RecommendationRow({
             s={s}
             emails={emails}
           />
+        ) : null}
+        {expanded && onDismiss ? (
+          <div className="mt-4 flex justify-end border-t border-border pt-3">
+            <Button variant="ghost" size="sm" onClick={onDismiss} icon={<ThumbsDown aria-hidden />}>
+              {s.notRelevant}
+            </Button>
+          </div>
         ) : null}
       </div>
     </li>
@@ -980,6 +1039,47 @@ function RecommendationDetail({
         </div>
       </div>
     </div>
+  );
+}
+
+/** Recommendations marked "not relevant", collapsed, each restorable. */
+export function DismissedList({
+  recs,
+  open,
+  onToggle,
+  onRestore,
+  lang,
+  s,
+}: {
+  recs: AdvisorRecommendation[];
+  open: boolean;
+  onToggle: () => void;
+  onRestore: (rec: AdvisorRecommendation) => void;
+  lang: AdvisorLang;
+  s: Strings;
+}) {
+  return (
+    <section className="space-y-2">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <ThumbsDown className="size-3" aria-hidden />
+        <span>{s.dismissedCount(recs.length)}</span>
+        <Button variant="link" size="sm" onClick={onToggle} aria-expanded={open} className="h-auto px-0 text-xs">
+          {open ? s.hideDismissed : s.showDismissed}
+        </Button>
+      </div>
+      {open ? (
+        <ul className="divide-y divide-border rounded-lg border border-dashed border-border">
+          {recs.map((r) => (
+            <li key={r.id} className="flex items-center justify-between gap-3 px-3 py-2">
+              <span className="min-w-0 text-sm text-muted-foreground">{tx(r.title, lang)}</span>
+              <Button variant="ghost" size="sm" onClick={() => onRestore(r)} icon={<RotateCcw aria-hidden />}>
+                {s.restore}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
   );
 }
 

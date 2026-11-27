@@ -114,7 +114,7 @@ Be specific — no generic advice:
 - urgency.level: critical = money or cover is being lost now, or a hard deadline is within 30 days; high = deadline this quarter or a large recurring cost; medium = this year; low = whenever. urgency.deadline = the actual date (YYYY-MM-DD) when one exists.
 - dependsOn: ids of recommendations that must happen first. risksIfIgnored: what happens if nothing changes, quantified where possible.
 - Merge duplicates; don't split one change into several recommendations. Prefer 8–16 recommendations including the opportunities.
-- id: a stable kebab-case slug describing the change (theme-member-subject, e.g. "fees-adult1-pension-accumulation"). When the request includes previousRecommendations, reuse the same id for the same recommendation and copy the English wording (task.en) of continuing action items verbatim — the app tracks ticked items by id + English task text. Don't re-add finished items.
+- id: a stable kebab-case slug describing the change (theme-member-subject, e.g. "fees-adult1-pension-accumulation"). When the request includes previousRecommendations, reuse the same id for the same recommendation and copy the English wording (task.en) of continuing action items verbatim — the app tracks ticked items by id + English task text. Don't re-add finished items. When the request includes dismissedRecommendations, the household rejected those as not relevant: don't recommend them, or the same idea under another id, again unless the snapshot shows a material change that makes it relevant.
 
 Ground everything:
 - Every figure must come from the SNAPSHOT or the knowledge base. Never invent balances, fees, rates, ages, phone numbers or goals. If you compute something, show the inputs in basis and keep the arithmetic simple.
@@ -409,7 +409,7 @@ function usageOf(msg: Anthropic.Beta.BetaMessage): AdvisorUsage {
 
 export async function generateAdvice(
   snapshot: AdvisorSnapshot,
-  previous: { previousRecommendations?: unknown[]; previousOpportunityTitles?: string[] } = {}
+  previous: { previousRecommendations?: unknown[]; previousOpportunityTitles?: string[]; dismissedRecommendations?: unknown[] } = {}
 ): Promise<{ output: AdvisorOutput; usage: AdvisorUsage }> {
   const client = new Anthropic();
   // Fable 5.1: thinking is always on (no `thinking` field), no sampling
@@ -431,6 +431,9 @@ export async function generateAdvice(
           `Review our household finances and give us a ranked plan: what to change, how, and the action items.\n\n=== SNAPSHOT (JSON) ===\n${JSON.stringify(snapshot, null, 2)}` +
           (previous.previousRecommendations?.length
             ? `\n\n=== previousRecommendations (reuse ids and continuing task wording; done items are finished) ===\n${JSON.stringify(previous.previousRecommendations, null, 2)}`
+            : "") +
+          (previous.dismissedRecommendations?.length
+            ? `\n\n=== dismissedRecommendations (the household marked these not relevant — don't recommend them or the same idea again) ===\n${JSON.stringify(previous.dismissedRecommendations, null, 2)}`
             : "") +
           (previous.previousOpportunityTitles?.length
             ? `\n\n=== previousOpportunityTitles (suggest different investment ideas unless something changed) ===\n${JSON.stringify(previous.previousOpportunityTitles)}`

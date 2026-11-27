@@ -24,12 +24,15 @@ shows it in the "Advisor" panel.
    curl -sf -H "Authorization: Bearer $SAVINGS_INGEST_TOKEN" "$HAMO_BASE_URL/api/savings/advisor/context" > /tmp/advisor-context.json
    ```
    It returns `{ inputHash, unchangedSinceLastReport, latestReportAt, system, outputSchema,
-   snapshot, previousRecommendations, previousOpportunityTitles }`.
+   snapshot, previousRecommendations, dismissedRecommendations, previousOpportunityTitles }`.
    - If `unchangedSinceLastReport` is true and the latest report is under 7 days old,
      stop and say nothing changed. A scheduled run should still re-run weekly, because
      laws and rates change.
    - `previousRecommendations` is the last report's recommendation ids, titles and action
      items, each with `done` (ticked by the user in the app).
+   - `dismissedRecommendations` is what the user marked **not relevant** in the app (id,
+     title, date). Never recommend these again — not under the same id and not the same
+     idea reworded — unless the snapshot shows a material change that makes it relevant.
    - `previousOpportunityTitles` is the investment ideas suggested last time; rotate them.
 2. **Read the knowledge base** in `docs/advisor/knowledge/`: `israel.md` and
    `us-and-cross-border.md`. Treat the figures in them as of their "Last verified" date.

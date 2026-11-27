@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { jsonResponse, errorResponse } from "@/lib/api-helpers";
 import { AUTH_COOKIE, expectedAuthCookie } from "@/lib/auth";
-import { getAdvisorActionStatuses, setAdvisorActionStatus } from "@/lib/savings-data";
+import { getAdvisorActionStatuses, setAdvisorActionStatus, setAdvisorDismissal } from "@/lib/savings-data";
 
 // Ticked advisor action items. Cookie-authenticated: this path is not in
 // PUBLIC_PATHS, so src/proxy.ts already rejects requests without the app
@@ -9,6 +9,7 @@ import { getAdvisorActionStatuses, setAdvisorActionStatus } from "@/lib/savings-
 //
 // GET  /api/savings/advisor/actions → { statuses: { [actionKey]: { done, doneAt } } }
 // PUT  /api/savings/advisor/actions   { recId, task, done, reportId? } → { key, done, doneAt }
+// PUT  /api/savings/advisor/actions   { recId, title, dismissed, reportId? } → marks "not relevant"
 // The key is derived on the server from recId + task (actionKey in
 // src/lib/advisor-report.ts), so it survives daily report regeneration.
 
@@ -32,6 +33,12 @@ export async function PUT(req: NextRequest) {
   try {
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
     const recId = typeof body?.recId === "string" ? body.recId.trim() : "";
+    if (typeof body?.dismissed === "boolean") {
+      const title = typeof body.title === "string" ? body.title.trim().slice(0, 500) : "";
+      if (!recId || recId.length > 200) return errorResponse("Body needs recId");
+      const reportId = typeof body.reportId === "string" ? body.reportId.slice(0, 64) : null;
+      return jsonResponse(await setAdvisorDismissal({ recId, title: title || recId, dismissed: body.dismissed, reportId }));
+    }
     const task = typeof body?.task === "string" ? body.task.trim() : "";
     if (!recId || !task || typeof body?.done !== "boolean") return errorResponse("Body needs recId, task and done (boolean)");
     if (recId.length > 200 || task.length > 2000) return errorResponse("recId or task too long");
