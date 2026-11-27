@@ -102,12 +102,12 @@ export default function PropertyValueSection({
         <form onSubmit={save} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Purchase price">
-              <input type="number" min="0" step="1000" value={form.purchasePrice}
+              <input type="number" min="0" step="0.01" value={form.purchasePrice}
                 onChange={(e) => setForm({ ...form, purchasePrice: e.target.value })}
                 placeholder="450000" className={inputCls} />
             </Field>
             <Field label="Down payment">
-              <input type="number" min="0" step="1000" value={form.downPayment}
+              <input type="number" min="0" step="0.01" value={form.downPayment}
                 onChange={(e) => setForm({ ...form, downPayment: e.target.value })}
                 placeholder="90000" className={inputCls} />
             </Field>
@@ -117,7 +117,7 @@ export default function PropertyValueSection({
                 className={inputCls} />
             </Field>
             <Field label="Current value (Zestimate)">
-              <input type="number" min="0" step="1000" value={form.currentValue}
+              <input type="number" min="0" step="0.01" value={form.currentValue}
                 onChange={(e) => setForm({ ...form, currentValue: e.target.value })}
                 placeholder="600000" className={inputCls} />
             </Field>
@@ -133,7 +133,7 @@ export default function PropertyValueSection({
               </select>
             </Field>
             <Field label="Mortgage balance (0 if paid off)">
-              <input type="number" min="0" step="1000" value={form.mortgageBalance}
+              <input type="number" min="0" step="0.01" value={form.mortgageBalance}
                 onChange={(e) => setForm({ ...form, mortgageBalance: e.target.value })}
                 placeholder="320000" className={inputCls} />
             </Field>

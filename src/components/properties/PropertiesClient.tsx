@@ -341,7 +341,7 @@ export default function PropertiesClient({
                 <input
                   type="number"
                   min="0"
-                  step="1000"
+                  step="0.01"
                   value={form.currentValue}
                   onChange={(e) => setForm({ ...form, currentValue: e.target.value })}
                   placeholder="750000"
@@ -354,7 +354,7 @@ export default function PropertiesClient({
                 <input
                   type="number"
                   min="0"
-                  step="1000"
+                  step="0.01"
                   value={form.mortgageBalance}
                   onChange={(e) => setForm({ ...form, mortgageBalance: e.target.value })}
                   placeholder="400000"
