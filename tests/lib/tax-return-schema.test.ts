@@ -26,6 +26,11 @@ describe("parseTaxReturn", () => {
     expect(() => parseTaxReturn(raw)).toThrow(/data\.notes\.0/);
   });
 
+  it("rejects an SSN printed with spaces", () => {
+    const raw = { ...minimal, data: { ...minimal.data, notes: ["id 987 65 4321"] } };
+    expect(() => parseTaxReturn(raw)).toThrow(/data\.notes\.0/);
+  });
+
   it("rejects EIN and long digit strings in text", () => {
     const ein = { ...minimal, data: { rentals: [{ address: "Payer 12-3456789" }] } };
     const acct = { ...minimal, data: { rentals: [{ address: "Acct 123456789012" }] } };

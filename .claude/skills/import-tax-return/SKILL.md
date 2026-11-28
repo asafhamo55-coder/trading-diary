@@ -20,7 +20,7 @@ never the numbers.
   only (get them from the app, below). The validator and the server reject
   identifier patterns; don't rely on that — never write them in the first place.
 - **Never print identifiers to the terminal.** When you inspect text, mask first
-  (`sed -E 's/[0-9]{3}-[0-9]{2}-[0-9]{4}/[SSN]/g; s/\b[0-9]{7,}\b/[ID]/g'`) and
+  (`sed -E 's/[0-9]{3}[- ][0-9]{2}[- ][0-9]{4}/[SSN]/g; s/[0-9]{2}-[0-9]{7}/[EIN]/g; s/[0-9]{7,}/[ID]/g; s/(PIN\)? +)[0-9]{4,6}/\1[PIN]/g'`) — returns print SSNs with spaces as well as dashes, and the 1040 shows the designee PIN and
   read only the lines you need.
 - **Never commit** PDFs, extracted text or records. Work only under the
   gitignored `private-data/tax/`.

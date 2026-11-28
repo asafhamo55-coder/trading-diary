@@ -146,8 +146,8 @@ export function shouldReplace(existing: { partial: boolean } | null, incoming: {
 }
 
 
-// SSN/ITIN, EIN, and any 9+ digit run (account, routing, PTIN digits, IDs).
-const PII_PATTERNS = [/\b\d{3}-\d{2}-\d{4}\b/, /\b\d{2}-\d{7}\b/, /\d{9,}/, /\bP\d{8}\b/];
+// SSN/ITIN (dashed or spaced, as returns print them), EIN, and any 9+ digit run (account, routing, PTIN digits, IDs).
+const PII_PATTERNS = [/\b\d{3}[- ]\d{2}[- ]\d{4}\b/, /\b\d{2}-\d{7}\b/, /\d{9,}/, /\bP\d{8}\b/];
 const PII_KEYS = /birth|dob|ssn|itin|\bein\b|ptin|routing|accountnumber|account_number|\bpin\b/i;
 
 /** JSON paths of strings or keys that look like personal identifiers. */
