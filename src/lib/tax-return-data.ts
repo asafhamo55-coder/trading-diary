@@ -6,6 +6,9 @@ import type { Prisma } from "@/generated/prisma/client";
 import { getAccount } from "./api-helpers";
 import { ensureSavingsReady } from "./savings-data";
 import { shouldReplace, taxReturnInputSchema, type TaxReturnInput } from "./tax-return-schema";
+import { fillTaxBasis, matchRentals, scheduleEToTransactions, taxReturnSource } from "./tax-return-backfill";
+import { parseProfile } from "./property-profile";
+import { ensurePropertySchema } from "./property-schema";
 
 export type TaxReturnDTO = TaxReturnInput & { id: string; updatedAt: string };
 
@@ -76,4 +79,41 @@ export async function listTaxReturns(): Promise<TaxReturnDTO[]> {
     const rows = await prisma.taxReturn.findMany({ where: { accountId }, orderBy: [{ taxYear: "desc" }, { jurisdiction: "asc" }] });
     return rows.map(serialize);
   });
+}
+
+/**
+ * Rewrite a federal return's Schedule E figures into the property books: in
+ * one transaction, delete this year's `taxReturn:<year>` rows for the matched
+ * properties, insert the new ones, and fill empty tax-basis fields. Statement
+ * imports and hand-entered rows are never touched.
+ */
+export async function backfillPropertyBooks(
+  ret: TaxReturnInput
+): Promise<{ created: number; deleted: number; unmatched: string[]; basisFilled: string[] }> {
+  await ensurePropertySchema(); // adds the `source` column on a fresh deploy
+  const accountId = (await getAccount()).id;
+  const properties = await prisma.property.findMany({
+    where: { accountId },
+    select: { id: true, address: true, street: true, unit: true, profile: true },
+  });
+  const { matched, unmatched } = matchRentals(ret.data.rentals, properties);
+  const source = taxReturnSource(ret.taxYear);
+  const propertyIds = [...new Set(matched.flatMap((m) => m.propertyIds))];
+  const rows = matched.flatMap((m) => scheduleEToTransactions(m.rental, ret.taxYear, m.propertyIds));
+  const basisUpdates = matched.flatMap((m) =>
+    m.propertyIds.flatMap((id) => {
+      const p = properties.find((x) => x.id === id);
+      const profile = parseProfile(p?.profile);
+      const taxBasis = fillTaxBasis(profile.taxBasis, m.rental.depreciation);
+      return taxBasis ? [{ id, profile: { ...((p?.profile as object) ?? {}), taxBasis } }] : [];
+    })
+  );
+  const [deleted] = await prisma.$transaction([
+    prisma.propertyTransaction.deleteMany({ where: { source, propertyId: { in: propertyIds } } }),
+    prisma.propertyTransaction.createMany({ data: rows }),
+    ...basisUpdates.map((u) =>
+      prisma.property.update({ where: { id: u.id }, data: { profile: u.profile as Prisma.InputJsonValue } })
+    ),
+  ]);
+  return { created: rows.length, deleted: deleted.count, unmatched, basisFilled: basisUpdates.map((u) => u.id) };
 }
