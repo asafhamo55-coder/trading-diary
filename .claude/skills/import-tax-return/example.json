@@ -1,0 +1,52 @@
+{
+  "taxYear": 2025,
+  "jurisdiction": "US-federal",
+  "filingStatus": "Married filing jointly",
+  "preparer": "Example CPA LLC",
+  "source": "example-return.pdf",
+  "partial": false,
+  "amended": false,
+  "data": {
+    "summary": {
+      "wages": 200000, "taxableInterest": 300, "ordinaryDividends": 900, "qualifiedDividends": 700,
+      "capitalGainLoss": -3000, "scheduleC": 12000, "form4797": 0, "scheduleE": 1500, "otherIncome": 0,
+      "totalIncome": 211700, "adjustments": 850, "agi": 210850,
+      "standardDeduction": null,
+      "itemized": { "taxes": 10000, "interest": 9000, "contributions": 500, "other": null, "total": 19500 },
+      "qbiDeduction": 0, "taxableIncome": 191350, "tax": 33000,
+      "credits": { "foreignTax": 1200, "childCare": null, "childTax": 500, "other": null, "total": 1700 },
+      "selfEmploymentTax": 1700, "additionalMedicare": 0, "niit": 0, "otherTaxes": 0, "totalTax": 33000,
+      "withholdingW2": 38000, "withholdingOther": 0, "estimatedPayments": 0, "totalPayments": 38000,
+      "refund": 5000, "amountOwed": null, "marginalBracketPct": 24
+    },
+    "rentals": [
+      {
+        "address": "100 EXAMPLE STREET",
+        "propertyId": null,
+        "unitIds": null,
+        "daysRented": 365,
+        "lines": { "RENT": 18000, "INSURANCE": 1200, "MANAGEMENT": 1440, "MORTGAGE_INTEREST": 7000, "REPAIRS": 800, "PROPERTY_TAX": 2500, "DEPRECIATION": 4000 },
+        "net": 1060,
+        "depreciation": { "basis": 140000, "land": 30000, "method": "SL 27.5 MM", "placedInService": "2022-06-01", "prior": 13000, "current": 4000 }
+      }
+    ],
+    "passiveLosses": { "allowed": 0, "suspended": 2500, "byActivity": [{ "activity": "100 EXAMPLE STREET", "suspended": 2500 }] },
+    "business": [{ "owner": "adult2", "activity": "Consulting", "grossReceipts": 15000, "expenses": 3000, "net": 12000, "homeOffice": 600 }],
+    "capitalGains": { "shortTerm": -1000, "longTerm": -2000, "carryover": 500, "sales4797": null },
+    "foreign": {
+      "taxCredit": [{ "basket": "passive", "credit": 200, "carryover": 50 }, { "basket": "general", "credit": 1000, "carryover": null }],
+      "form8938Filed": true, "fbarFiled": true, "accountCount": 2, "aggregateMaxValueUsd": 250000,
+      "accounts": [
+        { "institution": "Example Pension Fund", "type": "pension", "owner": "adult1", "maxValueUsd": 200000 },
+        { "institution": "Example Bank", "type": "deposit", "owner": "joint", "maxValueUsd": 50000 }
+      ]
+    },
+    "hsa": { "contributions": 1000, "employerContributions": 500, "deduction": 1000, "distributions": 0 },
+    "childCare": null,
+    "childTaxCredit": { "credit": 500, "additional": null },
+    "amt": { "amti": 200000, "amt": 0 },
+    "carryovers": [{ "form": "Schedule D", "description": "Short-term capital loss", "amount": 500 }],
+    "state": null,
+    "notes": ["Synthetic example — copy the shape, never the numbers."]
+  }
+}
