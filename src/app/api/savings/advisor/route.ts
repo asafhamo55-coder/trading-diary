@@ -21,6 +21,7 @@ import {
 } from "@/lib/advisor";
 import { getGuidelineSummary } from "@/lib/guidelines-data";
 import { getProperties } from "@/lib/property-data";
+import { listTaxReturns } from "@/lib/tax-return-data";
 import { previousOpportunityTitlesOf, previousRecommendationsOf, readAdvisorOutput } from "@/lib/advisor-report";
 
 // Fable at high effort over a large snapshot can take minutes.
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
     // Same snapshot as the Claude Code routine's context endpoint, including the
     // trading account's guideline status.
     const snapshot = {
-      ...buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow, properties, propertyRecords: await loadAdvisorPropertyRecords() }),
+      ...buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow, properties, propertyRecords: await loadAdvisorPropertyRecords(), taxReturns: await listTaxReturns().catch(() => []) }),
       tradingGuidelines: await getGuidelineSummary(),
     };
     const inputHash = snapshotHash(snapshot);

@@ -4,6 +4,7 @@ import { getGuidelineSummary } from "./guidelines-data";
 import { getProperties, type PropertyWithTx } from "./property-data";
 import { buildAdvisorSnapshot, type AdvisorSnapshot } from "./advisor";
 import type { GuidelineSummary } from "./guidelines";
+import { listTaxReturns } from "./tax-return-data";
 
 export type AdvisorContextSnapshot = AdvisorSnapshot & { tradingGuidelines: GuidelineSummary | null };
 
@@ -24,5 +25,5 @@ export async function buildAdvisorContextSnapshot(opts: { properties?: PropertyW
     getGuidelineSummary(),
   ]);
   const { coverage, ...nw } = netWorth;
-  return { ...buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow, properties, propertyRecords: await loadAdvisorPropertyRecords() }), tradingGuidelines };
+  return { ...buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow, properties, propertyRecords: await loadAdvisorPropertyRecords(), taxReturns: await listTaxReturns().catch(() => []) }), tradingGuidelines };
 }

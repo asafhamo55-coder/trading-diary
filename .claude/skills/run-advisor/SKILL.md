@@ -35,6 +35,14 @@ shows it in the "Advisor" panel.
      the same idea reworded — unless the snapshot shows a material change that makes it
      relevant. Treat each `reason` as a fact about the household and apply it to related
      recommendations too (e.g. "we're selling that property" changes every rec for it).
+   - `snapshot.taxReturns` (when present) is the household's **filed** US federal and
+     Georgia returns for the last two years plus `reconciliation` (each rental's latest
+     declared Schedule E vs this year's books annualized). The filed return is ground
+     truth for what was declared: never recommend claiming what it already claims
+     (depreciation, FTC, HSA, home office); use its wages/AGI/bracket for every tax
+     estimate, total payments vs total tax for withholding, suspended passive losses and
+     carryovers; turn each reconciliation diff into a data-fix or "ask the CPA" item.
+     Never output account numbers.
    - `previousOpportunityTitles` is the investment ideas suggested last time; rotate them.
 2. **Read the knowledge base** in `docs/advisor/knowledge/`: `israel.md` and
    `us-and-cross-border.md`. Treat the figures in them as of their "Last verified" date.

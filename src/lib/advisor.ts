@@ -17,6 +17,8 @@ import {
 } from "./savings";
 import type { HomeCashFlowSummary, HouseholdProfileDTO } from "./savings-data";
 import { fxProvenance } from "./currency";
+import type { TaxReturnDTO } from "./tax-return-data";
+import { compactTaxReturns, reconcileRentals, type AdvisorTaxReturn, type RentalReconciliation } from "./tax-return-advisor";
 import { ADVISOR_OUTPUT_SCHEMA, AdvisorError, parseAdvisorOutput, type AdvisorOutput } from "./advisor-report";
 import { buildRealEstateReview, type PropertyRecordFacts, type PropertyWithTx, type RealEstateReview } from "./advisor-properties";
 
@@ -92,12 +94,19 @@ New investment ideas (theme "opportunities") — required in every report:
 - Rank them with everything else by tenYearUsd — they may rank low; the theme is always shown.
 - Rotate: if the request includes previousOpportunityTitles, suggest different ideas unless something material changed (then say what changed in why).
 
+Filed tax returns (snapshot.taxReturns, when present):
+- taxReturns.years holds the household's filed US federal and Georgia returns for the last two years: income lines, AGI, deductions, credits, total tax, withholding and refund/owed, per-property Schedule E lines with depreciation, Form 8582 suspended passive losses, carryovers, foreign tax credit, FBAR/8938 status, Schedule C businesses and the state summary.
+- The filed return is the ground truth for what was declared. Never recommend claiming something it already claims (depreciation, the foreign tax credit, HSA, a home office) — check correctness or optimization instead, and cite the form and line.
+- Use the declared figures for the household's real situation: wages/AGI and the marginal bracket for every tax-saving estimate; total payments vs total tax for withholding (a large refund means over-withholding — say how to adjust the W-4); suspended passive losses and carryovers for what they can offset; the businesses on Schedule C as real income.
+- taxReturns.reconciliation compares each rental's latest declared Schedule E with this year's books annualized. Turn each diff into a data-fix action (books missing a cost, or a cost booked twice) or an "ask the CPA" item, and say which year each figure is from.
+- Never output account numbers or identifiers; refer to foreign accounts by institution and type.
+
 Real estate — review every US rental, every report (mandatory):
 - snapshot.realEstate.rentals has, per property: address, unit/building grouping, purchase price/date, down payment, value, mortgage, current rent and lease dates, vacancy months, income and expenses by Schedule E category for this year and last, NOI, cap rate, cash-on-cash, expense ratio, rent-to-value (the 1% rule), cost shares of rent, tax facts (depreciation start, land/building known?, cost-segregation candidate) and, when present, record (loans, insurance, property tax, management, basis, improvements). realEstate.residence is the primary home: value and mortgage only — use it for the refinance / HELOC / equity discussion, not for rental figures.
 - For EACH rental, produce property-level recommendations (themeId "real-estate", propertyId = the rental's id, subTheme):
   - revenue: rent vs market — web-search comparable rents for the address/zip and cite the source and date in benefit.basis; lease renewal timing (notice period before lease.end) and annual escalators; vacancy reduction; extra fees (pet, parking, storage).
   - profit: expense outliers vs typical ratios (property tax, insurance, repairs, management as % of rent), an insurance re-shop before renewal, a property-tax appeal before the appeal deadline, utilities pass-through, management fee vs benchmark, refinance when the loan rate is above market, PMI removal once equity allows, paying down vs investing.
-  - tax: depreciation captured correctly (no DEPRECIATION entry = flag), a cost-segregation study when the basis justifies it, repairs vs improvements classification, the passive-loss allowance / real-estate-professional status (income is unknown → ask), a 1031 exchange before any sale, an LLC/umbrella policy for liability, state property-tax exemptions and appeals.
+  - tax: depreciation captured correctly (check snapshot.taxReturns first — if the filed return claims depreciation for the property, it is captured; only a missing DEPRECIATION line on the return is a flag), a cost-segregation study when the basis justifies it, repairs vs improvements classification, the passive-loss allowance / real-estate-professional status (income is unknown → ask), a 1031 exchange before any sale, an LLC/umbrella policy for liability, state property-tax exemptions and appeals.
 - Skip a group for a property only when nothing in it applies, and say so in that property's best recommendation. Data gaps per property go in its recommendations' first action item and in questionsForUser.
 
 Emails — prepare them whenever someone else must act:
@@ -161,6 +170,8 @@ export interface AdvisorSnapshot {
   history: NetWorthPayload["history"];
   /** Per-property review (US rentals + the primary residence); null when properties weren't loaded. */
   realEstate: RealEstateReview | null;
+  /** Filed returns (last two years) and the declared-vs-books check; null when none are loaded. */
+  taxReturns: { years: AdvisorTaxReturn[]; reconciliation: RentalReconciliation[] } | null;
   /** Agents / CPA / HR the advisor can address emails to (no email/phone sent). */
   contacts: { id: string; name: string; role: string; country: string; language: string }[];
   dataGaps: string[];
@@ -176,6 +187,8 @@ export function buildAdvisorSnapshot(input: {
   properties?: PropertyWithTx[];
   /** Full property records by id (loans, insurance, tax, management, basis). */
   propertyRecords?: Record<string, PropertyRecordFacts | null | undefined>;
+  /** Filed tax returns (tax-return-data.ts listTaxReturns). */
+  taxReturns?: TaxReturnDTO[];
   asOf?: Date;
 }): AdvisorSnapshot {
   const { netWorth: nw, profile, coverage } = input;
@@ -319,6 +332,12 @@ export function buildAdvisorSnapshot(input: {
     // Full property records (loans, insurance, tax, basis…) come from
     // advisor-records.ts loadAdvisorPropertyRecords(), loaded by the callers.
     realEstate: input.properties ? buildRealEstateReview(input.properties, asOf, input.propertyRecords) : null,
+    taxReturns: input.taxReturns?.length
+      ? {
+          years: compactTaxReturns(input.taxReturns),
+          reconciliation: reconcileRentals(input.taxReturns, input.properties ?? [], asOf.toISOString().slice(0, 10)),
+        }
+      : null,
     contacts: (profile.contacts ?? []).map((c) => ({ id: c.id, name: c.name, role: c.role, country: c.country, language: c.language })),
     dataGaps: [...new Set(gaps)],
     assumptions: [...new Set(assumptions)],

@@ -5,6 +5,7 @@ import { checkSavingsToken } from "@/lib/ingest-auth";
 import { getAdvisorActionStatuses, getDismissedRecommendations, getHomeCashFlowSummary, getLatestAdvisorReport, getNetWorth, getProfile } from "@/lib/savings-data";
 import { getGuidelineSummary } from "@/lib/guidelines-data";
 import { getProperties } from "@/lib/property-data";
+import { listTaxReturns } from "@/lib/tax-return-data";
 import { ADVISOR_OUTPUT_SCHEMA, ADVISOR_SYSTEM, buildAdvisorSnapshot, snapshotHash } from "@/lib/advisor";
 import { previousOpportunityTitlesOf, previousRecommendationsOf, readAdvisorOutput } from "@/lib/advisor-report";
 
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     // The trading account's standing allocation rules (SPY/QQQ/large caps/cash)
     // ride along so the advisor can comment on drift and dip signals.
     const snapshot = {
-      ...buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow, properties, propertyRecords: await loadAdvisorPropertyRecords() }),
+      ...buildAdvisorSnapshot({ netWorth: nw, coverage, profile, cashFlow, properties, propertyRecords: await loadAdvisorPropertyRecords(), taxReturns: await listTaxReturns().catch(() => []) }),
       tradingGuidelines: await getGuidelineSummary(),
     };
     const inputHash = snapshotHash(snapshot);
