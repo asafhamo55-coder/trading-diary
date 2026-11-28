@@ -151,8 +151,15 @@ const PII_PATTERNS = [/\b\d{3}[- ]\d{2}[- ]\d{4}\b/, /\b\d{2}-\d{7}\b/, /\d{9,}/
 const PII_KEYS = /birth|dob|ssn|itin|\bein\b|ptin|routing|accountnumber|account_number|\bpin\b/i;
 
 /** JSON paths of strings or keys that look like personal identifiers. */
+const IBAN = /\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]){11,30}\b/;
+// Account and card numbers are often printed with separators ("12-345-678901").
+const collapse = (v: string) => v.replace(/(?<=\d)[\s.-](?=\d)/g, "");
+
 export function findPii(value: unknown, path: string[] = []): string[] {
-  if (typeof value === "string") return PII_PATTERNS.some((re) => re.test(value)) ? [path.join(".")] : [];
+  if (typeof value === "string") {
+    const hit = PII_PATTERNS.some((re) => re.test(value)) || IBAN.test(value) || /\d{9,}/.test(collapse(value));
+    return hit ? [path.join(".")] : [];
+  }
   if (Array.isArray(value)) return value.flatMap((v, i) => findPii(v, [...path, String(i)]));
   if (value && typeof value === "object") {
     return Object.entries(value).flatMap(([k, v]) => {

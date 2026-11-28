@@ -46,7 +46,14 @@ export function reconcileRentals(
     .sort((a, b) => b.taxYear - a.taxYear)[0];
   if (!latest) return [];
   const year = Number(today.slice(0, 4));
-  const months = Math.max(1, Number(today.slice(5, 7)));
+  const calendarMonths = Math.max(1, Number(today.slice(5, 7)));
+  // Annualize over the months the books actually cover (statements arrive in
+  // batches), never beyond today's month.
+  const bookMonths = properties
+    .flatMap((p) => p.transactions)
+    .filter((t) => t.year === year && !t.source?.startsWith("taxReturn:"))
+    .reduce((m, t) => Math.max(m, t.month), 0);
+  const months = Math.min(calendarMonths, Math.max(1, bookMonths || calendarMonths));
   const { matched } = matchRentals(
     latest.data.rentals,
     properties.map((p) => ({ id: p.id, address: p.address ?? "", street: p.street }))

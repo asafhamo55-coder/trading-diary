@@ -92,3 +92,27 @@ describe("fillTaxBasis", () => {
     expect(fillTaxBasis(undefined, null)).toBeNull();
   });
 });
+
+import { backfillDeleteWhere, excludeBookedProperties, statementRowsWhere } from "../../src/lib/tax-return-backfill";
+
+describe("review fixes", () => {
+  it("statement re-imports only replace rows without a source", () => {
+    expect(statementRowsWhere("p1")).toEqual({ propertyId: "p1", source: null });
+  });
+
+  it("a re-ingest deletes the year's rows across the whole account", () => {
+    expect(backfillDeleteWhere("acct", 2025)).toEqual({ source: "taxReturn:2025", property: { accountId: "acct" } });
+  });
+
+  it("splits basis across the units of a building", () => {
+    const dep = { basis: 200000, land: 50000, method: "SL 27.5", placedInService: "2022-04-14", prior: 0, current: 0 };
+    expect(fillTaxBasis(undefined, dep, 0.5)).toMatchObject({ landValue: 25000, buildingValue: 75000 });
+  });
+
+  it("skips properties that already have statement books for that year", () => {
+    const r = rental({ address: "1 Test St" });
+    const { matched, booked } = excludeBookedProperties([{ rental: r, propertyIds: ["a", "b"] }], new Set(["b"]));
+    expect(matched).toEqual([{ rental: r, propertyIds: ["a"] }]);
+    expect(booked).toEqual(["b"]);
+  });
+});

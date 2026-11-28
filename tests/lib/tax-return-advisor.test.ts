@@ -49,4 +49,11 @@ describe("reconcileRentals", () => {
   it("skips properties without a declared rental", () => {
     expect(reconcileRentals([declared], [prop("other", monthly("RENT", "INCOME", 1000, 6))], "2026-06-30")).toEqual([]);
   });
+
+  it("annualizes over the months the books actually cover", () => {
+    const books = [prop("p1", monthly("RENT", "INCOME", 1000, 6))];
+    const [r] = reconcileRentals([declared], books, "2026-11-27");
+    expect(r.booksRunRate.months).toBe(6);
+    expect(r.booksRunRate.rent).toBe(12000);
+  });
 });

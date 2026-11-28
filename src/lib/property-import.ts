@@ -12,6 +12,7 @@
 
 import { prisma } from "./db";
 import type { PropertyTxType } from "./property";
+import { statementRowsWhere } from "./tax-return-backfill";
 
 // ── Raw statement shape (faithful to the exported spreadsheet) ─────────────
 
@@ -183,7 +184,8 @@ export async function importPropertyStatement(
         );
       }
       // Replace prior imported children so re-imports don't accumulate dupes.
-      await tx.propertyTransaction.deleteMany({ where: { propertyId } });
+      // Generated rows (e.g. the tax-return backfill, `source` set) are kept.
+      await tx.propertyTransaction.deleteMany({ where: statementRowsWhere(propertyId) });
       await tx.tenant.deleteMany({ where: { propertyId } });
     } else {
       const p = await tx.property.create({ data: { accountId, ...data } });

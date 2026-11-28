@@ -38,6 +38,13 @@ describe("parseTaxReturn", () => {
     expect(() => parseTaxReturn(acct)).toThrow(/data\.rentals\.0\.address/);
   });
 
+  it("rejects separated account numbers and IBANs", () => {
+    for (const v of ["acct 12-345-678901", "IL62 0108 0000 0009 9999 999", "card 4111 1111 1111 1111"]) {
+      expect(() => parseTaxReturn({ ...minimal, data: { notes: [v] } })).toThrow(/data\.notes\.0/);
+    }
+    expect(parseTaxReturn({ ...minimal, data: { notes: ["placed in service 2025-08-01, 244 days"] } }).data.notes).toHaveLength(1);
+  });
+
   it("allows numbers in numeric fields and short digits in addresses", () => {
     const r = parseTaxReturn({ ...minimal, data: { rentals: [{ address: "1104 Example Cir", lines: { RENT: 15400 } }] } });
     expect(r.data.rentals[0].lines.RENT).toBe(15400);

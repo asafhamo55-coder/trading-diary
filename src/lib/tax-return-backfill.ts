@@ -20,6 +20,32 @@ export interface NewTx {
 
 export const taxReturnSource = (year: number) => `taxReturn:${year}`;
 
+/** Rows a statement re-import may replace: never generated (sourced) rows. */
+export const statementRowsWhere = (propertyId: string) => ({ propertyId, source: null });
+
+/** Every row a year's backfill created, on any of the account's properties. */
+export const backfillDeleteWhere = (accountId: string, year: number) => ({
+  source: taxReturnSource(year),
+  property: { accountId },
+});
+
+/**
+ * Drop properties that already have statement books for the year — the
+ * backfill only fills years the app has no books for (otherwise a later
+ * return would double-count on top of them).
+ */
+export function excludeBookedProperties<M extends { propertyIds: string[] }>(
+  matched: M[],
+  booked: Set<string>
+): { matched: M[]; booked: string[] } {
+  const skipped = new Set<string>();
+  const out = matched.flatMap((m) => {
+    const ids = m.propertyIds.filter((id) => (booked.has(id) ? (skipped.add(id), false) : true));
+    return ids.length ? [{ ...m, propertyIds: ids }] : [];
+  });
+  return { matched: out, booked: [...skipped] };
+}
+
 const SUFFIXES: Record<string, string> = {
   CIRCLE: "CIR",
   COURT: "CT",
@@ -110,12 +136,16 @@ type Basis = Partial<Record<"landValue" | "buildingValue" | "placedInService" | 
  */
 export function fillTaxBasis<T extends Basis>(
   existing: T | undefined | null,
-  dep: ScheduleERental["depreciation"]
+  dep: ScheduleERental["depreciation"],
+  /** This unit's share of a multi-unit building (1 for a single property). */
+  share = 1
 ): (T & Basis) | null {
   if (!dep) return null;
+  const part = (n: number) => Math.round(n * share * 100) / 100;
+  // `basis` is the total cost basis including land (see the extraction guide).
   const from: Basis = {
-    landValue: dep.land,
-    buildingValue: dep.basis != null ? dep.basis - (dep.land ?? 0) : null,
+    landValue: dep.land != null ? part(dep.land) : null,
+    buildingValue: dep.basis != null ? part(dep.basis - (dep.land ?? 0)) : null,
     placedInService: dep.placedInService,
     method: dep.method,
   };

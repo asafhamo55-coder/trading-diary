@@ -74,11 +74,13 @@ dues → `HOA`, anything else → `OTHER`; read the attached statement) ·
 21 income/loss → `net`. Foreign rentals are Schedule E columns too — include
 them (the app may have them as properties).
 
-**Depreciation report / Form 4562** (→ `rentals[].depreciation`): cost or basis
-· land (when listed separately; otherwise null) · method + life (e.g.
-"SL 27.5 MM", "SL 40 ADS") · date placed in service · prior depreciation ·
-current-year depreciation. When a property has several assets (building,
-improvements), sum basis/prior/current and note the split.
+**Depreciation report / Form 4562** (→ `rentals[].depreciation`):
+`basis` = the property's **total** cost basis **including land** (building
+line + land line) · `land` = the land line (null when not listed) · method +
+life of the building (e.g. "SL 27.5 MM", "SL 40 ADS") · building's date placed
+in service · prior and current-year depreciation of the building. Do **not**
+add improvements or amortized items (loan points) into `basis`; list them in
+`notes` — the app tracks improvements separately and would count them twice.
 
 **Form 8582** (→ `passiveLosses`): allowed losses · suspended (unallowed)
 losses · per-activity carryforward from the worksheet.

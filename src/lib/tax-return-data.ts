@@ -6,7 +6,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { getAccount } from "./api-helpers";
 import { ensureSavingsReady } from "./savings-data";
 import { shouldReplace, taxReturnInputSchema, type TaxReturnInput } from "./tax-return-schema";
-import { fillTaxBasis, matchRentals, scheduleEToTransactions, taxReturnSource } from "./tax-return-backfill";
+import { backfillDeleteWhere, excludeBookedProperties, fillTaxBasis, matchRentals, scheduleEToTransactions } from "./tax-return-backfill";
 import { parseProfile } from "./property-profile";
 import { ensurePropertySchema } from "./property-schema";
 
@@ -87,33 +87,49 @@ export async function listTaxReturns(): Promise<TaxReturnDTO[]> {
  * properties, insert the new ones, and fill empty tax-basis fields. Statement
  * imports and hand-entered rows are never touched.
  */
-export async function backfillPropertyBooks(
-  ret: TaxReturnInput
-): Promise<{ created: number; deleted: number; unmatched: string[]; basisFilled: string[] }> {
+export async function backfillPropertyBooks(ret: TaxReturnInput): Promise<{
+  created: number;
+  deleted: number;
+  unmatched: string[];
+  booksExist: string[];
+  basisFilled: string[];
+}> {
   await ensurePropertySchema(); // adds the `source` column on a fresh deploy
   const accountId = (await getAccount()).id;
   const properties = await prisma.property.findMany({
     where: { accountId },
     select: { id: true, address: true, street: true, unit: true, profile: true },
   });
-  const { matched, unmatched } = matchRentals(ret.data.rentals, properties);
-  const source = taxReturnSource(ret.taxYear);
-  const propertyIds = [...new Set(matched.flatMap((m) => m.propertyIds))];
+  const known = new Set(properties.map((p) => p.id));
+  const first = matchRentals(ret.data.rentals, properties);
+  // Ids supplied by the extractor must belong to this account.
+  const unmatched = [...first.unmatched];
+  const valid = first.matched.flatMap((m) => {
+    const ids = m.propertyIds.filter((id) => known.has(id));
+    if (!ids.length) unmatched.push(m.rental.address);
+    return ids.length ? [{ ...m, propertyIds: ids }] : [];
+  });
+  // Years the app already has statement books for are left alone.
+  const booked = await prisma.propertyTransaction.findMany({
+    where: { year: ret.taxYear, source: null, propertyId: { in: [...known] } },
+    select: { propertyId: true },
+    distinct: ["propertyId"],
+  });
+  const { matched, booked: booksExist } = excludeBookedProperties(valid, new Set(booked.map((b) => b.propertyId)));
   const rows = matched.flatMap((m) => scheduleEToTransactions(m.rental, ret.taxYear, m.propertyIds));
   const basisUpdates = matched.flatMap((m) =>
     m.propertyIds.flatMap((id) => {
       const p = properties.find((x) => x.id === id);
-      const profile = parseProfile(p?.profile);
-      const taxBasis = fillTaxBasis(profile.taxBasis, m.rental.depreciation);
+      const taxBasis = fillTaxBasis(parseProfile(p?.profile).taxBasis, m.rental.depreciation, 1 / m.propertyIds.length);
       return taxBasis ? [{ id, profile: { ...((p?.profile as object) ?? {}), taxBasis } }] : [];
     })
   );
   const [deleted] = await prisma.$transaction([
-    prisma.propertyTransaction.deleteMany({ where: { source, propertyId: { in: propertyIds } } }),
+    prisma.propertyTransaction.deleteMany({ where: backfillDeleteWhere(accountId, ret.taxYear) }),
     prisma.propertyTransaction.createMany({ data: rows }),
     ...basisUpdates.map((u) =>
       prisma.property.update({ where: { id: u.id }, data: { profile: u.profile as Prisma.InputJsonValue } })
     ),
   ]);
-  return { created: rows.length, deleted: deleted.count, unmatched, basisFilled: basisUpdates.map((u) => u.id) };
+  return { created: rows.length, deleted: deleted.count, unmatched, booksExist, basisFilled: basisUpdates.map((u) => u.id) };
 }
