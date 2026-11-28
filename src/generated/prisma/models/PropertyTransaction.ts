@@ -49,6 +49,7 @@ export type PropertyTransactionMinAggregateOutputType = {
   amount: number | null
   description: string | null
   taxOnly: boolean | null
+  source: string | null
   createdAt: Date | null
 }
 
@@ -63,6 +64,7 @@ export type PropertyTransactionMaxAggregateOutputType = {
   amount: number | null
   description: string | null
   taxOnly: boolean | null
+  source: string | null
   createdAt: Date | null
 }
 
@@ -77,6 +79,7 @@ export type PropertyTransactionCountAggregateOutputType = {
   amount: number
   description: number
   taxOnly: number
+  source: number
   createdAt: number
   _all: number
 }
@@ -105,6 +108,7 @@ export type PropertyTransactionMinAggregateInputType = {
   amount?: true
   description?: true
   taxOnly?: true
+  source?: true
   createdAt?: true
 }
 
@@ -119,6 +123,7 @@ export type PropertyTransactionMaxAggregateInputType = {
   amount?: true
   description?: true
   taxOnly?: true
+  source?: true
   createdAt?: true
 }
 
@@ -133,6 +138,7 @@ export type PropertyTransactionCountAggregateInputType = {
   amount?: true
   description?: true
   taxOnly?: true
+  source?: true
   createdAt?: true
   _all?: true
 }
@@ -234,6 +240,7 @@ export type PropertyTransactionGroupByOutputType = {
   amount: number
   description: string | null
   taxOnly: boolean
+  source: string | null
   createdAt: Date
   _count: PropertyTransactionCountAggregateOutputType | null
   _avg: PropertyTransactionAvgAggregateOutputType | null
@@ -271,6 +278,7 @@ export type PropertyTransactionWhereInput = {
   amount?: Prisma.FloatFilter<"PropertyTransaction"> | number
   description?: Prisma.StringNullableFilter<"PropertyTransaction"> | string | null
   taxOnly?: Prisma.BoolFilter<"PropertyTransaction"> | boolean
+  source?: Prisma.StringNullableFilter<"PropertyTransaction"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PropertyTransaction"> | Date | string
   property?: Prisma.XOR<Prisma.PropertyScalarRelationFilter, Prisma.PropertyWhereInput>
 }
@@ -286,6 +294,7 @@ export type PropertyTransactionOrderByWithRelationInput = {
   amount?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   taxOnly?: Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   property?: Prisma.PropertyOrderByWithRelationInput
 }
@@ -304,6 +313,7 @@ export type PropertyTransactionWhereUniqueInput = Prisma.AtLeast<{
   amount?: Prisma.FloatFilter<"PropertyTransaction"> | number
   description?: Prisma.StringNullableFilter<"PropertyTransaction"> | string | null
   taxOnly?: Prisma.BoolFilter<"PropertyTransaction"> | boolean
+  source?: Prisma.StringNullableFilter<"PropertyTransaction"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PropertyTransaction"> | Date | string
   property?: Prisma.XOR<Prisma.PropertyScalarRelationFilter, Prisma.PropertyWhereInput>
 }, "id">
@@ -319,6 +329,7 @@ export type PropertyTransactionOrderByWithAggregationInput = {
   amount?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   taxOnly?: Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.PropertyTransactionCountOrderByAggregateInput
   _avg?: Prisma.PropertyTransactionAvgOrderByAggregateInput
@@ -341,6 +352,7 @@ export type PropertyTransactionScalarWhereWithAggregatesInput = {
   amount?: Prisma.FloatWithAggregatesFilter<"PropertyTransaction"> | number
   description?: Prisma.StringNullableWithAggregatesFilter<"PropertyTransaction"> | string | null
   taxOnly?: Prisma.BoolWithAggregatesFilter<"PropertyTransaction"> | boolean
+  source?: Prisma.StringNullableWithAggregatesFilter<"PropertyTransaction"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PropertyTransaction"> | Date | string
 }
 
@@ -354,6 +366,7 @@ export type PropertyTransactionCreateInput = {
   amount: number
   description?: string | null
   taxOnly?: boolean
+  source?: string | null
   createdAt?: Date | string
   property: Prisma.PropertyCreateNestedOneWithoutTransactionsInput
 }
@@ -369,6 +382,7 @@ export type PropertyTransactionUncheckedCreateInput = {
   amount: number
   description?: string | null
   taxOnly?: boolean
+  source?: string | null
   createdAt?: Date | string
 }
 
@@ -382,6 +396,7 @@ export type PropertyTransactionUpdateInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   property?: Prisma.PropertyUpdateOneRequiredWithoutTransactionsNestedInput
 }
@@ -397,6 +412,7 @@ export type PropertyTransactionUncheckedUpdateInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -411,6 +427,7 @@ export type PropertyTransactionCreateManyInput = {
   amount: number
   description?: string | null
   taxOnly?: boolean
+  source?: string | null
   createdAt?: Date | string
 }
 
@@ -424,6 +441,7 @@ export type PropertyTransactionUpdateManyMutationInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -438,6 +456,7 @@ export type PropertyTransactionUncheckedUpdateManyInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -462,6 +481,7 @@ export type PropertyTransactionCountOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   description?: Prisma.SortOrder
   taxOnly?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -482,6 +502,7 @@ export type PropertyTransactionMaxOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   description?: Prisma.SortOrder
   taxOnly?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -496,6 +517,7 @@ export type PropertyTransactionMinOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   description?: Prisma.SortOrder
   taxOnly?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -561,6 +583,7 @@ export type PropertyTransactionCreateWithoutPropertyInput = {
   amount: number
   description?: string | null
   taxOnly?: boolean
+  source?: string | null
   createdAt?: Date | string
 }
 
@@ -574,6 +597,7 @@ export type PropertyTransactionUncheckedCreateWithoutPropertyInput = {
   amount: number
   description?: string | null
   taxOnly?: boolean
+  source?: string | null
   createdAt?: Date | string
 }
 
@@ -617,6 +641,7 @@ export type PropertyTransactionScalarWhereInput = {
   amount?: Prisma.FloatFilter<"PropertyTransaction"> | number
   description?: Prisma.StringNullableFilter<"PropertyTransaction"> | string | null
   taxOnly?: Prisma.BoolFilter<"PropertyTransaction"> | boolean
+  source?: Prisma.StringNullableFilter<"PropertyTransaction"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PropertyTransaction"> | Date | string
 }
 
@@ -630,6 +655,7 @@ export type PropertyTransactionCreateManyPropertyInput = {
   amount: number
   description?: string | null
   taxOnly?: boolean
+  source?: string | null
   createdAt?: Date | string
 }
 
@@ -643,6 +669,7 @@ export type PropertyTransactionUpdateWithoutPropertyInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -656,6 +683,7 @@ export type PropertyTransactionUncheckedUpdateWithoutPropertyInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -669,6 +697,7 @@ export type PropertyTransactionUncheckedUpdateManyWithoutPropertyInput = {
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -685,6 +714,7 @@ export type PropertyTransactionSelect<ExtArgs extends runtime.Types.Extensions.I
   amount?: boolean
   description?: boolean
   taxOnly?: boolean
+  source?: boolean
   createdAt?: boolean
   property?: boolean | Prisma.PropertyDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["propertyTransaction"]>
@@ -700,6 +730,7 @@ export type PropertyTransactionSelectCreateManyAndReturn<ExtArgs extends runtime
   amount?: boolean
   description?: boolean
   taxOnly?: boolean
+  source?: boolean
   createdAt?: boolean
   property?: boolean | Prisma.PropertyDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["propertyTransaction"]>
@@ -715,6 +746,7 @@ export type PropertyTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime
   amount?: boolean
   description?: boolean
   taxOnly?: boolean
+  source?: boolean
   createdAt?: boolean
   property?: boolean | Prisma.PropertyDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["propertyTransaction"]>
@@ -730,10 +762,11 @@ export type PropertyTransactionSelectScalar = {
   amount?: boolean
   description?: boolean
   taxOnly?: boolean
+  source?: boolean
   createdAt?: boolean
 }
 
-export type PropertyTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "propertyId" | "date" | "year" | "month" | "type" | "category" | "amount" | "description" | "taxOnly" | "createdAt", ExtArgs["result"]["propertyTransaction"]>
+export type PropertyTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "propertyId" | "date" | "year" | "month" | "type" | "category" | "amount" | "description" | "taxOnly" | "source" | "createdAt", ExtArgs["result"]["propertyTransaction"]>
 export type PropertyTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   property?: boolean | Prisma.PropertyDefaultArgs<ExtArgs>
 }
@@ -760,6 +793,7 @@ export type $PropertyTransactionPayload<ExtArgs extends runtime.Types.Extensions
     amount: number
     description: string | null
     taxOnly: boolean
+    source: string | null
     createdAt: Date
   }, ExtArgs["result"]["propertyTransaction"]>
   composites: {}
@@ -1195,6 +1229,7 @@ export interface PropertyTransactionFieldRefs {
   readonly amount: Prisma.FieldRef<"PropertyTransaction", 'Float'>
   readonly description: Prisma.FieldRef<"PropertyTransaction", 'String'>
   readonly taxOnly: Prisma.FieldRef<"PropertyTransaction", 'Boolean'>
+  readonly source: Prisma.FieldRef<"PropertyTransaction", 'String'>
   readonly createdAt: Prisma.FieldRef<"PropertyTransaction", 'DateTime'>
 }
     

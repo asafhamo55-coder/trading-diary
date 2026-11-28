@@ -209,6 +209,9 @@ model PropertyTransaction {
   // Counted for tax (Schedule E) but ignored by every performance figure —
   // net, yield, cash-on-cash, cash-flow charts. See `forReturns` in property.ts.
   taxOnly     Boolean            @default(false)
+  // Where a row came from when it wasn't typed in, e.g. "taxReturn:2025" for
+  // the Schedule E backfill (re-ingesting a return replaces only its rows).
+  source      String?
 
   createdAt   DateTime @default(now())
 
@@ -594,6 +597,26 @@ model AdvisorActionStatus {
   updatedAt DateTime  @updatedAt
 
   @@unique([accountId, key])
+}
+
+// Filed tax returns, extracted by the import-tax-return Claude Code skill.
+// One row per account × tax year × jurisdiction; `data` is validated by
+// src/lib/tax-return-schema.ts (no PII). DDL in src/lib/savings-schema.ts.
+model TaxReturn {
+  id           String   @id @default(cuid())
+  accountId    String
+  taxYear      Int
+  jurisdiction String // "US-federal" | "US-GA"
+  filingStatus String?
+  preparer     String?
+  source       String?
+  partial      Boolean  @default(false)
+  amended      Boolean  @default(false)
+  data         Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([accountId, taxYear, jurisdiction])
 }
 
 // Insurance & employer benefits across both countries — used to spot coverage

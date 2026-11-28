@@ -58,6 +58,8 @@ export interface PropertyTransactionDTO {
   description: string | null;
   /** Counted for tax, ignored by every performance figure. See `forReturns`. */
   taxOnly: boolean;
+  /** Provenance of generated rows, e.g. "taxReturn:2025"; null when typed or imported from statements. */
+  source?: string | null;
 }
 
 export interface PropertyDTO {

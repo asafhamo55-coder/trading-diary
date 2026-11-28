@@ -140,6 +140,12 @@ export type ScheduleERental = TaxReturnData["rentals"][number];
 
 export class TaxReturnError extends Error {}
 
+/** A full return is never overwritten by a partial one (e.g. a two-year comparison). */
+export function shouldReplace(existing: { partial: boolean } | null, incoming: { partial: boolean }): boolean {
+  return !(existing && !existing.partial && incoming.partial);
+}
+
+
 // SSN/ITIN, EIN, and any 9+ digit run (account, routing, PTIN digits, IDs).
 const PII_PATTERNS = [/\b\d{3}-\d{2}-\d{4}\b/, /\b\d{2}-\d{7}\b/, /\d{9,}/, /\bP\d{8}\b/];
 const PII_KEYS = /birth|dob|ssn|itin|\bein\b|ptin|routing|accountnumber|account_number|\bpin\b/i;

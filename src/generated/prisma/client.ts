@@ -172,6 +172,11 @@ export type AdvisorReport = Prisma.AdvisorReportModel
  */
 export type AdvisorActionStatus = Prisma.AdvisorActionStatusModel
 /**
+ * Model TaxReturn
+ * 
+ */
+export type TaxReturn = Prisma.TaxReturnModel
+/**
  * Model Benefit
  * 
  */

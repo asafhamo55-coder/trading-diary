@@ -167,6 +167,28 @@ export async function ensureSavingsSchema(): Promise<void> {
     `CREATE INDEX IF NOT EXISTS "Benefit_importKey_idx" ON "Benefit"("importKey")`
   );
 
+  // Filed tax returns (see tax-return-schema.ts).
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "TaxReturn" (
+      "id" TEXT NOT NULL,
+      "accountId" TEXT NOT NULL,
+      "taxYear" INTEGER NOT NULL,
+      "jurisdiction" TEXT NOT NULL,
+      "filingStatus" TEXT,
+      "preparer" TEXT,
+      "source" TEXT,
+      "partial" BOOLEAN NOT NULL DEFAULT false,
+      "amended" BOOLEAN NOT NULL DEFAULT false,
+      "data" JSONB NOT NULL,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "TaxReturn_pkey" PRIMARY KEY ("id")
+    )
+  `);
+  await prisma.$executeRawUnsafe(
+    `CREATE UNIQUE INDEX IF NOT EXISTS "TaxReturn_accountId_taxYear_jurisdiction_key" ON "TaxReturn"("accountId", "taxYear", "jurisdiction")`
+  );
+
   // Foreign keys (guarded — ADD CONSTRAINT has no IF NOT EXISTS). The
   // statement must end with a semicolon: it runs inside a PL/pgSQL DO block.
   await prisma.$executeRawUnsafe(`

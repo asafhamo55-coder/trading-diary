@@ -85,6 +85,10 @@ export async function ensurePropertySchema(): Promise<void> {
   await prisma.$executeRawUnsafe(
     `ALTER TABLE "PropertyTransaction" ADD COLUMN IF NOT EXISTS "taxOnly" BOOLEAN NOT NULL DEFAULT false`
   );
+  // Provenance of generated rows, e.g. "taxReturn:2025" (Schedule E backfill).
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE "PropertyTransaction" ADD COLUMN IF NOT EXISTS "source" TEXT`
+  );
 
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "Tenant" (

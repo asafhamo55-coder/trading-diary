@@ -410,6 +410,7 @@ export const ModelName = {
   HouseholdProfile: 'HouseholdProfile',
   AdvisorReport: 'AdvisorReport',
   AdvisorActionStatus: 'AdvisorActionStatus',
+  TaxReturn: 'TaxReturn',
   Benefit: 'Benefit',
   TradingGuideline: 'TradingGuideline',
   AssistantQuestion: 'AssistantQuestion'
@@ -428,7 +429,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "account" | "property" | "tenant" | "propertyLoan" | "propertyImprovement" | "propertyMaintenance" | "propertyDocument" | "propertyUtility" | "propertyTransaction" | "fundTransaction" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage" | "homeAccount" | "homeCategory" | "homeTransaction" | "homeImport" | "homeCategoryRule" | "savingsAccount" | "savingsSnapshot" | "householdProfile" | "advisorReport" | "advisorActionStatus" | "benefit" | "tradingGuideline" | "assistantQuestion"
+    modelProps: "account" | "property" | "tenant" | "propertyLoan" | "propertyImprovement" | "propertyMaintenance" | "propertyDocument" | "propertyUtility" | "propertyTransaction" | "fundTransaction" | "trade" | "tradeLeg" | "monthlyReview" | "errorDefinition" | "tradeError" | "assetLeverage" | "homeAccount" | "homeCategory" | "homeTransaction" | "homeImport" | "homeCategoryRule" | "savingsAccount" | "savingsSnapshot" | "householdProfile" | "advisorReport" | "advisorActionStatus" | "taxReturn" | "benefit" | "tradingGuideline" | "assistantQuestion"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2356,6 +2357,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TaxReturn: {
+      payload: Prisma.$TaxReturnPayload<ExtArgs>
+      fields: Prisma.TaxReturnFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaxReturnFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaxReturnFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload>
+        }
+        findFirst: {
+          args: Prisma.TaxReturnFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaxReturnFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload>
+        }
+        findMany: {
+          args: Prisma.TaxReturnFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload>[]
+        }
+        create: {
+          args: Prisma.TaxReturnCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload>
+        }
+        createMany: {
+          args: Prisma.TaxReturnCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TaxReturnCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload>[]
+        }
+        delete: {
+          args: Prisma.TaxReturnDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload>
+        }
+        update: {
+          args: Prisma.TaxReturnUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaxReturnDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaxReturnUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TaxReturnUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload>[]
+        }
+        upsert: {
+          args: Prisma.TaxReturnUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaxReturnPayload>
+        }
+        aggregate: {
+          args: Prisma.TaxReturnAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaxReturn>
+        }
+        groupBy: {
+          args: Prisma.TaxReturnGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaxReturnGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaxReturnCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaxReturnCountAggregateOutputType> | number
+        }
+      }
+    }
     Benefit: {
       payload: Prisma.$BenefitPayload<ExtArgs>
       fields: Prisma.BenefitFieldRefs
@@ -2778,6 +2853,7 @@ export const PropertyTransactionScalarFieldEnum = {
   amount: 'amount',
   description: 'description',
   taxOnly: 'taxOnly',
+  source: 'source',
   createdAt: 'createdAt'
 } as const
 
@@ -3078,6 +3154,24 @@ export const AdvisorActionStatusScalarFieldEnum = {
 } as const
 
 export type AdvisorActionStatusScalarFieldEnum = (typeof AdvisorActionStatusScalarFieldEnum)[keyof typeof AdvisorActionStatusScalarFieldEnum]
+
+
+export const TaxReturnScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  taxYear: 'taxYear',
+  jurisdiction: 'jurisdiction',
+  filingStatus: 'filingStatus',
+  preparer: 'preparer',
+  source: 'source',
+  partial: 'partial',
+  amended: 'amended',
+  data: 'data',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaxReturnScalarFieldEnum = (typeof TaxReturnScalarFieldEnum)[keyof typeof TaxReturnScalarFieldEnum]
 
 
 export const BenefitScalarFieldEnum = {
@@ -3457,6 +3551,7 @@ export type GlobalOmitConfig = {
   householdProfile?: Prisma.HouseholdProfileOmit
   advisorReport?: Prisma.AdvisorReportOmit
   advisorActionStatus?: Prisma.AdvisorActionStatusOmit
+  taxReturn?: Prisma.TaxReturnOmit
   benefit?: Prisma.BenefitOmit
   tradingGuideline?: Prisma.TradingGuidelineOmit
   assistantQuestion?: Prisma.AssistantQuestionOmit

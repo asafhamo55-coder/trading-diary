@@ -58,6 +58,7 @@ function serializeTx(t: {
   amount: number;
   description: string | null;
   taxOnly: boolean;
+  source?: string | null;
 }): PropertyTransactionDTO {
   return {
     id: t.id,
@@ -70,6 +71,7 @@ function serializeTx(t: {
     amount: t.amount,
     description: t.description,
     taxOnly: t.taxOnly,
+    source: t.source ?? null,
   };
 }
 

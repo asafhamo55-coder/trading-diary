@@ -77,6 +77,7 @@ export const ModelName = {
   HouseholdProfile: 'HouseholdProfile',
   AdvisorReport: 'AdvisorReport',
   AdvisorActionStatus: 'AdvisorActionStatus',
+  TaxReturn: 'TaxReturn',
   Benefit: 'Benefit',
   TradingGuideline: 'TradingGuideline',
   AssistantQuestion: 'AssistantQuestion'
@@ -259,6 +260,7 @@ export const PropertyTransactionScalarFieldEnum = {
   amount: 'amount',
   description: 'description',
   taxOnly: 'taxOnly',
+  source: 'source',
   createdAt: 'createdAt'
 } as const
 
@@ -559,6 +561,24 @@ export const AdvisorActionStatusScalarFieldEnum = {
 } as const
 
 export type AdvisorActionStatusScalarFieldEnum = (typeof AdvisorActionStatusScalarFieldEnum)[keyof typeof AdvisorActionStatusScalarFieldEnum]
+
+
+export const TaxReturnScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  taxYear: 'taxYear',
+  jurisdiction: 'jurisdiction',
+  filingStatus: 'filingStatus',
+  preparer: 'preparer',
+  source: 'source',
+  partial: 'partial',
+  amended: 'amended',
+  data: 'data',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaxReturnScalarFieldEnum = (typeof TaxReturnScalarFieldEnum)[keyof typeof TaxReturnScalarFieldEnum]
 
 
 export const BenefitScalarFieldEnum = {
